@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🐝Nectar Publisher</title>
+  <script src="resources/libs/vue/vue.global.js"></script>
+  <link href="resources/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="manifest" href="manifest.json" />
+  
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Necttar Publisher",
+      "applicationCategory": ["datasets", "metadata", "csv", "tsv", "ddi"],
+      "browserRequirements": "requires HTML5 support"
+    }
+  </script>
+</head>
+
+<body>
+  <div id="app" class="container">
+    <!-- top toolbar -->
+    <nav class="row navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">🐝 Nectar Publisher <span class="badge bg-secondary" aria-label="version">0.0.1</span></a>
+        <button class="navbar-toggler" 
+          type="button" 
+          data-bs-toggle="collapse" data-bs-target="#navbar" 
+          aria-controls="navbar" aria-expanded="false" 
+          aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <button type="button" class="btn btn-light" title="open csv/tsv file">📂 open csv</button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#aboutModal" title="about this app">ℹ️ about</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>aaaa</td>
+          </tr>
+        </tbody>    
+      </table>
+    </div>
+  </div>
+  <script src="resources/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="resources/libs/highlight/highlight.min.js"></script>
+  <script src="resources/libs/highlight/languages/json.min.js"></script>
+  <script src="resources/libs/highlight/languages/xml.min.js"></script>
+  <!-- nectar publisher source files -->
+  <script src="resources/modules/utils.js"></script>
+  <script src="resources/main.js"></script>
+</body>
+
+</html>
