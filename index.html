@@ -46,6 +46,8 @@
       </div>
     </nav>
 
+    <input id="file" @change="openCsv" type="file" accept=".csv,.tsv,text/csv" style="">
+    <span>sha256: </span><span v-html="dataset.sha256"></span>
     <div>
       <table class="table table-bordered">
         <thead>

@@ -2,27 +2,19 @@ const { createApp, ref, reactive, computed } = Vue
 
 createApp({
     methods:{
-        openCsv(){
-            let inputElement = document.createElement("input")
-            inputElement.type = "file"
-            inputElement.accept = ".csv,.tsv"
-            inputElement.onchange = _ => {
-                let file = Array.from(inputElement.files)[0];
-                this.input.fileName = file.name
+        async openCsv(event){
+            console.log(event.target.files);
+            //let inputElement = document.getElementsByClassName("file")
                 
-                this.input.type = file.type
-                this.input.size = file.size
-                var reader = new FileReader()
-                reader.readAsText(file, "UTF-8")
-
-                reader.onload = readerEvent => {
-                    var content = readerEvent.target.result
-                    this.input.delimiter = guessDelimiter(content)
-                    this.input.raw = content
-                    this.reloadDataset()
+            Papa.parse(event.target.files[0], {
+                complete: function(results) {
+                    console.log(results);
                 }
-            };
-            inputElement.click();
+            });
+
+            this.dataset.sha256 = await checksum(event.target.files[0], "SHA-256")
+            console.log("SHA-256: ", sha256)
+
         },
         saveFile(content, type, fileName){
             var fileAsBlob = new Blob([ content ], { type: type })
@@ -83,7 +75,7 @@ createApp({
         }
 
         return {
-            input, cv
+            input, dataset, cv
         }
     }
 }).mount("#app")
