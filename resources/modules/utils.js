@@ -5,10 +5,11 @@ const DataType = {
 }
 
 class Dataset{
-  raw
   fileName
   mimeType
   delimiter
+  linebreak
+  lastModified
   encoding = "utf-8"
   firstRowIsHeader = true
   /**
