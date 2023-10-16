@@ -86,16 +86,11 @@ class Parser{
         }
     })
   }
-
-  static hello(input) {
-    return "hello " + input
-  }
 }
 
 async function checksum(file, type){
   const arrayBuffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest(type, arrayBuffer); // hash the message
-  console.log(hashBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   return hashHex;
