@@ -5,7 +5,9 @@ const DataType = {
 }
 
 class Dataset{
+  data
   fileName
+  fileSize
   mimeType
   delimiter
   linebreak
@@ -40,12 +42,49 @@ class DatasetColumn{
   values = []
   valuesUnique
   dataType = DataType.Text
+  constructor(id){
+    this.id = id
+  }
 }
 
 class Parser{
 
-  static parseDelimitedText(input){
-    return new Dataset()
+  static async parseDelimitedText(file, done){
+    var dataset = new Dataset()
+
+    dataset.fileName = file.name
+    dataset.mimeType = file.type
+    dataset.fileSize = file.size
+    dataset.lastModified = new Date(file.lastModified).toISOString()
+    dataset.sha256 = await checksum(file, "SHA-256")
+
+    await Papa.parse(file, {
+        complete: function(results) {
+            dataset.columns = []
+            
+            dataset.delimiter = results.meta.delimiter
+            dataset.linebreak = results.meta.linebreak
+            
+            var columnIds = results.data[0]
+            if(dataset.firstRowIsHeader){
+              dataset.data = results.data.shift()
+            }else{
+              dataset.data = results.data
+            }
+
+            var position = 0
+
+            for(const c of columnIds){
+                var column = new DatasetColumn(c)
+                column.position = position
+                column.valuesUnique = [... new Set(dataset.data.map(d => d[position]))]
+                position++
+                dataset.columns.push(column)
+            }
+
+            done(dataset)
+        }
+    })
   }
 
   static hello(input) {

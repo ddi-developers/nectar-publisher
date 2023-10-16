@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>🐝Nectar Publisher</title>
+  <title>Nectar Publisher</title>
   <script src="resources/libs/vue/vue.global.js"></script>
   <link href="resources/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link rel="manifest" href="manifest.json" />
@@ -47,23 +47,25 @@
     </nav>
 
     <input id="file" @change="openCsv" type="file" accept=".csv,.tsv,text/csv" style="">
-    <span>sha256: </span><span v-html="dataset.sha256"></span>
-    <div>
+    <p v-if="dataset.sha256"><strong>sha256:</strong> <span v-html="dataset.sha256"></span></p>
+    <div v-if="dataset.columns.length > 0">
+      <div v-for="c of dataset.columns" class="row">
+        <input v-model="c.position" type="text" disabled>
+        <input v-model="c.id" type="text" disabled>
+      </div>
+    </div>
+
+    <div v-if="dataset.columns.length > 0">
       <table class="table table-bordered">
         <thead>
           <tr>
             <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
+            <th scope="col" v-for="c of dataset.columns" v-html="c.id"></th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>aaaa</td>
           </tr>
         </tbody>    
       </table>

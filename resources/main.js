@@ -4,23 +4,9 @@ createApp({
     methods:{
         async openCsv(event){
             const file = event.target.files[0]
-            console.log(file)
-
-            this.dataset.fileName = file.name
-            this.dataset.mimeType = file.type
-            this.dataset.lastModified = new Date(file.lastModified).toISOString()
-            var self = this
-            Papa.parse(file, {
-                complete: function(results) {
-                    console.log(results);
-                    self.dataset.delimiter = results.meta.delimiter
-                    self.dataset.linebreak = results.meta.linebreak
-                    
-                }
-            });
-
-            this.dataset.sha256 = await checksum(file, "SHA-256")
-            console.log(await this.dataset)
+            document.title = file.name + " - Nectar Publisher"
+            
+            await Parser.parseDelimitedText(file, (d) => this.dataset = d)
         },
         saveFile(content, type, fileName){
             var fileAsBlob = new Blob([ content ], { type: type })
@@ -45,9 +31,10 @@ createApp({
     setup() {
         const codeListVariableIndex = ref(null)
         const examples = reactive([{},{}])
-        const dataset = reactive(new Dataset("","t.csv","text/csv",","))
+        const dataset = ref(new Dataset("","t.csv","text/csv",","))
         const cv = {
             colRoles : [{id: "Dimension"}, {id: "Attribute"}, {id: "Measure"}],
+            representationType : ["text", "numeric", "code", "datetime", "other"]
         }
 
         return {
