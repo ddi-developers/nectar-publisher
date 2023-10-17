@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nectar Publisher</title>
   <script src="resources/libs/vue/vue.global.js"></script>
-  <link href="resources/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="resources/libs/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="resources/libs/highlight/styles/default.min.css">
   <link rel="manifest" href="manifest.json" />
   
   <script type="application/ld+json">
@@ -48,6 +49,12 @@
 
     <input id="file" @change="openCsv" type="file" accept=".csv,.tsv,text/csv" style="">
     <p v-if="dataset.sha256"><strong>sha256:</strong> <span v-html="dataset.sha256"></span></p>
+    <p v-if="dataset.lastModified"><strong>lastModified:</strong> <span v-html="dataset.lastModified"></span></p>
+
+    <div class="form-floating mb-3">
+      <pre><code v-html="JSON.stringify(dataset, null, 2)" class="language-json"></code></pre>
+    </div>
+
     <div v-if="dataset.columns.length > 0">
       <div v-for="c of dataset.columns" class="row">
         <input v-model="c.position" type="text" disabled>
@@ -76,6 +83,7 @@
   <script src="resources/libs/highlight/languages/json.min.js"></script>
   <script src="resources/libs/highlight/languages/xml.min.js"></script>
   <!-- nectar publisher source files -->
+  <script src="resources/modules/libs.js"></script>
   <script src="resources/modules/utils.js"></script>
   <script src="resources/main.js"></script>
 </body>
