@@ -18,7 +18,7 @@
       "name": "Nectar Publisher",
       "applicationCategory": ["datasets", "metadata", "documentation", "csv", "tsv", "ddi"],
       "browserRequirements": "requires HTML5 support",
-      "softwareVersion": "0.0.1"
+      "softwareVersion": "Pre-alpha 0.0.1"
     }
   </script>
 	<style>
@@ -130,15 +130,9 @@
 								<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
 								<input v-model="column.name" type="text" class="form-control">
 							</div>
-							<div class="col-md-4">
+							<div class="col-md-6">
 								<label class="form-label" :class="{notFirst: (index > 0)}">Label</label>
 								<input v-model="column.label" type="text" class="form-control">
-							</div>
-							<div class="col-md-2">
-								<label class="form-label" :class="{notFirst: (index > 0)}">Role</label>
-								<select v-model="column.role" class="form-select" aria-label="Default select example">
-									<option v-for="colRole in cv.colRoles" :value="colRole.id">{{ colRole.id }}</option>
-								</select>
 							</div>
 							<div class="col-md-2">
 								<label class="form-label" :class="{notFirst: (index > 0)}">Type</label>
@@ -194,7 +188,7 @@
 					<div class="modal-body">
 						<p>
 							Nectar Publisher aims to be a lightweight simple documentation tool for tabular data.<br>
-							Currenty supports CSV & TSV files with suport for spreadsheets in development.
+							Currenty supports CSV, TSV and XLSX.
 						</p>
 						<p>
 							Libraries used:
@@ -234,9 +228,6 @@
 				</div>
 			</div>
 		</div>
-
-
-
 
 	</div>
 	<script src="resources/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
