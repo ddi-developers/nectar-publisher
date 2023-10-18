@@ -5,8 +5,11 @@ createApp({
         async openCsv(event){
             const file = event.target.files[0]
             document.title = file.name + " - Nectar Publisher"
-            
-            await Parser.parseDelimitedText(file, (d) => this.dataset = d)
+            if(file.name.endsWith(".xlsx")){
+                await Parser.parseSpreadsheet(file)
+            }else{
+                await Parser.parseDelimitedText(file, (d) => this.dataset = d)
+            }
         },
         saveFile(content, type, fileName){
             var fileAsBlob = new Blob([ content ], { type: type })

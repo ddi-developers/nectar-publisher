@@ -47,20 +47,66 @@
       </div>
     </nav>
 
-    <input id="file" @change="openCsv" type="file" accept=".csv,.tsv,text/csv" style="">
+    <input id="file" @change="openCsv" type="file" accept=".csv,.tsv,.xlsx,text/csv" style="">
+    <!--
     <p v-if="dataset.sha256"><strong>sha256:</strong> <span v-html="dataset.sha256"></span></p>
     <p v-if="dataset.lastModified"><strong>lastModified:</strong> <span v-html="dataset.lastModified"></span></p>
+    -->
+
+		<!-- Instance Variable list -->
+		<div class="row" v-if="dataset.fileName != null">
+			<form class="mb-4">
+				<div class="row mb-2" v-for="(column, index) in dataset.columns">
+					<div class="col-md-1">
+						<label class="form-label" :class="{notFirst: (index > 0)}">Position</label>
+						<input v-model="column.position" type="text" class="form-control" disabled>
+					</div>
+					<div class="col-md-2">
+						<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
+						<input v-model="column.name" type="text" class="form-control">
+					</div>
+					<div class="col-md-4">
+						<label class="form-label" :class="{notFirst: (index > 0)}">Label</label>
+						<input v-model="column.label" type="text" class="form-control">
+					</div>
+					<div class="col-md-2">
+						<label class="form-label" :class="{notFirst: (index > 0)}">Role</label>
+						<select v-model="column.role" class="form-select" aria-label="Default select example">
+							<option v-for="colRole in cv.colRoles" :value="colRole.id">{{ colRole.id }}</option>
+						</select>
+					</div>
+					<div class="col-md-2">
+						<label class="form-label" :class="{notFirst: (index > 0)}">Type</label>
+						<select v-model="column.hasIntendedDataType" class="form-select"
+							aria-label="Default select example">
+							<option v-for="colType in cv.colTypes" :value="colType.id">{{ colType.label }}</option>
+						</select>
+					</div>
+					<div class="col-md-1">
+						<label class="form-label row codeCheckLabel" :class="{notFirst: (index > 0)}">Coded</label>
+						<div class="btn-group" role="group" aria-label="coded variable">
+							<input v-model="column.coded" @change="column.createCodeList()" type="checkbox" class="btn-check" :id="'coded-'+column.id" autocomplete="off">
+							<label class="btn btn-outline-secondary" :for="'coded-'+column.id">
+								<span v-if="!column.coded">☐</span>
+								<span v-if="column.coded">☒</span>
+							</label>
+							<button v-if="column.coded" @click="codeListVariableIndex=index" data-bs-toggle="modal" data-bs-target="#codeListModal" type="button" class="btn btn-outline-secondary">✏️</button>
+						</div>
+					</div>
+					<hr class="mt-4" />
+				</div>
+			</form>
+		</div>
+
+
+
 
     <div class="form-floating mb-3">
-      <pre><code v-html="JSON.stringify(dataset, null, 2)" class="language-json"></code></pre>
+      <pre><code v="JSON.stringify(dataset, null, 2)" class="language-json"></code></pre>
     </div>
 
-    <div v-if="dataset.columns.length > 0">
-      <div v-for="c of dataset.columns" class="row">
-        <input v-model="c.position" type="text" disabled>
-        <input v-model="c.id" type="text" disabled>
-      </div>
-    </div>
+
+
 
     <div v-if="dataset.columns.length > 0">
       <table class="table table-bordered">

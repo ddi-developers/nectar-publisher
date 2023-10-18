@@ -15,6 +15,7 @@ class Dataset{
   lastModified
   encoding = "utf-8"
   firstRowIsHeader = true
+  errors = []
   /**
    * list of columns in the dataset
    * @type {DatasetColumn[]}
@@ -39,15 +40,33 @@ class Dataset{
 class DatasetColumn{
   position
   id
+  name
+  label
   values = []
   valuesUnique
   dataType = DataType.Text
   constructor(id){
     this.id = id
+    this.name=id
   }
 }
 
 class Parser{
+  static async parseSpreadsheet(file){
+    console.log("Parse Spreadsheet ", file)
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = function (e) {
+        var data = new Uint8Array(reader.result);
+        var workbook = XLSX.read(data, {type: 'array'});
+        var sheet = workbook.Sheets[workbook.SheetNames[0]];
+        console.log(sheet)
+        var arr = XLSX.utils.sheet_to_json(sheet, {header: 1});
+        console.log("sheet array", arr)
+    }
+
+    console.log("sheet ")
+  }
 
   static async parseDelimitedText(file, done){
     var dataset = new Dataset()
@@ -61,6 +80,7 @@ class Parser{
     await Papa.parse(file, {
       complete: function(results) {
         dataset.columns = []
+        dataset.errors = results.errors
         
         dataset.delimiter = results.meta.delimiter
         dataset.linebreak = results.meta.linebreak
