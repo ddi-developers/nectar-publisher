@@ -73,8 +73,16 @@
 
 		<input ref="inputFile" id="inputFile" @change="openCsv" type="file" accept=".csv,.tsv,.xlsx,text/csv"
 			style="display: none;">
+		<div class="border border-danger text-danger" v-if="input.dataset.errors.length > 0">
+			<strong>The file "{{ input.dataset.fileName }}" have errors:</strong><br>
+			<ul>
+				<li v-for="e in input.dataset.errors"><strong>row {{ e.row }}</strong> {{ e.message }}</li>
+			</ul> 
+			<em>We strongly recomend you to fix these errors in your file.</em>
+		</div>
 
-		<div class="row" v-if="dataset.fileName == null">
+
+		<div class="row" v-if="input.dataset.fileName == null">
 			<p>
 				Document your datasets be providing basic variable descriptions.
 				Nectar Publisher works offline and can be downloaded as a <a href="#">zip-file</a>
@@ -105,7 +113,7 @@
 		</div>
 
 
-		<ul class="nav nav-tabs" id="myTab" role="tablist" v-if="dataset.fileName != null">
+		<ul class="nav nav-tabs" id="myTab" role="tablist" v-if="input.dataset.fileName != null">
 			<li class="nav-item" role="presentation">
 			  <button class="nav-link active" id="variable-tab" data-bs-toggle="tab" data-bs-target="#variable-tab-pane" type="button" role="tab" aria-controls="variable-tab-pane" aria-selected="true">📝Variables</button>
 			</li>
@@ -113,12 +121,13 @@
 			  <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">🗂️Export documentation</button>
 			</li>
 		  </ul>
-		  <div class="tab-content" id="myTabContent" v-if="dataset.fileName != null">
+		  <div class="tab-content" id="myTabContent" v-if="input.dataset.fileName != null">
 			<div class="tab-pane fade show active" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab" tabindex="0">
 				<!-- Instance Variable list -->
-				<div class="row" v-if="dataset.fileName != null">
+				
+				<div class="row" v-if="input.dataset.fileName != null">
 					<form class="mb-4">
-						<div class="row mb-2" v-for="(column, index) in dataset.columns">
+						<div class="row mb-2" v-for="(column, index) in input.dataset.columns">
 							<div class="col-md-1">
 								<label class="form-label" :class="{notFirst: (index > 0)}">Position</label>
 								<input v-model="column.position" type="text" class="form-control" disabled>
@@ -140,15 +149,11 @@
 								</select>
 							</div>
 							<div class="col-md-1">
-								<label class="form-label row codeCheckLabel" :class="{notFirst: (index > 0)}">Coded</label>
+								<label class="form-label row codeCheckLabel" :class="{notFirst: (index > 0)}">Details</label>
 								<div class="btn-group" role="group" aria-label="coded variable">
 									<input v-model="column.coded" @change="column.createCodeList()" type="checkbox"
 										class="btn-check" :id="'coded-'+column.id" autocomplete="off">
-									<label class="btn btn-outline-secondary" :for="'coded-'+column.id">
-										<span v-if="!column.coded">☐</span>
-										<span v-if="column.coded">☒</span>
-									</label>
-									<button v-if="column.coded" @click="codeListVariableIndex=index" data-bs-toggle="modal"
+									<button data-bs-toggle="modal"
 										data-bs-target="#codeListModal" type="button"
 										class="btn btn-outline-secondary">✏️</button>
 								</div>
@@ -160,11 +165,10 @@
 			</div>
 			<div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
 						
-    			<p v-if="dataset.sha256"><strong>sha256:</strong> <span v-html="dataset.sha256"></span></p>
-    			<p v-if="dataset.lastModified"><strong>lastModified:</strong> <span v-html="dataset.lastModified"></span></p>
-    
+				<pre><code v-html="output.markdown"></code></pre>
+
 				<div class="form-floating mb-3">
-					<pre><code v="JSON.stringify(dataset, null, 2)" class="language-json"></code></pre>
+					<pre><code v="JSON.stringify(input.dataset, null, 2)" class="language-json"></code></pre>
 				</div>
 			</div>
 		  </div>
@@ -237,6 +241,8 @@
 	<!-- nectar publisher source files -->
 	<script src="resources/modules/libs.js"></script>
 	<script src="resources/modules/utils.js"></script>
+	<script src="resources/modules/export/ddi-c-2.5.js"></script>
+	<script src="resources/modules/export/markdown.js"></script>
 	<script src="resources/main.js"></script>
 </body>
 

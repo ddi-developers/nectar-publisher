@@ -63,6 +63,7 @@ class Parser{
     console.log("Parse Spreadsheet ", file)
     var dataset = new Dataset()
     dataset.fileName = file.name
+    dataset.lastModified = new Date(file.lastModified).toISOString()
     dataset.sha256 = await checksum(file, "SHA-256")
        
     var reader = new FileReader();
