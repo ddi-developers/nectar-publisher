@@ -31,8 +31,12 @@ createApp({
       representationType: [{ id: "text", label: "Text" }, { id: "numeric", label: "Numeric" }, { id: "code", label: "Code" }, { id: "datetime", label: "Date time" }, { id: "other", label: "Other" }]
     }
 
+    const appMetadata = computed(() => {
+      return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText)
+    })
+
     return {
-      dataset, cv
+      dataset, cv, appMetadata
     }
   }
 }).mount("#app")

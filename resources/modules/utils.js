@@ -154,3 +154,7 @@ async function checksum(file, type){
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   return hashHex;
 }
+
+function getAppMetadata(){
+  return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText);
+}
