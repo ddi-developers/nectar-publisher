@@ -6,7 +6,7 @@ const DataType = {
 
 class Dataset{
   data = [[]]
-  fileName
+  fileName = null
   fileSize
   mimeType
   sha256

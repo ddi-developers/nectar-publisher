@@ -17,7 +17,8 @@
       "@type": "WebApplication",
       "name": "Necttar Publisher",
       "applicationCategory": ["datasets", "metadata", "csv", "tsv", "ddi"],
-      "browserRequirements": "requires HTML5 support"
+      "browserRequirements": "requires HTML5 support",
+      "softwareVersion": "0.0.1"
     }
   </script>
 	<style>
@@ -76,6 +77,20 @@
     <p v-if="dataset.sha256"><strong>sha256:</strong> <span v-html="dataset.sha256"></span></p>
     <p v-if="dataset.lastModified"><strong>lastModified:</strong> <span v-html="dataset.lastModified"></span></p>
     -->
+	<div class="row" v-if="dataset.fileName == null">
+		<p>
+		Document your datasets be providing basic variable descriptions.
+		Nectar Publisher works offline and can be downloaded as a <a href="#">zip-file</a>
+		</p>
+		<p>
+			Features:
+			<ul>
+				<li>Autodetect delimiter (in CSV-files)</li>
+				<li>Export DDI Codebook version 2.5</li>
+				<li>Creates file checksum (SHA-256)</li>
+			</ul>
+		</p>
+	</div>
 
 		<!-- Instance Variable list -->
 		<div class="row" v-if="dataset.fileName != null">

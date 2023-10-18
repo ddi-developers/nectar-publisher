@@ -25,7 +25,7 @@ createApp({
   },
   setup() {
     const examples = reactive([{}, {}])
-    const dataset = ref(new Dataset("", "t.csv", "text/csv", ","))
+    const dataset = ref(new Dataset(null, null, "text/csv", ","))
     const cv = {
       colRoles: [{ id: "Dimension" }, { id: "Attribute" }, { id: "Measure" }],
       representationType: [{ id: "text", label: "Text" }, { id: "numeric", label: "Numeric" }, { id: "code", label: "Code" }, { id: "datetime", label: "Date time" }, { id: "other", label: "Other" }]
