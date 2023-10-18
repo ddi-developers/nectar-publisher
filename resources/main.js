@@ -4,24 +4,18 @@ createApp({
   methods: {
     async openCsv(event) {
       const file = event.target.files[0]
-      document.title = file.name + " - Nectar Publisher"
+      document.title = `${file.name} - ${ this.appMetadata.name}`
       await Parser.parseFile(file, (d) => this.dataset = d)
     },
     saveFile(content, type, fileName) {
       var fileAsBlob = new Blob([content], { type: type })
       //saveFileBrowser(fileName, fileAsBlob)
     },
-    loadExample(example) {
-    },
     copyToClipboard(text) {
       copyTextToClipboard(text)
-    },
-    async reloadDataset() {
-
     }
   },
   mounted() {
-    this.reloadDataset()
   },
   setup() {
     const examples = reactive([{}, {}])

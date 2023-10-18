@@ -60,7 +60,7 @@
 					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 						<li class="nav-item">
 							<button @click="this.$refs.inputFile.click()" type="button" class="btn btn-light"
-								title="open csv/tsv file">📂 open csv</button>
+								title="open csv/tsv or spreadsheet">📂 import data</button>
 						</li>
 						<li class="nav-item">
 							<button type="button" class="btn btn-light" data-bs-toggle="modal"
@@ -82,71 +82,103 @@
 				Document your datasets be providing basic variable descriptions.
 				Nectar Publisher works offline and can be downloaded as a <a href="#">zip-file</a>
 			</p>
+			<h4>Import datasets</h4>
 			<p>
-				Features:
+				The first row in the csv/tsv and spreadsheet file should be the name of the column.<br>
+				Example:<br>
+				<img src="resources/images/intro/spreadsheet-example.png" alt="example for a spreadsheet">
+			</p>
+			<p>
+			<strong>Features:</strong>
 			<ul>
 				<li>Autodetect delimiter (in CSV-files)</li>
-				<li>Export DDI Codebook version 2.5</li>
 				<li>Creates file checksum (SHA-256)</li>
+				<li>Export machine readable metadata</li>
+				<ul>
+					<li>DDI 2.5</li>
+				</ul>
+				<li>Export documentation in human redable formats:</li>
+				<ul>
+					<li>Markdown</li>
+					<li>PDF</li>
+					<li>HTML</li>
+				</ul>
 			</ul>
 			</p>
 		</div>
 
-		<!-- Instance Variable list -->
-		<div class="row" v-if="dataset.fileName != null">
-			<form class="mb-4">
-				<div class="row mb-2" v-for="(column, index) in dataset.columns">
-					<div class="col-md-1">
-						<label class="form-label" :class="{notFirst: (index > 0)}">Position</label>
-						<input v-model="column.position" type="text" class="form-control" disabled>
-					</div>
-					<div class="col-md-2">
-						<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
-						<input v-model="column.name" type="text" class="form-control">
-					</div>
-					<div class="col-md-4">
-						<label class="form-label" :class="{notFirst: (index > 0)}">Label</label>
-						<input v-model="column.label" type="text" class="form-control">
-					</div>
-					<div class="col-md-2">
-						<label class="form-label" :class="{notFirst: (index > 0)}">Role</label>
-						<select v-model="column.role" class="form-select" aria-label="Default select example">
-							<option v-for="colRole in cv.colRoles" :value="colRole.id">{{ colRole.id }}</option>
-						</select>
-					</div>
-					<div class="col-md-2">
-						<label class="form-label" :class="{notFirst: (index > 0)}">Type</label>
-						<select v-model="column.hasIntendedDataType" class="form-select"
-							aria-label="Default select example">
-							<option v-for="colType in cv.representationType" :value="colType.id">{{ colType.label }}
-							</option>
-						</select>
-					</div>
-					<div class="col-md-1">
-						<label class="form-label row codeCheckLabel" :class="{notFirst: (index > 0)}">Coded</label>
-						<div class="btn-group" role="group" aria-label="coded variable">
-							<input v-model="column.coded" @change="column.createCodeList()" type="checkbox"
-								class="btn-check" :id="'coded-'+column.id" autocomplete="off">
-							<label class="btn btn-outline-secondary" :for="'coded-'+column.id">
-								<span v-if="!column.coded">☐</span>
-								<span v-if="column.coded">☒</span>
-							</label>
-							<button v-if="column.coded" @click="codeListVariableIndex=index" data-bs-toggle="modal"
-								data-bs-target="#codeListModal" type="button"
-								class="btn btn-outline-secondary">✏️</button>
+
+		<ul class="nav nav-tabs" id="myTab" role="tablist" v-if="dataset.fileName != null">
+			<li class="nav-item" role="presentation">
+			  <button class="nav-link active" id="variable-tab" data-bs-toggle="tab" data-bs-target="#variable-tab-pane" type="button" role="tab" aria-controls="variable-tab-pane" aria-selected="true">📝Variables</button>
+			</li>
+			<li class="nav-item" role="presentation">
+			  <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">🗂️Export documentation</button>
+			</li>
+		  </ul>
+		  <div class="tab-content" id="myTabContent" v-if="dataset.fileName != null">
+			<div class="tab-pane fade show active" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab" tabindex="0">
+				<!-- Instance Variable list -->
+				<div class="row" v-if="dataset.fileName != null">
+					<form class="mb-4">
+						<div class="row mb-2" v-for="(column, index) in dataset.columns">
+							<div class="col-md-1">
+								<label class="form-label" :class="{notFirst: (index > 0)}">Position</label>
+								<input v-model="column.position" type="text" class="form-control" disabled>
+							</div>
+							<div class="col-md-2">
+								<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
+								<input v-model="column.name" type="text" class="form-control">
+							</div>
+							<div class="col-md-4">
+								<label class="form-label" :class="{notFirst: (index > 0)}">Label</label>
+								<input v-model="column.label" type="text" class="form-control">
+							</div>
+							<div class="col-md-2">
+								<label class="form-label" :class="{notFirst: (index > 0)}">Role</label>
+								<select v-model="column.role" class="form-select" aria-label="Default select example">
+									<option v-for="colRole in cv.colRoles" :value="colRole.id">{{ colRole.id }}</option>
+								</select>
+							</div>
+							<div class="col-md-2">
+								<label class="form-label" :class="{notFirst: (index > 0)}">Type</label>
+								<select v-model="column.hasIntendedDataType" class="form-select"
+									aria-label="Default select example">
+									<option v-for="colType in cv.representationType" :value="colType.id">{{ colType.label }}
+									</option>
+								</select>
+							</div>
+							<div class="col-md-1">
+								<label class="form-label row codeCheckLabel" :class="{notFirst: (index > 0)}">Coded</label>
+								<div class="btn-group" role="group" aria-label="coded variable">
+									<input v-model="column.coded" @change="column.createCodeList()" type="checkbox"
+										class="btn-check" :id="'coded-'+column.id" autocomplete="off">
+									<label class="btn btn-outline-secondary" :for="'coded-'+column.id">
+										<span v-if="!column.coded">☐</span>
+										<span v-if="column.coded">☒</span>
+									</label>
+									<button v-if="column.coded" @click="codeListVariableIndex=index" data-bs-toggle="modal"
+										data-bs-target="#codeListModal" type="button"
+										class="btn btn-outline-secondary">✏️</button>
+								</div>
+							</div>
+							<hr class="mt-4" />
 						</div>
-					</div>
-					<hr class="mt-4" />
+					</form>
 				</div>
-			</form>
-		</div>
+			</div>
+			<div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+				Documentation export in this tab
+				<div class="form-floating mb-3">
+					<pre><code v="JSON.stringify(dataset, null, 2)" class="language-json"></code></pre>
+				</div>
+			</div>
+		  </div>
+		  
 
 
 
 
-		<div class="form-floating mb-3">
-			<pre><code v="JSON.stringify(dataset, null, 2)" class="language-json"></code></pre>
-		</div>
 
 
 		<!-- About Modal -->
@@ -156,7 +188,7 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<h1 class="modal-title fs-5" id="aboutModallLabel"><img src="resources/images/logo/nectar.svg"
-								alt="Nectar Publisher" height="32"> About nectar-publisher</h1>
+								alt="Nectar Publisher" height="32"> About {{ appMetadata.name }}</h1>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
