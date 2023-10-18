@@ -73,10 +73,7 @@
 
 		<input ref="inputFile" id="inputFile" @change="openCsv" type="file" accept=".csv,.tsv,.xlsx,text/csv"
 			style="display: none;">
-		<!--
-    <p v-if="dataset.sha256"><strong>sha256:</strong> <span v-html="dataset.sha256"></span></p>
-    <p v-if="dataset.lastModified"><strong>lastModified:</strong> <span v-html="dataset.lastModified"></span></p>
-    -->
+
 		<div class="row" v-if="dataset.fileName == null">
 			<p>
 				Document your datasets be providing basic variable descriptions.
@@ -162,7 +159,10 @@
 				</div>
 			</div>
 			<div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
-				Documentation export in this tab
+						
+    			<p v-if="dataset.sha256"><strong>sha256:</strong> <span v-html="dataset.sha256"></span></p>
+    			<p v-if="dataset.lastModified"><strong>lastModified:</strong> <span v-html="dataset.lastModified"></span></p>
+    
 				<div class="form-floating mb-3">
 					<pre><code v="JSON.stringify(dataset, null, 2)" class="language-json"></code></pre>
 				</div>
