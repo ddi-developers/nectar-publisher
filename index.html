@@ -2,15 +2,15 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nectar Publisher</title>
-  <script src="resources/libs/vue/vue.global.js"></script>
-  <link rel="stylesheet" href="resources/libs/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="resources/libs/highlight/styles/default.min.css">
-  <link rel="manifest" href="manifest.json" />
-  
-  <script type="application/ld+json">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Nectar Publisher</title>
+	<script src="resources/libs/vue/vue.global.js"></script>
+	<link rel="stylesheet" href="resources/libs/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="resources/libs/highlight/styles/default.min.css">
+	<link rel="manifest" href="manifest.json" />
+
+	<script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
@@ -19,18 +19,20 @@
       "browserRequirements": "requires HTML5 support"
     }
   </script>
-  <style>
-		.checkbox-xl input{
+	<style>
+		.checkbox-xl input {
 			margin-top: .1rem;
 			width: 2rem;
 			height: 2rem;
 		}
-		form .codeCheckLabel{
-				margin-left:0px;
+
+		form .codeCheckLabel {
+			margin-left: 0px;
 		}
-		@media (min-width: 768px) { 
-			form .row .notFirst{
-				display:none;
+
+		@media (min-width: 768px) {
+			form .row .notFirst {
+				display: none;
 			}
 
 			form hr {
@@ -41,33 +43,34 @@
 </head>
 
 <body>
-  <div id="app" class="container">
-    <!-- top toolbar -->
-    <nav class="row navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">🐝 Nectar Publisher <span class="badge bg-secondary" aria-label="version">0.0.1</span></a>
-        <button class="navbar-toggler" 
-          type="button" 
-          data-bs-toggle="collapse" data-bs-target="#navbar" 
-          aria-controls="navbar" aria-expanded="false" 
-          aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <button @click="this.$refs.inputFile.click()" type="button" class="btn btn-light" title="open csv/tsv file">📂 open csv</button>
-            </li>
-            <li class="nav-item">
-              <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#aboutModal" title="about this app">ℹ️ about</button>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+	<div id="app" class="container">
+		<!-- top toolbar -->
+		<nav class="row navbar navbar-expand-lg bg-body-tertiary">
+			<div class="container-fluid">
+				<a class="navbar-brand" href="#">🐝 Nectar Publisher <span class="badge bg-secondary"
+						aria-label="version">0.0.1</span></a>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar"
+					aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div id="navbar" class="collapse navbar-collapse">
+					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+						<li class="nav-item">
+							<button @click="this.$refs.inputFile.click()" type="button" class="btn btn-light"
+								title="open csv/tsv file">📂 open csv</button>
+						</li>
+						<li class="nav-item">
+							<button type="button" class="btn btn-light" data-bs-toggle="modal"
+								data-bs-target="#aboutModal" title="about this app">ℹ️ about</button>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
 
-    <input ref="inputFile" id="inputFile" @change="openCsv" type="file" accept=".csv,.tsv,.xlsx,text/csv" style="display: none;">
-    <!--
+		<input ref="inputFile" id="inputFile" @change="openCsv" type="file" accept=".csv,.tsv,.xlsx,text/csv"
+			style="display: none;">
+		<!--
     <p v-if="dataset.sha256"><strong>sha256:</strong> <span v-html="dataset.sha256"></span></p>
     <p v-if="dataset.lastModified"><strong>lastModified:</strong> <span v-html="dataset.lastModified"></span></p>
     -->
@@ -98,18 +101,22 @@
 						<label class="form-label" :class="{notFirst: (index > 0)}">Type</label>
 						<select v-model="column.hasIntendedDataType" class="form-select"
 							aria-label="Default select example">
-							<option v-for="colType in cv.representationType" :value="colType.id">{{ colType.label }}</option>
+							<option v-for="colType in cv.representationType" :value="colType.id">{{ colType.label }}
+							</option>
 						</select>
 					</div>
 					<div class="col-md-1">
 						<label class="form-label row codeCheckLabel" :class="{notFirst: (index > 0)}">Coded</label>
 						<div class="btn-group" role="group" aria-label="coded variable">
-							<input v-model="column.coded" @change="column.createCodeList()" type="checkbox" class="btn-check" :id="'coded-'+column.id" autocomplete="off">
+							<input v-model="column.coded" @change="column.createCodeList()" type="checkbox"
+								class="btn-check" :id="'coded-'+column.id" autocomplete="off">
 							<label class="btn btn-outline-secondary" :for="'coded-'+column.id">
 								<span v-if="!column.coded">☐</span>
 								<span v-if="column.coded">☒</span>
 							</label>
-							<button v-if="column.coded" @click="codeListVariableIndex=index" data-bs-toggle="modal" data-bs-target="#codeListModal" type="button" class="btn btn-outline-secondary">✏️</button>
+							<button v-if="column.coded" @click="codeListVariableIndex=index" data-bs-toggle="modal"
+								data-bs-target="#codeListModal" type="button"
+								class="btn btn-outline-secondary">✏️</button>
 						</div>
 					</div>
 					<hr class="mt-4" />
@@ -120,13 +127,14 @@
 
 
 
-    <div class="form-floating mb-3">
-      <pre><code v="JSON.stringify(dataset, null, 2)" class="language-json"></code></pre>
-    </div>
+		<div class="form-floating mb-3">
+			<pre><code v="JSON.stringify(dataset, null, 2)" class="language-json"></code></pre>
+		</div>
 
 
-    <!-- About Modal -->
-		<div class="modal modal-dialog-scrollable fade" id="aboutModal" tabindex="-2" aria-labelledby="aboutModalLabel" aria-hidden="true">
+		<!-- About Modal -->
+		<div class="modal modal-dialog-scrollable fade" id="aboutModal" tabindex="-2" aria-labelledby="aboutModalLabel"
+			aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -134,40 +142,46 @@
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<img src="resources/ddi-cdi-sample-generator.svg" class="mx-auto d-block" alt="Nectar Publisher" height="64">
+						<img src="resources/ddi-cdi-sample-generator.svg" class="mx-auto d-block" alt="Nectar Publisher"
+							height="64">
 						<p>
 							Nectar Publisher aims to be a lightweight simple documentation tool for tabular data.<br>
-              Currenty supports CSV & TSV files with suport for spreadsheets in development.
+							Currenty supports CSV & TSV files with suport for spreadsheets in development.
 						</p>
 						<p>
 							Libraries used:
-              <ul>
-                <li><a href="https://www.papaparse.com" target="_blank">Papa Parse</a></li>
-                <li><a href="https://sheetjs.com" target="_blank">Sheet JS CE</a></li>
-                <li><a href="https://vuejs.org" target="_blank">Vue.js</a></li>
-                <li><a href="https://getbootstrap.com" target="_blank">Bootstrap</a></li>
-              </ul>
+						<ul>
+							<li><a href="https://www.papaparse.com" target="_blank">Papa Parse</a></li>
+							<li><a href="https://sheetjs.com" target="_blank">Sheet JS CE</a></li>
+							<li><a href="https://vuejs.org" target="_blank">Vue.js</a></li>
+							<li><a href="https://getbootstrap.com" target="_blank">Bootstrap</a></li>
+						</ul>
 						</p>
 						<h5>Created by</h5>
 						<p>
-							<ul>
-								<li>
-									Olof Olsson, SND
-									<a href="https://orcid.org/0000-0002-7365-0691">
-										<img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" />
-									</a>
-								</li>
-								<li>
-									Oliver Hopt, GESIS
-									<a href="https://orcid.org/0000-0002-3848-574X">
-										<img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" />
-									</a>
-								</li>
-							</ul>
+						<ul>
+							<li>
+								Olof Olsson, SND
+								<a href="https://orcid.org/0000-0002-7365-0691">
+									<img alt="ORCID logo"
+										src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png"
+										width="16" height="16" />
+								</a>
+							</li>
+							<li>
+								Oliver Hopt, GESIS
+								<a href="https://orcid.org/0000-0002-3848-574X">
+									<img alt="ORCID logo"
+										src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png"
+										width="16" height="16" />
+								</a>
+							</li>
+						</ul>
 						</p>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#aboutModal">Close</button>
+						<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+							data-bs-target="#aboutModal">Close</button>
 					</div>
 				</div>
 			</div>
@@ -176,15 +190,15 @@
 
 
 
-  </div>
-  <script src="resources/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="resources/libs/highlight/highlight.min.js"></script>
-  <script src="resources/libs/highlight/languages/json.min.js"></script>
-  <script src="resources/libs/highlight/languages/xml.min.js"></script>
-  <!-- nectar publisher source files -->
-  <script src="resources/modules/libs.js"></script>
-  <script src="resources/modules/utils.js"></script>
-  <script src="resources/main.js"></script>
+	</div>
+	<script src="resources/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="resources/libs/highlight/highlight.min.js"></script>
+	<script src="resources/libs/highlight/languages/json.min.js"></script>
+	<script src="resources/libs/highlight/languages/xml.min.js"></script>
+	<!-- nectar publisher source files -->
+	<script src="resources/modules/libs.js"></script>
+	<script src="resources/modules/utils.js"></script>
+	<script src="resources/main.js"></script>
 </body>
 
 </html>
