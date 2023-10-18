@@ -52,17 +52,44 @@ class DatasetColumn{
 }
 
 class Parser{
-  static async parseSpreadsheet(file){
+  static async parseSpreadsheet(file, done){
     console.log("Parse Spreadsheet ", file)
+    var dataset = new Dataset()
+    dataset.fileName = file.name
+    dataset.sha256 = await checksum(file, "SHA-256")
+       
     var reader = new FileReader();
     reader.readAsArrayBuffer(file);
     reader.onload = function (e) {
-        var data = new Uint8Array(reader.result);
-        var workbook = XLSX.read(data, {type: 'array'});
+        var fileReaderData = new Uint8Array(reader.result);
+        var workbook = XLSX.read(fileReaderData, {type: 'array'});
         var sheet = workbook.Sheets[workbook.SheetNames[0]];
-        console.log(sheet)
+
         var arr = XLSX.utils.sheet_to_json(sheet, {header: 1});
         console.log("sheet array", arr)
+     
+        dataset.columns = []
+        
+        dataset.delimiter = null
+        dataset.linebreak = null
+        
+        var columnIds = arr[0]
+        if(dataset.firstRowIsHeader){
+          arr.shift()
+        }
+        dataset.data = arr
+        
+        for(const [i, c] of columnIds.entries()){
+          var column = new DatasetColumn(c)
+          column.position = i
+          column.valuesUnique = [... new Set(dataset.data.map(d => d[i]))]
+          column.valuesUnique.sort()
+          dataset.columns.push(column)
+        }
+
+        console.log(dataset)
+
+        done(dataset)
     }
 
     console.log("sheet ")

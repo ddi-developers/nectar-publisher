@@ -6,7 +6,7 @@ createApp({
             const file = event.target.files[0]
             document.title = file.name + " - Nectar Publisher"
             if(file.name.endsWith(".xlsx")){
-                await Parser.parseSpreadsheet(file)
+                await Parser.parseSpreadsheet(file, (d) => this.dataset = d)
             }else{
                 await Parser.parseDelimitedText(file, (d) => this.dataset = d)
             }

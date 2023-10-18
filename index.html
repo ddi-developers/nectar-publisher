@@ -19,6 +19,25 @@
       "browserRequirements": "requires HTML5 support"
     }
   </script>
+  <style>
+		.checkbox-xl input{
+			margin-top: .1rem;
+			width: 2rem;
+			height: 2rem;
+		}
+		form .codeCheckLabel{
+				margin-left:0px;
+		}
+		@media (min-width: 768px) { 
+			form .row .notFirst{
+				display:none;
+			}
+
+			form hr {
+				display: none;
+			}
+		}
+	</style>
 </head>
 
 <body>
@@ -106,23 +125,57 @@
     </div>
 
 
+    <!-- About Modal -->
+		<div class="modal modal-dialog-scrollable fade" id="aboutModal" tabindex="-2" aria-labelledby="aboutModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h1 class="modal-title fs-5" id="aboutModallLabel">ℹ️ About nectar-publisher</h1>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<img src="resources/ddi-cdi-sample-generator.svg" class="mx-auto d-block" alt="Nectar Publisher" height="64">
+						<p>
+							Nectar Publisher aims to be a lightweight simple documentation tool for tabular data.<br>
+              Currenty supports CSV & TSV files with suport for spreadsheets in development.
+						</p>
+						<p>
+							Libraries used:
+              <ul>
+                <li><a href="https://www.papaparse.com" target="_blank">Papa Parse</a></li>
+                <li><a href="https://sheetjs.com" target="_blank">Sheet JS CE</a></li>
+                <li><a href="https://vuejs.org" target="_blank">Vue.js</a></li>
+                <li><a href="https://getbootstrap.com" target="_blank">Bootstrap</a></li>
+              </ul>
+						</p>
+						<h5>Created by</h5>
+						<p>
+							<ul>
+								<li>
+									Olof Olsson, SND
+									<a href="https://orcid.org/0000-0002-7365-0691">
+										<img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" />
+									</a>
+								</li>
+								<li>
+									Oliver Hopt, GESIS
+									<a href="https://orcid.org/0000-0002-3848-574X">
+										<img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" />
+									</a>
+								</li>
+							</ul>
+						</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#aboutModal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
 
 
-    <div v-if="dataset.columns.length > 0">
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col" v-for="c of dataset.columns" v-html="c.id"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">1</th>
-          </tr>
-        </tbody>    
-      </table>
-    </div>
+
+
   </div>
   <script src="resources/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="resources/libs/highlight/highlight.min.js"></script>
