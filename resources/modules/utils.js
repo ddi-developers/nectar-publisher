@@ -52,6 +52,13 @@ class DatasetColumn{
 }
 
 class Parser{
+  static async parseFile(file, doneCallback){
+    if(file.name.endsWith(".xlsx")){
+      await Parser.parseSpreadsheet(file, (d) => doneCallback(d))
+    }else{
+        await Parser.parseDelimitedText(file, (d) => doneCallback(d))
+    }
+  }
   static async parseSpreadsheet(file, done){
     console.log("Parse Spreadsheet ", file)
     var dataset = new Dataset()
@@ -130,6 +137,14 @@ class Parser{
       }
     })
   }
+}
+
+function copyTextToClipboard(text){
+  navigator.clipboard.writeText(text).then(() => {
+    console.log("Content copied to clipboard");
+  },() => {
+      console.error("Failed to copy to clipboard");
+  });
 }
 
 async function checksum(file, type){

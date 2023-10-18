@@ -1,47 +1,38 @@
 const { createApp, ref, reactive, computed } = Vue
 
 createApp({
-    methods:{
-        async openCsv(event){
-            const file = event.target.files[0]
-            document.title = file.name + " - Nectar Publisher"
-            if(file.name.endsWith(".xlsx")){
-                await Parser.parseSpreadsheet(file, (d) => this.dataset = d)
-            }else{
-                await Parser.parseDelimitedText(file, (d) => this.dataset = d)
-            }
-        },
-        saveFile(content, type, fileName){
-            var fileAsBlob = new Blob([ content ], { type: type })
-            //saveFileBrowser(fileName, fileAsBlob)
-        },
-        loadExample(example){
-        },
-        copyToClipboard(text){
-            navigator.clipboard.writeText(text).then(() => {
-                console.log("Content copied to clipboard");
-            },() => {
-                console.error("Failed to cpy to clipboard");
-            });
-        },
-        async reloadDataset(){
-
-        }
+  methods: {
+    async openCsv(event) {
+      const file = event.target.files[0]
+      document.title = file.name + " - Nectar Publisher"
+      await Parser.parseFile(file, (d) => this.dataset = d)
     },
-    mounted(){
-        this.reloadDataset()
+    saveFile(content, type, fileName) {
+      var fileAsBlob = new Blob([content], { type: type })
+      //saveFileBrowser(fileName, fileAsBlob)
     },
-    setup() {
-        const codeListVariableIndex = ref(null)
-        const examples = reactive([{},{}])
-        const dataset = ref(new Dataset("","t.csv","text/csv",","))
-        const cv = {
-            colRoles : [{id: "Dimension"}, {id: "Attribute"}, {id: "Measure"}],
-            representationType : ["text", "numeric", "code", "datetime", "other"]
-        }
+    loadExample(example) {
+    },
+    copyToClipboard(text) {
+      copyTextToClipboard(text)
+    },
+    async reloadDataset() {
 
-        return {
-            dataset, cv
-        }
     }
+  },
+  mounted() {
+    this.reloadDataset()
+  },
+  setup() {
+    const examples = reactive([{}, {}])
+    const dataset = ref(new Dataset("", "t.csv", "text/csv", ","))
+    const cv = {
+      colRoles: [{ id: "Dimension" }, { id: "Attribute" }, { id: "Measure" }],
+      representationType: [{ id: "text", label: "Text" }, { id: "numeric", label: "Numeric" }, { id: "code", label: "Code" }, { id: "datetime", label: "Date time" }, { id: "other", label: "Other" }]
+    }
+
+    return {
+      dataset, cv
+    }
+  }
 }).mount("#app")

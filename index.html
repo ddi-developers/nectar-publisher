@@ -56,7 +56,7 @@
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <button type="button" class="btn btn-light" title="open csv/tsv file">📂 open csv</button>
+              <button @click="this.$refs.inputFile.click()" type="button" class="btn btn-light" title="open csv/tsv file">📂 open csv</button>
             </li>
             <li class="nav-item">
               <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#aboutModal" title="about this app">ℹ️ about</button>
@@ -66,7 +66,7 @@
       </div>
     </nav>
 
-    <input id="file" @change="openCsv" type="file" accept=".csv,.tsv,.xlsx,text/csv" style="">
+    <input ref="inputFile" id="inputFile" @change="openCsv" type="file" accept=".csv,.tsv,.xlsx,text/csv" style="display: none;">
     <!--
     <p v-if="dataset.sha256"><strong>sha256:</strong> <span v-html="dataset.sha256"></span></p>
     <p v-if="dataset.lastModified"><strong>lastModified:</strong> <span v-html="dataset.lastModified"></span></p>
@@ -98,7 +98,7 @@
 						<label class="form-label" :class="{notFirst: (index > 0)}">Type</label>
 						<select v-model="column.hasIntendedDataType" class="form-select"
 							aria-label="Default select example">
-							<option v-for="colType in cv.colTypes" :value="colType.id">{{ colType.label }}</option>
+							<option v-for="colType in cv.representationType" :value="colType.id">{{ colType.label }}</option>
 						</select>
 					</div>
 					<div class="col-md-1">
