@@ -1,6 +1,4 @@
 const DataType = {
-	Numreric: "number",
-	Autumn: "autumn",
   Text: "text"
 }
 
@@ -44,6 +42,7 @@ class DatasetColumn{
   label
   values = []
   valuesUnique
+  hasIntendedDataType
   dataType = DataType.Text
   constructor(id){
     this.id = id
@@ -53,19 +52,22 @@ class DatasetColumn{
 
 class Parser{
   static async parseFile(file, doneCallback){
-    if(file.name.endsWith(".xlsx")){
-      await Parser.parseSpreadsheet(file, (d) => doneCallback(d))
-    }else{
-        await Parser.parseDelimitedText(file, (d) => doneCallback(d))
-    }
-  }
-  static async parseSpreadsheet(file, done){
-    console.log("Parse Spreadsheet ", file)
     var dataset = new Dataset()
+
     dataset.fileName = file.name
+    dataset.mimeType = file.type
+    dataset.fileSize = file.size
     dataset.lastModified = new Date(file.lastModified).toISOString()
     dataset.sha256 = await checksum(file, "SHA-256")
-       
+
+    if(file.name.endsWith(".xlsx")){
+      await Parser.parseSpreadsheet(file, dataset, (d) => doneCallback(d))
+    }else{
+        await Parser.parseDelimitedText(file, dataset, (d) => doneCallback(d))
+    }
+  }
+
+  static async parseSpreadsheet(file, dataset, done){       
     var reader = new FileReader();
     reader.readAsArrayBuffer(file);
     reader.onload = function (e) {
@@ -74,10 +76,8 @@ class Parser{
         var sheet = workbook.Sheets[workbook.SheetNames[0]];
 
         var arr = XLSX.utils.sheet_to_json(sheet, {header: 1});
-        console.log("sheet array", arr)
      
         dataset.columns = []
-        
         dataset.delimiter = null
         dataset.linebreak = null
         
@@ -92,26 +92,15 @@ class Parser{
           column.position = i
           column.valuesUnique = [... new Set(dataset.data.map(d => d[i]))]
           column.valuesUnique.sort()
+          column.hasIntendedDataType = guessType(column.valuesUnique)
           dataset.columns.push(column)
         }
 
-        console.log(dataset)
-
         done(dataset)
     }
-
-    console.log("sheet ")
   }
 
-  static async parseDelimitedText(file, done){
-    var dataset = new Dataset()
-
-    dataset.fileName = file.name
-    dataset.mimeType = file.type
-    dataset.fileSize = file.size
-    dataset.lastModified = new Date(file.lastModified).toISOString()
-    dataset.sha256 = await checksum(file, "SHA-256")
-
+  static async parseDelimitedText(file, dataset, done){
     await Papa.parse(file, {
       complete: function(results) {
         dataset.columns = []
@@ -131,6 +120,7 @@ class Parser{
           column.position = i
           column.valuesUnique = [... new Set(dataset.data.map(d => d[i]))]
           column.valuesUnique.sort()
+          column.hasIntendedDataType = guessType(column.valuesUnique)
           dataset.columns.push(column)
         }
 
@@ -146,6 +136,57 @@ function copyTextToClipboard(text){
   },() => {
       console.error("Failed to copy to clipboard");
   });
+}
+
+function guessType(values){
+  var numRegEx = /^\d*(\.\d+)?$/
+  var intReg = /^\d+$/;
+  var doubleReg = /\d+\.\d*|\.?\d+/
+  var dateReg = /^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$/
+  
+  if(values.every(i => intReg.test(i))) return 'numeric';
+
+  if(values.every(i => doubleReg.test(i))) return 'numeric';
+
+  if(values.every(i => numRegEx.test(i))) return 'numeric';
+
+  // TODO: work out a better date test
+  if(values.every(i => dateReg.test(i))) return 'datetime';
+
+  if(values.every(i => typeof i === "string")) return  'text';
+  return 'other';
+}
+
+/**
+ * Format bytes as human-readable text.
+ * 
+ * @param bytes Number of bytes.
+ * @param si True to use metric (SI) units, aka powers of 1000. False to use 
+ *           binary (IEC), aka powers of 1024.
+ * @param dp Number of decimal places to display.
+ * 
+ * @return Formatted string.
+ */
+function humanFileSize(bytes, si=false, dp=1) {
+  const thresh = si ? 1000 : 1024;
+
+  if (Math.abs(bytes) < thresh) {
+    return bytes + ' B';
+  }
+
+  const units = si 
+    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] 
+    : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+  let u = -1;
+  const r = 10**dp;
+
+  do {
+    bytes /= thresh;
+    ++u;
+  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+
+  return bytes.toFixed(dp) + ' ' + units[u];
 }
 
 async function checksum(file, type){
