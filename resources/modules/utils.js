@@ -60,7 +60,9 @@ class Parser{
     dataset.lastModified = new Date(file.lastModified).toISOString()
     dataset.sha256 = await checksum(file, "SHA-256")
 
-    if(file.name.endsWith(".xlsx")){
+    const sheetJsSuffixes = ['.xlsx', '.xls', '.ods']
+
+    if (sheetJsSuffixes.some(suffix => file.name.endsWith(suffix))){
       await Parser.parseSpreadsheet(file, dataset, (d) => doneCallback(d))
     }else{
         await Parser.parseDelimitedText(file, dataset, (d) => doneCallback(d))

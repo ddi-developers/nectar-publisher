@@ -71,7 +71,7 @@
 			</div>
 		</nav>
 
-		<input ref="inputFile" id="inputFile" @change="openCsv" type="file" accept=".csv,.tsv,.xlsx,text/csv"
+		<input ref="inputFile" id="inputFile" @change="openCsv" type="file" accept=".csv,.tsv,.xlsx,.xls,.ods,text/csv"
 			style="display: none;">
 		<div class="border border-danger text-danger" v-if="input.dataset.errors.length > 0">
 			<strong>The file "{{ input.dataset.fileName }}" have errors:</strong><br>
@@ -89,7 +89,7 @@
 			</p>
 			<h4>Import datasets</h4>
 			<p>
-				The first row in the csv/tsv and spreadsheet file should be the name of the column.<br>
+				The first row in the .csv/.tsv or spreadsheet (.xlsx/.xls/.ods) file should be the name of the column.<br>
 				Example:<br>
 				<img src="resources/images/intro/spreadsheet-example.png" alt="example for a spreadsheet">
 			</p>
