@@ -1,6 +1,6 @@
 const { createApp, ref, reactive, computed } = Vue
 
-createApp({
+const app = createApp({
   methods: {
     async openCsv(event) {
       this.input.file = event.target.files[0]
@@ -15,8 +15,7 @@ createApp({
       copyTextToClipboard(text)
     }
   },
-  mounted() {
-  },
+  mounted() {},
   setup() {
     const input = reactive({
       file: null,
@@ -25,11 +24,9 @@ createApp({
     const cv = {
       representationType: [{ id: "text", label: "Text" }, { id: "numeric", label: "Numeric" }, { id: "code", label: "Code" }, { id: "datetime", label: "Date time" }, { id: "other", label: "Other" }]
     }
-
     const appMetadata = computed(() => {
       return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText)
     })
-
     const output = computed(() => {
       return {
         markdown: datasetToMarkdown(input.dataset)
