@@ -40,6 +40,7 @@ class DatasetColumn{
   id
   name
   label
+  description
   values = []
   valuesUnique
   hasIntendedDataType

@@ -120,7 +120,7 @@
 			<div class="tab-pane fade show active" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab" tabindex="0">
 				<!-- Columns in the dataset -->
 				<div class="row" v-if="input.dataset.fileName != null">
-					<form class="mb-2" v-for="(column, index) in input.dataset.columns">
+					<form class="mb-2" v-for="(column, index) in input.dataset.columns" :class="{ 'bg-light rounded': column.showDetails }">
 						<div class="row">
 							<div class="col-md-1">
 								<label class="form-label" :class="{notFirst: (index > 0)}">Position</label>
@@ -147,14 +147,15 @@
 							</div>
 							<div class="col-md-1">
 								<label class="form-label row button-label" :class="{notFirst: (index > 0)}">Details</label>
-								<button @click="column.showDetails = !column.showDetails" type="button" class="btn btn-outline-secondary">⚙️</button>
+								<button @click="column.showDetails = !column.showDetails" type="button" :class="{ 'bg-primary': column.showDetails }" class="btn btn-outline-secondary">⚙️</button>
 							</div>
 							
 						</div>
 						<Transition>
-							<div v-if="column.showDetails" class="row details">
-								<div class="col-md-12">
-									This is the variable details
+							<div v-if="column.showDetails" class="row details mb-2">
+								<div class="mb-12">
+									<label :for="'description-' + column.position" class="form-label">Description</label>
+									<textarea v-model="column.description" class="form-control" :id="'description-' + column.position" rows="4"></textarea>
 								</div>
 							</div>
 						</Transition>
