@@ -1,0 +1,22 @@
+.v-enter-active,
+.v-leave-active {
+    transition: opacity 0.3s ease;
+}
+.v-enter-from,
+.v-leave-to {
+    opacity: 0;
+}
+
+.button-label{
+    margin-left: 0.1rem;
+}
+
+@media (min-width: 768px) {
+    form .row .notFirst {
+        display: none;
+    }
+
+    form hr {
+        display: none;
+    }
+}
