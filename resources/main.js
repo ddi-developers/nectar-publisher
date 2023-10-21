@@ -1,8 +1,22 @@
 const { createApp, ref, reactive, computed } = Vue
 
+var ColumnRow =  {
+  props:['column'],
+  setup() {
+    const count = ref(0)
+    return { count }
+  },
+  template: `
+    <div class="mb-2">
+      <input v-model="column.name">
+    </div>`
+}
+
+
 const app = createApp({
+  components: {ColumnRow: ColumnRow},
   methods: {
-    async openCsv(event) {
+    async importDataFromFile(event) {
       this.input.file = event.target.files[0]
       document.title = `${this.input.file.name} - ${ this.appMetadata.name}`
       await Parser.parseFile(this.input.file, (d) => this.input.dataset = d)
