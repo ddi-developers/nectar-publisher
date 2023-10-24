@@ -92,7 +92,7 @@
 			<div class="card mt-2 mb-2 alert alert-info">
 				<div class="card-body">
 					Document your datasets by providing basic variable descriptions.
-					Nectar Publisher works offline and can be downloaded as a <a href="#">zip-file</a>
+					Nectar Publisher works offline and can be downloaded as a <a :href="appMetadata.downloadUrl" :title="'download version' + ' ' + appMetadata.softwareVersion">zip-file</a>
 				</div>
 			</div>
 			<div class="card">
@@ -157,13 +157,26 @@
 									<label :for="'description-' + column.position" class="form-label">Description</label>
 									<textarea v-model="column.description" class="form-control" :id="'description-' + column.position" rows="4"></textarea>
 								</div>
-								<div class="col-md-6">
+								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-6">
 									<label class="form-label">Unit</label>
-									<input v-model="column.label" type="text" class="form-control">
+									<input v-model="column.unit" list="unit-list" type="text" class="form-control">
+									<!-- not a good way to do it, just a temp list... -->
+									<datalist id="unit-list">
+										<option>candela</option>
+										<option>meter</option>
+										<option>seconds</option>
+										<option>mole</option>
+										<option>ampere</option>
+										<option>kelvin</option>
+										<option>celcius</option>
+										<option>kilogram</option>
+										<option>percent</option>
+										<option>pascal</option>
+									</datalist>
 								</div>
-								<div class="col-md-6">
-									<label class="form-label">Something</label>
-									<input v-model="column.label" type="text" class="form-control">
+								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-6">
+									<label class="form-label">Decimals</label>
+									<input v-model.number="column.decimals" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
 								</div>
 							</div>
 						</Transition>
