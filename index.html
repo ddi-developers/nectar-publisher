@@ -157,7 +157,7 @@
 									<label :for="'description-' + column.position" class="form-label">Description</label>
 									<textarea v-model="column.description" class="form-control" :id="'description-' + column.position" rows="4"></textarea>
 								</div>
-								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-6">
+								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-12">
 									<label class="form-label">Unit</label>
 									<input v-model="column.unit" list="unit-list" type="text" class="form-control">
 									<!-- not a good way to do it, just a temp list... -->
@@ -175,8 +175,12 @@
 									</datalist>
 								</div>
 								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-6">
-									<label class="form-label">Decimals</label>
-									<input v-model.number="column.decimals" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
+									<label class="form-label">Decimal positions</label>
+									<input v-model.number="column.decimalPositions" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
+								</div>
+								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-6">
+									<label class="form-label">Accuracy</label>
+									<input v-model.number="column.accuracy" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
 								</div>
 							</div>
 						</Transition>
