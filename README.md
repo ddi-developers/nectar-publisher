@@ -5,7 +5,7 @@ Document your tabular datasets and create codebooks and machine actionable metad
 ## Run the application
 
 * On GitHub pages: https://ddi-developers.github.io/nectar-publisher
-* Localy by download and extracting [this zip-file](#) (no internet connection required after download)
+* Localy by download and extracting [this zip-file](https://github.com/borsna/nectar-publisher/archive/refs/heads/main.zip) (no internet connection required after download)
 
 ## Build instructions
 
