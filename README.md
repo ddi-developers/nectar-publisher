@@ -13,21 +13,24 @@ Document your tabular datasets and create codebooks and machine actionable metad
 ### Inputs
 - [x] CSV / TSV - files
 - [x] Excel / ODS spreadsheet
+
 ### Imports
 - [ ] DDI-C 2.5 variable documentation
 - [ ] DDI-L 3.3 variable documentation
-### Output
--
-- [ ] DDI-C 2.5 XML
-- [ ] DDI-L 3.3 XML
-- [ ] DDI-CDI JSON-LD
-#### Codebook
-- [ ] Markdown
-- [ ] Html
-- [ ] Pdf
-### Plugin system to push metadata & data to external repository
-- [ ] Define a interface and example implementation
 
+### Output
+- [ ] Metadata
+  - [ ] DDI-C 2.5 XML
+  - [ ] DDI-L 3.3 XML
+  - [ ] DDI-CDI JSON-LD
+- [ ] Codebook
+  - [ ] Markdown
+  - [ ] Html
+  - [ ] Pdf
+
+### Plugin system to push metadata & data to external repository
+- [ ] Define a interface and
+- [ ] Example implementation
 
 ### Column based listing with variables in focus
 - [x] Responsive layout
@@ -37,12 +40,12 @@ Document your tabular datasets and create codebooks and machine actionable metad
 ### Metadata
 
 #### Data file documentation
-- file metadata (extracted from file)
+- [x] File metadata (extracted from file)
   - [x] filename
   - [x] delimiter
   - [x] mimeType
   - [x] checksum (sha256)
-- Variable documentation
+- [ ] Variable metadata (autodetected & input)
   - [x] Id (column header name if exist, fallback to column number)
   - [x] Column number (auto generated on file import)
   - [x] Name (set to column header if existing)
@@ -65,8 +68,8 @@ Document your tabular datasets and create codebooks and machine actionable metad
 ## Build instructions
 
 No build tools required.  
-Nectar Publisher aims for easy development without the need for any special tools.  
-Open any source file, edit and save [KISS Principle](https://en.wikipedia.org/wiki/KISS_principle).
+Nectar Publisher aims for easy development & deployment without the need for any special tools or processes.  
+Open any source file; edit, save see changes in the browser [KISS Principle](https://en.wikipedia.org/wiki/KISS_principle).
 
 ## License
 
