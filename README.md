@@ -17,10 +17,11 @@ Document your tabular datasets and create codebooks and machine actionable metad
 - [ ] DDI-C 2.5 variable documentation
 - [ ] DDI-L 3.3 variable documentation
 ### Output
+-
 - [ ] DDI-C 2.5 XML
 - [ ] DDI-L 3.3 XML
 - [ ] DDI-CDI JSON-LD
-#### Codebook:
+#### Codebook
 - [ ] Markdown
 - [ ] Html
 - [ ] Pdf
@@ -45,21 +46,21 @@ Document your tabular datasets and create codebooks and machine actionable metad
   - [x] Id (column header name if exist, fallback to column number)
   - [x] Column number (auto generated on file import)
   - [x] Name (set to column header if existing)
-- [ ] Label
-- [ ] Description
-- [ ] DataType
-- [ ] UnitCode
-- [ ] Min/Max value
-- [ ] CollectionMethod
-- [ ] ResponseDomain
-  - [ ] Text
-  - [ ] Numeric
-  - [ ] Datetime
-  - [ ] Code
-    - [ ] value
-    - [ ] label
-    - [ ] isMissingValue
-    - [ ] frequency
+  - [ ] Label
+  - [ ] Description
+  - [ ] DataType
+  - [ ] UnitCode
+  - [ ] Min/Max value
+  - [ ] CollectionMethod
+  - [ ] ResponseDomain
+    - [ ] Text
+    - [ ] Numeric
+    - [ ] Datetime
+    - [ ] Code
+      - [ ] value
+      - [ ] label
+      - [ ] isMissingValue
+      - [ ] frequency
 
 ## Build instructions
 
