@@ -10,11 +10,12 @@ Document your tabular datasets and create codebooks and machine actionable metad
 
 ## Implementation and status for `Nectar Publisher 1.0`
 
-### Inputs
+### Dataset inputs
 - [x] CSV / TSV - files
 - [x] Excel / ODS spreadsheet
+- [ ] SPSS
 
-### Imports
+### Metadata imports
 - [ ] DDI-C 2.5 variable documentation
 - [ ] DDI-L 3.3 variable documentation
 
