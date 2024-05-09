@@ -2,10 +2,13 @@
 
 Document your tabular datasets and create codebooks and machine actionable metadata using DDI.
 
+> [!NOTE]
+> Nectar Publisher is under early development and might not work correctly
+
 ## Run the application
 
 * On GitHub pages: https://ddi-developers.github.io/nectar-publisher
-* Localy by download and extracting [this zip-file](https://github.com/borsna/nectar-publisher/archive/refs/heads/main.zip) (no internet connection required after download)
+* Localy by download and extracting [this zip-file](https://github.com/ddi-developers/nectar-publisher/archive/refs/heads/main.zip) (works offline when downloaded)
 
 
 ## Implementation and status for `Nectar Publisher 1.0`
@@ -30,8 +33,8 @@ Document your tabular datasets and create codebooks and machine actionable metad
   - [ ] Pdf
 
 ### Plugin system to push metadata & data to external repository
-- [ ] Define a interface and
-- [ ] Example implementation
+- [ ] Define a interface with methods for export
+- [ ] Example implementation for a repository
 
 ### Column based listing with variables in focus
 - [x] Responsive layout
@@ -45,6 +48,7 @@ Document your tabular datasets and create codebooks and machine actionable metad
   - [x] filename
   - [x] delimiter
   - [x] mimeType
+  - [x] size (bytes)
   - [x] checksum (sha256)
 - [ ] Variable metadata (autodetected & input)
   - [x] Id (column header name if exist, fallback to column number)
