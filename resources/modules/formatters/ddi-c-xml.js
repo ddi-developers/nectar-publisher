@@ -14,7 +14,7 @@ function toDdiCXml(input){
 
     var fileTxt = xmlDoc.createElementNS(ns, "fileTxt")
     fileTxt.appendChild(createTextNode(xmlDoc, ns, "fileName", input.fileName))
-    fileTxt.appendChild(createTextNode(xmlDoc, ns, "fileType", input.type))
+    fileTxt.appendChild(createTextNode(xmlDoc, ns, "fileType", input.mimeType))
 
     var dataFingerprint = xmlDoc.createElementNS(ns, "dataFingerprint")
     dataFingerprint.setAttribute("type", "dataFile")
@@ -23,7 +23,7 @@ function toDdiCXml(input){
     fileTxt.appendChild(dataFingerprint)
 
     var dimensns = xmlDoc.createElementNS(ns,"dimensns")
-    dimensns.appendChild(createTextNode(xmlDoc, ns, "caseQnty", input.recordCount))
+    dimensns.appendChild(createTextNode(xmlDoc, ns, "caseQnty", input.data.length))
     dimensns.appendChild(createTextNode(xmlDoc, ns, "varQnty", input.columns.length))
 
     fileDscr.appendChild(dimensns)
