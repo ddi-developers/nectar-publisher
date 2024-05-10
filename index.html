@@ -66,7 +66,7 @@
 								title="open csv/tsv or spreadsheet">📂 import data</button>
 						</li>
 						<li class="nav-item">
-							<button @click="importViaService" type="button" class="btn btn-light"
+							<button data-bs-target="#importViaServiceModal" data-bs-toggle="modal" type="button" class="btn btn-light"
 								title="import data via external service">🌐 import data via service</button>
 						</li>
 						<li class="nav-item">
@@ -80,6 +80,9 @@
 
 		<input ref="inputFile" id="inputFile" @change="importDataFromFile" type="file" accept=".csv,.tsv,.xlsx,.xls,.ods,text/csv"
 			style="display: none;">
+		<input ref="inputFileToRemote" id="inputFileToRemove" @change="importDataFromRemote" type="file" accept=".spss,.sas,.csv"
+		style="display: none;">
+
 
 		<div class="row card border border-danger text-danger" v-if="input.dataset.errors.length > 0">
 			<div class="card-body">
@@ -199,7 +202,7 @@
 			</div>
 
 		</div>
-		  
+		
 		<!-- About Modal -->
 		<div class="modal modal-dialog-scrollable fade" id="aboutModal" tabindex="-2" aria-labelledby="aboutModalLabel"
 			aria-hidden="true">
@@ -245,6 +248,42 @@
 				</div>
 			</div>
 		</div>
+
+
+		<!-- importViaServiceModal Modal -->
+		<div class="modal modal-dialog-scrollable fade" id="importViaServiceModal" tabindex="-2" aria-labelledby="importViaServiceModalLabel"
+			aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h1 class="modal-title fs-5" id="importViaServiceModalLabel">
+							🌐 Import data via external service
+						</h1>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<!-- hard coded button at the moment-->
+						<!-- TODO: adding services and store them in local storage -->
+						<p>
+							<button 
+								type="button" 
+								class="btn btn-primary" 
+								data-url="http://example.com/service.r">
+								📄 import via r-server
+							</button>
+						</p>
+						<p>
+							
+						</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+							data-bs-target="#importViaServiceModal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
 
 	</div>
 	<!-- Libraries -->
