@@ -23,7 +23,6 @@ const DataType = {
 
     constructor(input, fileName, mimeType, delimiter = undefined, firstRowIsHeader = true){
       this.fileName = fileName
-      this.fileHash = { sha256: "" }
       this.mimeType = mimeType
       this.firstRowIsHeader = firstRowIsHeader
       if(delimiter == undefined){

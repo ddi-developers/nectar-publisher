@@ -18,7 +18,7 @@ function toDdiCXml(input){
 
     var dataFingerprint = xmlDoc.createElementNS(ns, "dataFingerprint")
     dataFingerprint.setAttribute("type", "dataFile")
-    dataFingerprint.appendChild(createTextNode(xmlDoc, ns, "digitalFingerprintValue", input.fileHash.sha256))
+    dataFingerprint.appendChild(createTextNode(xmlDoc, ns, "digitalFingerprintValue", input.sha256))
     dataFingerprint.appendChild(createTextNode(xmlDoc, ns, "algorithmSpecification", "SHA-256"))
     fileTxt.appendChild(dataFingerprint)
 
@@ -41,8 +41,8 @@ function toDdiCXml(input){
         variable.setAttribute("files", input.fileName)
         variable.setAttribute("representationType", getVarRepresentationType(column))
 
-        if(column.displayLabel){
-            variable.appendChild(createTextNode(xmlDoc, ns, "labl", column.displayLabel))
+        if(column.label){
+            variable.appendChild(createTextNode(xmlDoc, ns, "labl", column.label))
         }
 
         if(column.coded){
@@ -76,16 +76,8 @@ function toDdiCXml(input){
 function getVarRepresentationType(column){
     if(column.coded){
         return "coded"
-    }else if(!column.hasIntendedDataType){
-        return "other"
-    }else if(column.hasIntendedDataType.endsWith("String")){
-        return "text"
-    }else if(column.hasIntendedDataType.endsWith("Integer")){
-        return "numeric"
-    }else if(column.hasIntendedDataType.endsWith("Double")){
-        return "numeric"
-    }else if(column.hasIntendedDataType.endsWith("DateTime")){
-        return "datetime"
+    }else if(column.hasIntendedDataType){
+        return column.hasIntendedDataType
     }
 
     return "other"
