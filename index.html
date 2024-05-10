@@ -82,7 +82,7 @@
 				<strong>The file "{{ input.dataset.fileName }}" have errors:</strong><br>
 				<ul>
 					<li v-for="e in input.dataset.errors"><strong>row {{ e.row }}</strong> {{ e.message }}</li>
-				</ul> 
+				</ul>
 				<em>We strongly recomend you to fix these errors in your file.</em>
 			</div>
 		</div>
@@ -149,7 +149,7 @@
 								<label class="form-label row button-label" :class="{notFirst: (index > 0)}">Details</label>
 								<button @click="column.showDetails = !column.showDetails" type="button" :class="{ 'bg-primary': column.showDetails }" class="btn btn-outline-secondary">⚙️</button>
 							</div>
-							
+
 						</div>
 						<Transition>
 							<div v-if="column.showDetails" class="row details mb-2">
@@ -190,7 +190,7 @@
 			</div>
 
 			<!-- Output tab -->
-			<div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">			
+			<div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
 				<pre><code v-html="output.markdown"></code></pre>
 				<div class="form-floating mb-3">
 					<pre><code v="JSON.stringify(input.dataset, null, 2)" class="language-json"></code></pre>
@@ -198,7 +198,65 @@
 			</div>
 
 		  </div>
-		  
+
+
+		<!-- Exports -->
+		<ul class="nav nav-tabs" id="exportTabs" role="tablist" v-if="input.dataset.fileName != null">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="md-tab" data-bs-toggle="tab" data-bs-target="#md-tab-pane" type="button" role="tab" aria-controls="md-tab-pane" aria-selected="true">🅫 MarkDown</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="csv-tab" data-bs-toggle="tab" data-bs-target="#csv-tab-pane" type="button" role="tab" aria-controls="csv-tab-pane" aria-selected="true">📄 csv</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="json-tab" data-bs-toggle="tab" data-bs-target="#json-tab-pane" type="button" role="tab" aria-controls="json-tab-pane" aria-selected="true">⚗️ ddi-cdi (json-ld)</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="ddi-l-tab" data-bs-toggle="tab" data-bs-target="#ddi-l-tab-pane" type="button" role="tab" aria-controls="ddi-l-tab-pane" aria-selected="true"><> ddi-l (xml)</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="ddi-c-tab" data-bs-toggle="tab" data-bs-target="#ddi-c-tab-pane" type="button" role="tab" aria-controls="ddi-c-tab-pane" aria-selected="true"><> ddi-c (xml)</button>
+			</li>
+		</ul>
+
+		<div class="tab-content exports" id="exportTabsContent" v-if="input.dataset.fileName != null">
+			<div class="tab-pane fade show active" id="md-tab-pane" role="tabpanel" aria-labelledby="md-tab" tabindex="0">
+				<div class="more">
+					<button class="btn btn-outline-primary" @click="saveFile(output.markdown, 'text/markdown', output.filename + '.md')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.markdown)">copy</button>
+				</div>
+				<pre><code v-html="output.markdown"></code></pre>
+			</div>
+			<div class="tab-pane fade" id="csv-tab-pane" role="tabpanel" aria-labelledby="csv-tab" tabindex="0">
+				<div class="more">
+					<button class="btn btn-outline-primary" @click="saveFile(output.csv, 'text/csv', output.filename + '.csv')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.csv)">copy</button>
+				</div>
+				<pre><code v-html="output.csv"></code></pre>
+			</div>
+			<div class="tab-pane fade" id="json-tab-pane" role="tabpanel" aria-labelledby="json-tab" tabindex="0">
+				<div class="more">
+					<button class="btn btn-outline-primary" @click="saveFile(output.json, 'application/ld+json', output.filename + '.jsonld')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.json)">copy</button>
+				</div>
+				<pre><code v-html="output.json"></code></pre>
+			</div>
+			<div class="tab-pane fade" id="ddi-l-tab-pane" role="tabpanel" aria-labelledby="ddi-l-tab" tabindex="0">
+				<div class="more">
+					<button class="btn btn-outline-primary" @click="saveFile(output.ddil, 'application/xml', output.filename + '.ddi-c.xml')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddil)">copy</button>
+				</div>
+				<pre><code v-html="output.ddil"></code></pre>
+			</div>
+			<div class="tab-pane fade" id="ddi-c-tab-pane" role="tabpanel" aria-labelledby="ddi-c-tab" tabindex="0">
+				<div class="more">
+					<button class="btn btn-outline-primary" @click="saveFile(output.ddic, 'application/xml', output.filename + '.ddi-l.xml')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddic)">copy</button>
+				</div>
+				<pre><code v-html="output.ddic"></code></pre>
+			</div>
+		</div>
+
 		<!-- About Modal -->
 		<div class="modal modal-dialog-scrollable fade" id="aboutModal" tabindex="-2" aria-labelledby="aboutModalLabel"
 			aria-hidden="true">
@@ -257,6 +315,10 @@
 	<script src="resources/modules/utils.js"></script>
 	<script src="resources/modules/export/ddi-c-2.5.js"></script>
 	<script src="resources/modules/export/markdown.js"></script>
+	<script src="resources/modules/formatters/utils.js"></script>
+	<script src="resources/modules/formatters/ddi-cdi-json-ld.js"></script>
+	<script src="resources/modules/formatters/ddi-l-xml.js"></script>
+	<script src="resources/modules/formatters/ddi-c-xml.js"></script>
 	<script src="resources/main.js"></script>
 </body>
 

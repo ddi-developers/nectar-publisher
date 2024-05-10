@@ -23,7 +23,7 @@ const app = createApp({
     },
     saveFile(content, type, fileName) {
       var fileAsBlob = new Blob([content], { type: type })
-      //saveFileBrowser(fileName, fileAsBlob)
+      saveFileBrowser(fileName, fileAsBlob)
     },
     copyToClipboard(text) {
       copyTextToClipboard(text)
@@ -42,8 +42,18 @@ const app = createApp({
       return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText)
     })
     const output = computed(() => {
+      console.log(input)
       return {
-        markdown: datasetToMarkdown(input.dataset)
+        filename: input.file?.name?.split('.').slice(0, -1).join('.'),
+        markdown: datasetToMarkdown(input.dataset),
+        csv: [
+          input.dataset.columns.map(e => e.name).join(input.dataset.delimiter),
+          ...input.dataset.data.map(e => e.join(input.dataset.delimiter))
+        ].join('\n'),
+        json: toDdiCdiJsonLd(input.dataset),
+        cdi : (hljs.highlight(toDdiCdiJsonLd(input.dataset), { language: "json" }).value),
+        ddic : (hljs.highlight(toDdiCXml(input.dataset), { language: "xml" }).value),
+        ddil : (hljs.highlight(toDdiLXml(input.dataset), { language: "xml" }).value)
       }
     })
 

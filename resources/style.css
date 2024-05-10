@@ -20,3 +20,27 @@
         display: none;
     }
 }
+
+#exportTabs {
+    margin-top: 2em;
+}
+
+.exports {
+    position: relative;
+}
+
+.more {
+    position: absolute;
+    inset: 1em 1em auto auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+}
+
+pre {
+    padding: 2em;
+    border: 1px solid #eee;
+    border-top: none;
+    max-height: 90vh;
+    overflow: auto;
+}
