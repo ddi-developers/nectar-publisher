@@ -242,7 +242,7 @@
 					<button class="btn btn-outline-primary" @click="saveFile(output.json, 'application/ld+json', output.filename + '.jsonld')">save</button>
 					<button class="btn btn-outline-primary" @click="copyToClipboard(output.json)">copy</button>
 				</div>
-				<pre><code v-html="output.json"></code></pre>
+				<pre><code v-html="output.cdi"></code></pre>
 			</div>
 			<div class="tab-pane fade" id="ddi-l-tab-pane" role="tabpanel" aria-labelledby="ddi-l-tab" tabindex="0">
 				<div class="more">
