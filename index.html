@@ -66,6 +66,10 @@
 								title="open csv/tsv or spreadsheet">📂 import data</button>
 						</li>
 						<li class="nav-item">
+							<button @click="importViaService" type="button" class="btn btn-light"
+								title="import data via external service">🌐 import data via service</button>
+						</li>
+						<li class="nav-item">
 							<button type="button" class="btn btn-light" data-bs-toggle="modal"
 								data-bs-target="#aboutModal" title="about this app">ℹ️ about</button>
 						</li>
@@ -86,7 +90,6 @@
 				<em>We strongly recomend you to fix these errors in your file.</em>
 			</div>
 		</div>
-
 
 		<div class="row" v-if="input.dataset.fileName == null">
 			<div class="card mt-2 mb-2 alert alert-info">
@@ -195,7 +198,7 @@
 				</div>
 			</div>
 
-		  </div>
+		</div>
 		  
 		<!-- About Modal -->
 		<div class="modal modal-dialog-scrollable fade" id="aboutModal" tabindex="-2" aria-labelledby="aboutModalLabel"
