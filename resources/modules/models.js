@@ -35,6 +35,12 @@ const DataType = {
     }
   }
   
+  class CodeValue{
+    value
+    frequency
+    label
+    isMissingValue
+  }
   class DatasetColumn{
     position
     id
@@ -42,6 +48,14 @@ const DataType = {
     label
     description
     values = []
+    /**
+     * list of code values
+     * @type {CodeValue[]}
+     * @public
+     */
+    codeValues = []
+
+    responseUnit
     valuesUnique
     hasIntendedDataType
     dataType = DataType.Text
@@ -51,6 +65,8 @@ const DataType = {
      * @public
      */
     question
+    minValue 
+    maxValue
   
     constructor(id){
       this.id = id
@@ -60,5 +76,8 @@ const DataType = {
   }
   
   class Question{
-    // TODO: properties for questions from DDI-L & DDI-C
+    preQuestionText
+    questionText
+    postQuestionText 
+    interviewerInstructions
   }
