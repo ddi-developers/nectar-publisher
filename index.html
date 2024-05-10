@@ -66,6 +66,11 @@
 								title="open csv/tsv or spreadsheet">📂 import data</button>
 						</li>
 						<li class="nav-item">
+							<button @click="this.$refs.inputMetadata.click()" type="button" class="btn btn-light"
+								title="import metadata from DDI-C">📄 import metadata</button>
+						</li>
+
+						<li class="nav-item">
 							<button data-bs-target="#importViaServiceModal" data-bs-toggle="modal" type="button" class="btn btn-light"
 								title="import data via external service">🌐 import data via service</button>
 						</li>
@@ -80,8 +85,9 @@
 
 		<input ref="inputFile" id="inputFile" @change="importDataFromFile" type="file" accept=".csv,.tsv,.xlsx,.xls,.ods,text/csv"
 			style="display: none;">
-		<input ref="inputFileToRemote" id="inputFileToRemove" @change="importDataFromRemote" type="file" accept=".spss,.sas,.csv"
+		<input ref="inputFileToRemote" id="inputFileToRemove" @change="importDataFromService" type="file" accept=".sav,.spss,.sas,.csv"
 		style="display: none;">
+		<input ref="inputMetadata" id="inputMetadata" @change="importMetadata" type="file" accept=".xml" style="display: none;">
 
 
 		<div class="row card border border-danger text-danger" v-if="input.dataset.errors.length > 0">
@@ -325,8 +331,9 @@
 							<button
 								type="button"
 								class="btn btn-primary"
-								data-url="http://example.com/service.r">
-								📄 import via r-server
+								@click="this.$refs.inputFileToRemote.click()"
+								>
+								📄 import via OpenCPU
 							</button>
 						</p>
 						<p>
@@ -358,6 +365,8 @@
 	<script src="resources/modules/formatters/ddi-cdi-json-ld.js"></script>
 	<script src="resources/modules/formatters/ddi-l-xml.js"></script>
 	<script src="resources/modules/formatters/ddi-c-xml.js"></script>
+	<script src="resources/modules/opencpu.js"></script>
+	<script src="resources/modules/importers/ddi-c-xml-importer.js"></script>
 	<script src="resources/main.js"></script>
 </body>
 
