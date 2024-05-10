@@ -21,6 +21,11 @@ const app = createApp({
       document.title = `${this.input.file.name} - ${ this.appMetadata.name}`
       await Parser.parseFile(this.input.file, (d) => this.input.dataset = d)
     },
+    async importDataFromService(event) {
+      this.input.file = event.target.files[0]
+      document.title = `${this.input.file.name} - ${ this.appMetadata.name}`
+      // TODO: call service and get the metadata
+    },
     saveFile(content, type, fileName) {
       var fileAsBlob = new Blob([content], { type: type })
       saveFileBrowser(fileName, fileAsBlob)
