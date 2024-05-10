@@ -47,7 +47,6 @@ const app = createApp({
       return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText)
     })
     const output = computed(() => {
-      console.log(input)
       return {
         filename: input.file?.name?.split('.').slice(0, -1).join('.'),
         markdown: datasetToMarkdown(input.dataset),

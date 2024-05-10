@@ -113,7 +113,7 @@ function createTextNode(xmlDoc, ns, name, text){
 }
 
 function saveFileBrowser(fileName, content){
-  
+
     var downloadLink = document.createElement("a")
     downloadLink.download = fileName
     downloadLink.innerHTML = "Download File"
@@ -127,7 +127,7 @@ function saveFileBrowser(fileName, content){
       downloadLink.style.display = "none"
       document.body.appendChild(downloadLink)
     }
-  
+
     downloadLink.click();
 }
 
@@ -259,28 +259,32 @@ function getCsvExamples(){
 function getColTypes(){
     return [
         {label: "Text", id: "http://rdf-vocabulary.ddialliance.org/cv/DataType/1.1.2/#String"},
-        {label: "Integer", id: "http://rdf-vocabulary.ddialliance.org/cv/DataType/1.1.2/#Integer"}, 
-        {label: "Double", id: "http://rdf-vocabulary.ddialliance.org/cv/DataType/1.1.2/#Double"}, 
+        {label: "Integer", id: "http://rdf-vocabulary.ddialliance.org/cv/DataType/1.1.2/#Integer"},
+        {label: "Double", id: "http://rdf-vocabulary.ddialliance.org/cv/DataType/1.1.2/#Double"},
         {label: "Date", id: "http://rdf-vocabulary.ddialliance.org/cv/DataType/1.1.2/#Date"},
         {label: "DateTime", id: "http://rdf-vocabulary.ddialliance.org/cv/DataType/1.1.2/#DateTime"}
     ]
 }
 
-function guessType(values){
-    const base = "http://rdf-vocabulary.ddialliance.org/cv/DataType/1.1.2/#";     
-    
-    var intReg = /^\d+$/;
-    var doubleReg = /\d+\.\d*|\.?\d+/
-    var dateReg = /^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$/
-    
-    if(values.every(i => intReg.test(i))) return base + 'Integer';
+function isEmpty(value) {
+    return value === undefined || value === null || value === ''
+}
 
-    if(values.every(i => doubleReg.test(i))) return base + 'Double';
+function guessType(values){
+    const intReg = /^-?\d+$/;
+    const doubleReg = /^-?(\d+\.\d*|\.?\d+)$/
+    const dateReg = /^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$/
+    const dateTimeReg = /^(19|20)(\d{2})-([0]\d|1[0-2])-([0-2]\d|3[01]) ([0-1]\d|2[0-3]):([0-5]\d):([0-5]\d)$/
+
+    if(values.every(i => intReg.test(i) || isEmpty(i))) return 'numeric';
+
+    if(values.every(i => doubleReg.test(i) || isEmpty(i))) return 'numeric';
 
     // TODO: work out a better date test
-    if(values.every(i => dateReg.test(i))) return base + 'Date';
+    if(values.every(i => dateReg.test(i) || isEmpty(i))) return 'date';
+    if(values.every(i => dateTimeReg.test(i) || isEmpty(i))) return 'datetime';
 
-    if(values.every(i => typeof i === "string")) return  base +'String';
+    if(values.every(i => typeof i === "string")) return 'text';
     return null;
 }
 
