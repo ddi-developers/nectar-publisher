@@ -107,7 +107,6 @@
 			</div>
 		</div>
 
-
 		<ul class="nav nav-tabs" id="myTab" role="tablist" v-if="input.dataset.fileName != null">
 			<li class="nav-item" role="presentation">
 			  <button class="nav-link active" id="variable-tab" data-bs-toggle="tab" data-bs-target="#variable-tab-pane" type="button" role="tab" aria-controls="variable-tab-pane" aria-selected="true">📝Variables</button>
@@ -148,8 +147,7 @@
 							<div class="col-md-1">
 								<label class="form-label row button-label" :class="{notFirst: (index > 0)}">Details</label>
 								<button @click="column.showDetails = !column.showDetails" type="button" :class="{ 'bg-primary': column.showDetails }" class="btn btn-outline-secondary">⚙️</button>
-							</div>
-							
+							</div>							
 						</div>
 						<Transition>
 							<div v-if="column.showDetails" class="row details mb-2">
@@ -252,6 +250,7 @@
 	<script src="resources/libs/highlight/languages/json.min.js"></script>
 	<script src="resources/libs/highlight/languages/xml.min.js"></script>
 	<!-- Nectar Publisher source files -->
+	<script src="resources/modules/models.js"></script>
 	<script src="resources/modules/libs.js"></script>
 	<script src="resources/modules/makepdf-fonts.js"></script>
 	<script src="resources/modules/utils.js"></script>
