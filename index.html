@@ -167,6 +167,17 @@
 									<label :for="'description-' + column.position" class="form-label">Description</label>
 									<textarea v-model="column.description" class="form-control" :id="'description-' + column.position" rows="4"></textarea>
 								</div>
+
+								<div class="mb-12">
+									<label class="form-label">Data type</label>
+									<div class="input-group">
+										<select v-model="column.varFormat.otherCategory" class="form-select">
+											<option v-for="dataType in cv.dataType" :value="colType.id">{{ dataType.id }}</option>
+										</select>
+									</div>
+								</div>
+
+
 								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-12">
 									<label class="form-label">Unit</label>
 									<input v-model="column.unit" list="unit-list" type="text" class="form-control">

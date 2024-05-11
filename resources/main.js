@@ -45,7 +45,8 @@ const app = createApp({
       dataset: new Dataset()
     })
     const cv = {
-      representationType: [{ id: "text", label: "Text" }, { id: "geo", label: "Geographic location" }, { id: "numeric", label: "Numeric" }, { id: "code", label: "Code" }, { id: "datetime", label: "Date time" }, { id: "other", label: "Other" }]
+      representationType: [{ id: "text", label: "Text" }, { id: "geo", label: "Geographic location" }, { id: "numeric", label: "Numeric" }, { id: "code", label: "Code" }, { id: "datetime", label: "Date time" }, { id: "other", label: "Other" }],
+      dataType: [] //Datatype! 
     }
     const appMetadata = computed(() => {
       return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText)
