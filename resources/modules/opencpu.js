@@ -100,7 +100,11 @@ class OpenCPU{
                         }
 
                         if(value.class){
-                            column.hasIntendedDataType = getVarIntendedDataType(value.class.slice(-1)[0])
+                            if(value.class[0] == "haven_labelled"){
+                                column.hasIntendedDataType = "code"
+                            }else{
+                                column.hasIntendedDataType = getVarIntendedDataType(value.class.slice(-1)[0])
+                            }
                             column.varFormat.schema = "R"
                             column.varFormat.type = value.class.slice(-1)[0]
                             column.varFormat.otherCategory = getVarDataType(value.class.slice(-1)[0])
