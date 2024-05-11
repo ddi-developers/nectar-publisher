@@ -23,7 +23,18 @@ curl https://cloud.opencpu.org/ocpu/tmp/IDREP3/R/.val/json
  */
 class OpenCPU{
 
-    static getFileInfo(file){
+    static async parseFile(file, doneCallback){
+        var dataset = new Dataset()
+
+        dataset.fileName = file.name
+        dataset.mimeType = file.type
+        dataset.fileSize = file.size
+        dataset.lastModified = new Date(file.lastModified).toISOString()
+        dataset.sha256 = await checksum(file, "SHA-256")
+        dataset.columns = []
+        dataset.delimiter = null
+        dataset.linebreak = null
+
         var base = "https://cloud.opencpu.org/ocpu/";
         var data = new FormData()
         data.append('file', file)
@@ -80,14 +91,27 @@ class OpenCPU{
                 })
                 .then(json => {
                     console.log(json)
+                    var i = 0
                     for (const [key, value] of Object.entries(json)) {
-                        console.log(`${key}: ${value}`);
+                        console.log(`${key}: ${value}`)
+                        var column = new DatasetColumn(key)
+                        if(value.label){
+                            column.label = value.label[0]
+                        }
+
+                        if(value.class){
+                            column.hasIntendedDataType = getVarIntendedDataType(value.class.slice(-1)[0])
+                            column.varFormat.schema = "R"
+                            column.varFormat.type = value.class.slice(-1)[0]
+                            column.varFormat.otherCategory = getVarDataType(value.class.slice(-1)[0])
+                        }
+
+                        column.position = i
+                        dataset.columns.push(column)
+                        i = i + 1
                     }
-                      
-
+                    doneCallback(dataset)
                 })
-
-
             })
         })
     }
@@ -98,4 +122,40 @@ function getId(responseText){
 
     var regex = /\/ocpu\/tmp\/(.*?)\/R\/\.val/
     return regex.exec(lines[0])[1]
+}
+
+function getVarIntendedDataType(type){
+    switch(type){
+        case 'double':
+        case 'complex':
+        case 'integer':
+            return 'numeric';
+            break;
+        case 'character':
+            return 'text';
+            break;
+    }
+    
+    return 'other';
+}
+
+
+function getVarDataType(type){
+    switch(type){
+        case 'double':
+            return 'Double';
+            break;
+        //case 'complex':
+        case 'integer':
+            return 'Integer';
+            break;
+        case 'character':
+            return 'String';
+            break;
+        case 'logical':
+            return 'Boolean';
+            break;
+    }
+    
+    return 'Other';
 }

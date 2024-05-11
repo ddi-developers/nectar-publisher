@@ -25,7 +25,7 @@ const app = createApp({
       this.input.file = event.target.files[0]
       document.title = `${this.input.file.name} - ${ this.appMetadata.name}`
       // TODO: call service and get the metadata
-      OpenCPU.getFileInfo(this.input.file);
+      await OpenCPU.parseFile(this.input.file, (d) => this.input.dataset = d)
     },
     async importMetadata(event) {
       importDdiCMetadata(event.target.files[0])
