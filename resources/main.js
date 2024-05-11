@@ -28,7 +28,12 @@ const app = createApp({
       await OpenCPU.parseFile(this.input.file, (d) => this.input.dataset = d)
     },
     async importMetadata(event) {
-      importDdiCMetadata(event.target.files[0])
+      if (this.input.file === null){
+        console.log('Data file must already exist!');
+      } else {
+        //this.meta.file = event.target.files[0]
+        this.input.dataset.columns = importDdiCMetadata(event.target.files[0], this.input.dataset.columns)
+      }
     },
     saveFile(content, type, fileName) {
       var fileAsBlob = new Blob([content], { type: type })
