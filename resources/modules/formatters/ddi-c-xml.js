@@ -45,23 +45,35 @@ function toDdiCXml(input){
             variable.appendChild(createTextNode(xmlDoc, ns, "labl", column.label))
         }
 
-        if(column.coded){
-            for(const code of column.codeList){
+        if(column.codeValues){
+            for(const codeValue of column.codeValues){
                 var catgry = xmlDoc.createElementNS(ns, "catgry")
 
-                catgry.appendChild(createTextNode(xmlDoc, ns, "catValu", code.notation))
+                catgry.appendChild(createTextNode(xmlDoc, ns, "catValu", codeValue.value))
 
-                if(code.prefLabel){
-                    catgry.appendChild(createTextNode(xmlDoc, ns, "labl", code.prefLabel))
+                if(codeValue.label){
+                    catgry.appendChild(createTextNode(xmlDoc, ns, "labl", codeValue.label))
                 }
 
-                var catStat = createTextNode(xmlDoc, ns, "catStat", column.catStat[code.notation])
-                catStat.setAttribute("type", "freq")
-                catgry.appendChild(catStat)
-
+                if(column.catStat){
+                    var catStat = createTextNode(xmlDoc, ns, "catStat", column.catStat[codeValue.notation])
+                    catStat.setAttribute("type", "freq")
+                    catgry.appendChild(catStat)
+                }
+                
                 variable.appendChild(catgry)
             }
         }
+
+        if(column.varFormat){
+            var varFormat = xmlDoc.createElementNS(ns, "varFormat")
+            varFormat.setAttribute("type", column.varFormat.type)
+            varFormat.setAttribute("schema", column.varFormat.schema)
+            varFormat.setAttribute("otherCategory", column.varFormat.otherCategory)
+
+            variable.appendChild(varFormat)
+        }
+
 
         dataDscr.appendChild(variable)
     }
