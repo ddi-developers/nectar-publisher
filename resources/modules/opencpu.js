@@ -129,11 +129,8 @@ class OpenCPU{
                             return response.json();
                         })
                         .then(codeLists => {
-                            console.log(json)
-                            console.log(codeLists)
                             var i = 0
                             for (const [key, value] of Object.entries(json)) {
-                                console.log(`${key}: ${value}`)
                                 var column = new DatasetColumn(key)
                                 if(value.label){
                                     column.label = value.label[0]
@@ -166,7 +163,6 @@ class OpenCPU{
                                 dataset.columns.push(column)
                                 i = i + 1
                             }
-                            console.log(dataset)
 
                             // Getting CSV from file
                             //curl https://cloud.opencpu.org/ocpu/library/utils/R/write.csv -d "x=x0b8bd45a2e949b&file='test.csv'"
@@ -203,19 +199,11 @@ class OpenCPU{
                                 })
                                 .then(csvContent => {
                                     Parser.parseDelimtedTextString(csvContent, dataset, (d) => {dataset = d})
+                                    doneCallback(dataset)
                                 })
                             })
-
-
-
-                            doneCallback(dataset)
-        
-
-
                         })
                     })
-                    
-
                 })
             })
         })
