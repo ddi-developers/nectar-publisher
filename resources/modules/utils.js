@@ -60,20 +60,15 @@ class Parser{
     if(dataset.firstRowIsHeader){
       results.data.shift()
     }
-    dataset.data = results.data
+    dataset.data = results.data  
 
-    // TODO: check if existing columns, only update the data type
-    
-    for(const [i, c] of columnIds.entries()){
-      dataset.column[i].valuesUnique = [... new Set(dataset.data.map(d => d[i]))]
-      dataset.column[i].valuesUnique.sort()
-      dataset.column[i].hasIntendedDataType = RepresentationTypes.find(e => 
-        e.id === guessDataType(dataset.column[i].valuesUnique)
+    for(let i = 0 ; i < dataset.columns.length ; i++){
+      dataset.columns[i].valuesUnique = [... new Set(dataset.data.map(d => d[i+1]))]
+      dataset.columns[i].valuesUnique.sort()
+      dataset.columns[i].hasIntendedDataType = RepresentationTypes.find(e => 
+        e.id === guessDataType(dataset.columns[i].valuesUnique)
       )
     }
-
-    console.log("parsed string as data array")
-    console.log(dataset.data)
 
     done(dataset)
   }

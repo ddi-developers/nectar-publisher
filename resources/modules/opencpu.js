@@ -64,44 +64,6 @@ class OpenCPU{
             var id1 = getId(responseText)
 
             console.log("ID1: " +id1)
-            
-            // Getting CSV from file
-            //curl https://cloud.opencpu.org/ocpu/library/utils/R/write.csv -d "x=x0b8bd45a2e949b&file='test.csv'"
-            //curl https://cloud.opencpu.org/ocpu/tmp/x0b17a01642b5cd/files/test.csv    
-
-            var data = new FormData()
-            data.append('x', id1)
-            data.append('file', "'data.csv'")
-
-            fetch(base + "library/utils/R/write.csv", {
-                method: 'POST',
-                body: data
-            })
-            .then(response => {
-                // Check if the response is successful
-                if (!response.ok) {
-                  throw new Error('Network response was not ok for writeCSV');
-                }
-                // Read the response content as text
-                return response.text();
-            })
-            .then(responseText => {
-                var id4 = getId(responseText)
-                console.log("ID4: " + id4)
-
-                fetch(base +`/tmp/${id4}/files/data.csv`)
-                .then(response => {
-                    // Check if the response is successful (HTTP status code 200)
-                    if (!response.ok) {
-                      throw new Error('Network response was not ok for getCSV');
-                    }
-                    // Parse the response body as text
-                    return response.text();
-                })
-                .then(csvContent => {
-                    dataset.
-                })
-            })
 
             // Getting attributes for each variable
             // curl https://cloud.opencpu.org/ocpu/library/base/R/lapply -d "X=IDREP&FUN=function(x) attributes(x)"
@@ -205,6 +167,47 @@ class OpenCPU{
                                 i = i + 1
                             }
                             console.log(dataset)
+
+                            // Getting CSV from file
+                            //curl https://cloud.opencpu.org/ocpu/library/utils/R/write.csv -d "x=x0b8bd45a2e949b&file='test.csv'"
+                            //curl https://cloud.opencpu.org/ocpu/tmp/x0b17a01642b5cd/files/test.csv    
+
+                            var data = new FormData()
+                            data.append('x', id1)
+                            data.append('file', "'data.csv'")
+
+                            fetch(base + "library/utils/R/write.csv", {
+                                method: 'POST',
+                                body: data
+                            })
+                            .then(response => {
+                                // Check if the response is successful
+                                if (!response.ok) {
+                                throw new Error('Network response was not ok for writeCSV');
+                                }
+                                // Read the response content as text
+                                return response.text();
+                            })
+                            .then(responseText => {
+                                var id4 = getId(responseText)
+                                console.log("ID4: " + id4)
+
+                                fetch(base +`/tmp/${id4}/files/data.csv`)
+                                .then(response => {
+                                    // Check if the response is successful (HTTP status code 200)
+                                    if (!response.ok) {
+                                    throw new Error('Network response was not ok for getCSV');
+                                    }
+                                    // Parse the response body as text
+                                    return response.text();
+                                })
+                                .then(csvContent => {
+                                    Parser.parseDelimtedTextString(csvContent, dataset, (d) => {dataset = d})
+                                })
+                            })
+
+
+
                             doneCallback(dataset)
         
 

@@ -63,7 +63,7 @@ const DataType = {
     varFormat
 
     responseUnit
-    valuesUnique
+    valuesUnique = []
     hasIntendedDataType
     dataType = DataType.Text
     /**
