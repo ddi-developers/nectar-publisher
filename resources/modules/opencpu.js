@@ -90,31 +90,80 @@ class OpenCPU{
                     return response.json();
                 })
                 .then(json => {
-                    console.log(json)
-                    var i = 0
-                    for (const [key, value] of Object.entries(json)) {
-                        console.log(`${key}: ${value}`)
-                        var column = new DatasetColumn(key)
-                        if(value.label){
-                            column.label = value.label[0]
-                        }
+    
 
-                        if(value.class){
-                            if(value.class[0] == "haven_labelled"){
-                                column.hasIntendedDataType = "code"
-                            }else{
-                                column.hasIntendedDataType = getVarIntendedDataType(value.class.slice(-1)[0])
+                    // Getting codeLists
+                    //curl https://cloud.opencpu.org/ocpu/library/base/R/lapply -d "X=IDREP&FUN=function(x) as.list(attributes(x)$labels)"
+                    var data = new FormData()
+                    data.append('X', id1)
+                    data.append('FUN', "function(x) as.list(attributes(x)$labels)")
+        
+                    fetch(base + "library/base/R/lapply", {
+                        method: 'POST',
+                        body: data
+                    }).then(response => {
+                        // Check if the response is successful
+                        if (!response.ok) {
+                          throw new Error('Network response was not ok ID3');
+                        }
+                        // Read the response content as text
+                        return response.text();
+                    })
+                    .then(responseText => {
+                        var id3 = getId(responseText)
+                        console.log("ID3: "+id3)
+                        fetch(base +`/tmp/${id3}/R/.val/json`)
+                        .then(response => {
+                            // Check if the response is successful (HTTP status code 200)
+                            if (!response.ok) {
+                              throw new Error('Network response was not ok for codelist');
                             }
-                            column.varFormat.schema = "R"
-                            column.varFormat.type = value.class.slice(-1)[0]
-                            column.varFormat.otherCategory = getVarDataType(value.class.slice(-1)[0])
-                        }
+                            // Parse the response body as JSON
+                            return response.json();
+                        })
+                        .then(codeLists => {
+                            console.log(json)
+                            console.log(codeLists)
+                            var i = 0
+                            for (const [key, value] of Object.entries(json)) {
+                                console.log(`${key}: ${value}`)
+                                var column = new DatasetColumn(key)
+                                if(value.label){
+                                    column.label = value.label[0]
+                                }
+        
+                                if(value.class){
+                                    if(value.class[0] == "haven_labelled"){
+                                        column.hasIntendedDataType = "code"
+                                        if(codeLists[key]){
+                                            for(const [k,v] of Object.entries(codeLists[key])){
+                                                var c = new CodeValue()
+                                                c.value = v[0]
+                                                c.label = k
+                                                column.codeValues.push(c)
+                                            }
+                                        }
+                                    }else{
+                                        column.hasIntendedDataType = getVarIntendedDataType(value.class.slice(-1)[0])
+                                    }
+                                    column.varFormat.schema = "R"
+                                    column.varFormat.type = value.class.slice(-1)[0]
+                                    column.varFormat.otherCategory = getVarDataType(value.class.slice(-1)[0])
+                                }
+        
+                                column.position = i
+                                dataset.columns.push(column)
+                                i = i + 1
+                            }
+                            console.log(dataset)
+                            doneCallback(dataset)
+        
 
-                        column.position = i
-                        dataset.columns.push(column)
-                        i = i + 1
-                    }
-                    doneCallback(dataset)
+
+                        })
+                    })
+                    
+
                 })
             })
         })
