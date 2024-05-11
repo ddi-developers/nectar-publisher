@@ -46,7 +46,45 @@ const app = createApp({
     })
     const cv = {
       representationType: [{ id: "text", label: "Text" }, { id: "geo", label: "Geographic location" }, { id: "numeric", label: "Numeric" }, { id: "code", label: "Code" }, { id: "datetime", label: "Date time" }, { id: "other", label: "Other" }],
-      dataType: [] //Datatype! 
+      dataType: [
+        {"id" : "String"},
+        {"id" : "NormalizedString"},
+        {"id" : "Boolean"},
+        {"id" : "Decimal"},
+        {"id" : "Integer"},
+        {"id" : "PositiveInteger"},
+        {"id" : "NegativeInteger"},
+        {"id" : "NonNegativeInteger"},
+        {"id" : "NonPositiveInteger"},
+        {"id" : "Long"},
+        {"id" : "Int"},
+        {"id" : "Short"},
+        {"id" : "Byte"},
+        {"id" : "UnsignedLong"},
+        {"id" : "UnsignedInt"},
+        {"id" : "UnsignedShort"},
+        {"id" : "UnsignedByte"},
+        {"id" : "Float"},
+        {"id" : "Double"},
+        {"id" : "DateTime"},
+        {"id" : "Time"},
+        {"id" : "Date"},
+        {"id" : "GYearMonth"},
+        {"id" : "YearMonth"},
+        {"id" : "GYear"},
+        {"id" : "Year"},
+        {"id" : "GMonthDay"},
+        {"id" : "MonthDay"},
+        {"id" : "GDay"},
+        {"id" : "Day"},
+        {"id" : "GMonth"},
+        {"id" : "Month"},
+        {"id" : "Duration"},
+        {"id" : "HexBinary"},
+        {"id" : "Base64Binary"},
+        {"id" : "AnyURI"},
+        {"id" : "Other"}
+      ] //Datatype! 
     }
     const appMetadata = computed(() => {
       return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText)
