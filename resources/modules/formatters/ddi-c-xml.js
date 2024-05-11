@@ -75,10 +75,10 @@ function toDdiCXml(input){
 
 function getVarRepresentationType(column){
     if(column.coded){
-        return "coded"
+        return "Coded"
     }else if(column.hasIntendedDataType){
-        return column.hasIntendedDataType
+        return column.hasIntendedDataType.id
     }
 
-    return "other"
+    return "Other"
 }

@@ -2,7 +2,7 @@ class Column{
     id
     name
     displayLabel
-    hasIntendedDataType = ""
+    hasIntendedDataType = null
     role
 	position
     coded = false
@@ -12,9 +12,9 @@ class Column{
     constructor(id, position, values){
 		this.position = position
         this.values = values
-        var type = guessType(values)
+        const type = guessDataType(values)
         if(type){
-            this.hasIntendedDataType = type
+            this.hasIntendedDataType = RepresentationTypes.find(e => e.id === type)
         }
         if(isNaN(id)){
             this.name = id
@@ -271,10 +271,10 @@ function isEmpty(value) {
 }
 
 function guessType(values){
-    const intReg = /^-?\d+$/;
-    const doubleReg = /^-?(\d+\.\d*|\.?\d+)$/
-    const dateReg = /^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$/
-    const dateTimeReg = /^(19|20)(\d{2})-([0]\d|1[0-2])-([0-2]\d|3[01]) ([0-1]\d|2[0-3]):([0-5]\d):([0-5]\d)$/
+    const intReg = /^(- ?)?\d{1,3}(([. '`]?\d{3})*|([, '`]?\d{3})*)?$/;
+    const doubleReg = /^(- ?)?\d{1,3}(([. '`]?\d{3})*(,\d+)|([, '`]?\d{3})*(.\d+))?$/ // /^-?(\d+\.\d*|\.?\d+)$/
+    const dateReg = /^\d{4}-(0\d|1[0-2])-([0-2]\d|3[01])$/
+    const dateTimeReg = /^(19|20)(\d{2})-(0\d|1[0-2])-([0-2]\d|3[01])[T ]([0-1]\d|2[0-3]):([0-5]\d)(:([0-5]\d)(\.\d{1,3})?)?(Z|[+-]([0-1]\d|2[0-3]):([0-5]\d))?$/
 
     if(values.every(i => intReg.test(i) || isEmpty(i))) return 'numeric';
 
@@ -284,7 +284,97 @@ function guessType(values){
     if(values.every(i => dateReg.test(i) || isEmpty(i))) return 'date';
     if(values.every(i => dateTimeReg.test(i) || isEmpty(i))) return 'datetime';
 
-    if(values.every(i => typeof i === "string")) return 'text';
+    if(values.every(i => typeof i === "string" || isEmpty(i))) return 'text';
+    return null;
+}
+
+function guessDataType(values) {
+    /*
+    https://vocabularies.cessda.eu/vocabulary/DataType?lang=en
+    unhandled data types:
+    // NormalizedString
+    // Long
+    // Int
+    // GDay
+    // GMonth
+    // Other
+    */
+
+    // Boolean
+    if (values.every(i => (/^(?:true|false|1|0)$/i.test(i)) || isEmpty(i))) return 'Boolean';
+
+    // Unasigned byte
+    // Whole numbers in the range 0 - 255.
+    if (values.every(i => (/^\d+$/.test(i) && i >= 0 && i <= 255) || isEmpty(i))) return 'UnsignedByte';
+
+    // Unsigned short
+    // Whole numbers in the range 0 - 65535.
+    if (values.every(i => (/^\d+$/.test(i) && i >= 0 && i <= 65535) || isEmpty(i))) return 'UnsignedShort';
+
+    // Unsigned int
+    // Whole numbers in the range 0 - 4294967295.
+    if (values.every(i => (/^\d+$/.test(i) && i >= 0 && i <= 4294967295) || isEmpty(i))) return 'UnsignedInt';
+
+    // Unsigned long
+    // Whole numbers in the range 0 - 18446744073709551615.
+    if (values.every(i => (/^\d+$/.test(i) && i >= 0 && i <= 18446744073709551615) || isEmpty(i))) return 'UnsignedLong';
+
+    // Byte
+    // Whole numbers in the range -128 - 127.
+    if (values.every(i => (/^-?\d+$/.test(i) && i >= -128 && i <= 127) || isEmpty(i))) return 'Byte';
+
+    // Short
+    // Whole numbers in the range -32768 - 32767.
+    if (values.every(i => (/^-?\d+$/.test(i) && i >= -32768 && i <= 32767) || isEmpty(i))) return 'Short';
+
+    const regex = {
+        NonNegativeInteger: /^[1-9]\d*$/,
+        NonPositiveInteger: /^-[1-9]\d*$/,
+        PositiveInteger: /^\d+$/,
+        NegativeInteger: /^-\d+$/,
+        Integer: /^-?\d+$/,
+        Decimal: /^[+-]?\d*([.,]\d+)?$/,
+        // Double / Float
+        Double: /^(- ?)?(\d+([.,]\d+([eE]-?\d+)?|([eE]\d+))?|INF)$/,
+
+        DateTime: /^(19|20)(\d{2})-(0\d|1[0-2])-([0-2]\d|3[01])[T ]([0-1]\d|2[0-3]):([0-5]\d)(:([0-5]\d)(\.\d{1,3})?)?(Z|[+-]([0-1]\d|2[0-3]):([0-5]\d))?$/,
+        // Date
+        // Integer-valued year, month, day, and time zone hour and minutes, e.g., 2003-06-30-05:00 (30 June 2003 Eastern Standard Time U.S.).
+        Date: /^(19|20)(\d{2})-(0\d|1[0-2])-([0-2]\d|3[01])(-([0-1]\d|2[0-3]):([0-5]\d))?$/,
+        // Time
+        // Left-truncated dateTime, e.g., 13:20:00-05:00 (1:20 pm for Eastern Standard Time U.S.).
+        Time: /^([0-1]\d|2[0-3]):([0-5]\d)(:([0-5]\d)(\.\d{1,3})?)?([+-]([0-1]\d|2[0-3]):([0-5]\d))?$/,
+        // YearMonth
+        // Integer-valued year and month, e.g., 2004-11.
+        GYearMonth: /^(19|20)\d{2}-(0\d|1[0-2])$/,
+        // Year
+        // Integer-valued year, e.g., 2005.
+        GYear: /^(19|20)\d{2}$/,
+        // MonthDay
+        // Integer-valued month and day, e.g., 12-31.
+        GMonthDay: /^(0\d|1[0-2])-([0-2]\d|3[01])$/,
+
+        HexBinary: /^(?:[0-9a-fA-F]{2})+$/,
+        Base64Binary: /^(?:[A-Za-z0-9+/]{4})*$/,
+        AnyURI: /^(?:ftps?|https?|wss?):\/\/(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(?:\/\S*)?$/,
+        Duration: /^(-)?P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)(?:\.(\d+))?S)?)?$/,
+    }
+
+    let result = null;
+    for (let regexKey in regex) {
+        if (values.every(i => regex[regexKey].test(i) || isEmpty(i))) {
+            result = regexKey;
+            break;
+        }
+    }
+    if (result !== null) {
+        return result;
+    }
+
+    // String
+    // Finite sequences of characters. A character is an atomic unit of written communication; it is not further specified except to note that every character has a corresponding Universal Character Set code point (which is an integer).
+    if(values.every(i => typeof i === "string" || isEmpty(i))) return 'String';
+
     return null;
 }
 

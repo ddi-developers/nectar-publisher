@@ -5,6 +5,11 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Nectar Publisher</title>
+
+	<link rel="icon" type="image/png" sizes="32x32" href="resources/images/icons/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="resources/images/icons/favicon-16x16.png">
+	<link rel="shortcut icon" href="resources/images/icons/favicon.ico">
+
 	<script src="resources/libs/vue/vue.global.js"></script>
 	<link rel="stylesheet" href="resources/libs/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="resources/libs/highlight/styles/default.min.css">
@@ -143,10 +148,10 @@
 								<label class="form-label" :class="{notFirst: (index > 0)}">Type</label>
 								<div class="input-group">
 									<select v-model="column.hasIntendedDataType" class="form-select">
-										<option v-for="colType in cv.representationType" :value="colType.id">{{ colType.label }}</option>
+										<option v-for="colType in cv.representationType" :value="colType">{{ colType.label }}</option>
 									</select>
 									<Transition>
-										<button v-if="column.hasIntendedDataType == 'code'" class="btn btn-outline-secondary" type="button" title="document codelist">🧾</button>
+										<button v-if="column.hasIntendedDataType.id == 'Code'" class="btn btn-outline-secondary" type="button" title="document codelist">🧾</button>
 									</Transition>
 								</div>
 							</div>
@@ -161,7 +166,7 @@
 									<label :for="'description-' + column.position" class="form-label">Description</label>
 									<textarea v-model="column.description" class="form-control" :id="'description-' + column.position" rows="4"></textarea>
 								</div>
-								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-12">
+								<div v-if="column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal'" class="col-md-12">
 									<label class="form-label">Unit</label>
 									<input v-model="column.unit" list="unit-list" type="text" class="form-control">
 									<!-- not a good way to do it, just a temp list... -->
@@ -178,11 +183,11 @@
 										<option>pascal</option>
 									</datalist>
 								</div>
-								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-6">
+								<div v-if="column.hasIntendedDataType.type == 'decimal'" class="col-md-6">
 									<label class="form-label">Decimal positions</label>
 									<input v-model.number="column.decimalPositions" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
 								</div>
-								<div v-if="column.hasIntendedDataType == 'numeric'" class="col-md-6">
+								<div v-if="column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal'" class="col-md-6">
 									<label class="form-label">Accuracy</label>
 									<input v-model.number="column.accuracy" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
 								</div>

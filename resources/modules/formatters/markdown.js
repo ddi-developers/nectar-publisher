@@ -8,11 +8,11 @@ function datasetToMarkdown(dataset){
              `**Last modified:** ${dataset.lastModified}  \n` +
              `**Checksum (SHA256):** \`${dataset.sha256}\`  \n`+
              `\n\n`
-    
+
     md += `## Variables\n\n`
     for(col of dataset.columns){
         md += `### ${col.id}  \n\n` +
-              ` type: ${col.hasIntendedDataType}  \n` +
+              ` type: ${col.hasIntendedDataType.id}  \n` +
               `\n`
     }
 

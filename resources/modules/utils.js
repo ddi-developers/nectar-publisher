@@ -42,7 +42,7 @@ class Parser{
           column.position = i
           column.valuesUnique = [... new Set(dataset.data.map(d => d[i]))]
           column.valuesUnique.sort()
-          column.hasIntendedDataType = guessType(column.valuesUnique)
+          column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique))
           dataset.columns.push(column)
         }
 
@@ -70,7 +70,7 @@ class Parser{
           column.position = i
           column.valuesUnique = [... new Set(dataset.data.map(d => d[i]))]
           column.valuesUnique.sort()
-          column.hasIntendedDataType = guessType(column.valuesUnique)
+          column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique))
           dataset.columns.push(column)
         }
 
@@ -86,25 +86,6 @@ function copyTextToClipboard(text){
   },() => {
       console.error("Failed to copy to clipboard");
   });
-}
-
-function guessType(values){
-  var numRegEx = /^\d*(\.\d+)?$/
-  var intReg = /^\d+$/;
-  var doubleReg = /\d+\.\d*|\.?\d+/
-  var dateReg = /^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$/
-
-  if(values.every(i => intReg.test(i))) return 'numeric';
-
-  if(values.every(i => doubleReg.test(i))) return 'numeric';
-
-  if(values.every(i => numRegEx.test(i))) return 'numeric';
-
-  // TODO: work out a better date test
-  if(values.every(i => dateReg.test(i))) return 'datetime';
-
-  if(values.every(i => typeof i === "string")) return  'text';
-  return 'other';
 }
 
 /**
@@ -163,3 +144,40 @@ console.log(median_of_arr(arr));
 function getAppMetadata(){
   return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText);
 }
+
+const RepresentationTypes= [
+  {id: "String", label: "String / Text", type: "string" },
+  {id: "NormalizedString", label: "Normalized string / text", type: "string" },
+  {id: "Boolean", label: "Boolean" },
+  {id: "Decimal", label: "Decimal", type: "decimal" },
+  {id: "Integer", label: "Integer", type: "numeric" },
+  {id: "PositiveInteger", label: "Positive integer", type: "numeric" },
+  {id: "NegativeInteger", label: "Negative integer", type: "numeric" },
+  {id: "NonNegativeInteger", label: "Non - negative integer", type: "numeric" },
+  {id: "NonPositiveInteger", label: "Non - positive integer", type: "numeric" },
+  {id: "Long", label: "Long", type: "numeric" },
+  {id: "Int", label: "Int", type: "numeric" },
+  {id: "Short", label: "Short", type: "numeric" },
+  {id: "Byte", label: "Byte", type: "numeric" },
+  {id: "UnsignedLong", label: "Unsigned long", type: "numeric" },
+  {id: "UnsignedInt", label: "Unsigned int", type: "numeric" },
+  {id: "UnsignedShort", label: "Unsigned short", type: "numeric" },
+  {id: "UnsignedByte", label: "Unsigned byte", type: "numeric" },
+  {id: "Float", label: "Float", type: "decimal" },
+  {id: "Double", label: "Double", type: "decimal" },
+  {id: "DateTime", label: "DateTime", type: "datetime" },
+  {id: "Time", label: "Time", type: "datetime" },
+  {id: "Date", label: "Date", type: "datetime" },
+  {id: "GYearMonth", label: "YearMonth", type: "datetime" },
+  {id: "GYear", label: "Year", type: "datetime" },
+  {id: "GMonthDay", label: "MonthDay", type: "datetime" },
+  {id: "GDay", label: "Day", type: "datetime" },
+  {id: "GMonth", label: "Month", type: "datetime" },
+  {id: "Duration", label: "Duration", type: "datetime" },
+  {id: "HexBinary", label: "hexBinary", type: "string" },
+  {id: "Base64Binary", label: "base64Binary", type: "string" },
+  {id: "AnyURI", label: "anyURI", type: "string" },
+  {id: "GeographicLocation", label: "Geographic location", type: "string"},
+  {id: "Code", label: "Code", type: "string"},
+  {id: "Other", label: "Other" },
+];
