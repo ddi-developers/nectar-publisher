@@ -53,7 +53,9 @@ class Parser{
   static parseDelimtedTextString(string, dataset, done){
     var results = Papa.parse(string);     
     dataset.data = results.data       
-    
+    dataset.delimiter = results.meta.delimiter
+    dataset.linebreak = results.meta.linebreak
+
     var columnIds = results.data[0]
     if(dataset.firstRowIsHeader){
       results.data.shift()
