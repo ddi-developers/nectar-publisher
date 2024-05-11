@@ -26,27 +26,27 @@
       "browserRequirements": "requires HTML5 support",
       "softwareVersion": "Pre-alpha 0.0.1",
 	  "downloadUrl": "https://github.com/ddi-developers/nectar-publisher/archive/refs/heads/main.zip",
-	  "creator":[
-		{
-			"@type": "Person",
-			"id": "https://orcid.org/0000-0002-7365-0691",
-			"name": "Olof Olsson",
-			"affiliation": {
-				"@type": "Organization",
-				"id": "https://ror.org/00ancw882",
-				"name": "Swedish National Data Service"
-			}
-		},
-		{
-			"@type": "Person",
-			"id": "https://orcid.org/0000-0002-3848-574X",
-			"name": "Oliver Hopt",
-			"affiliation": {
-				"@type": "Organization",
-				"id": "https://ror.org/018afyw53",
-				"name": "Leibniz-Institute for the Social Science, GESIS"
-			}
-		},
+	  "creator": [
+		  {
+			  "@type": "Person",
+			  "id": "https://orcid.org/0000-0002-7365-0691",
+			  "name": "Olof Olsson",
+			  "affiliation": {
+				  "@type": "Organization",
+				  "id": "https://ror.org/00ancw882",
+				  "name": "Swedish National Data Service"
+			  }
+		  },
+		  {
+			  "@type": "Person",
+			  "id": "https://orcid.org/0000-0002-3848-574X",
+			  "name": "Oliver Hopt",
+			  "affiliation": {
+				  "@type": "Organization",
+				  "id": "https://ror.org/018afyw53",
+				  "name": "Leibniz-Institute for the Social Science, GESIS"
+			  }
+		  },
 		  {
 			  "@type": "Person",
 			  "id": "https://orcid.org/0009-0008-3750-273X",
@@ -66,10 +66,20 @@
 				  "id": "https://ror.org/032ymzc07",
 				  "name": "University of Applied Sciences of the Grisons, FHGR"
 			  }
+		  },
+		  {
+			  "@type": "Person",
+			  "id": "https://orcid.org/0000-0001-9472-0161",
+			  "name": "Deirdre Lungley",
+			  "affiliation": {
+				  "@type": "Organization",
+				  "id": "https://ror.org/03fknw408",
+				  "name": "UK Data Archive"
+			  }
 		  }
 	  ]
-    }
-  	</script>
+	}
+	</script>
 </head>
 
 <body>
@@ -110,7 +120,7 @@
 
 		<input ref="inputFile" id="inputFile" @change="importDataFromFile" type="file" accept=".csv,.tsv,.xlsx,.xls,.ods,text/csv"
 			style="display: none;">
-		<input ref="inputFileToRemote" id="inputFileToRemove" @change="importDataFromService" type="file" accept=".sav,.spss,.sas,.csv"
+		<input ref="inputFileToRemote" id="inputFileToRemove" @change="importDataFromService" type="file" accept=".sav"
 		style="display: none;">
 		<input ref="inputMetadata" id="inputMetadata" @change="importMetadata" type="file" accept=".xml" style="display: none;">
 

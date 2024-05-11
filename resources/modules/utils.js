@@ -51,6 +51,29 @@ class Parser{
     }
   }
 
+  static parseDelimtedTextString(string, dataset, done){
+    var results = Papa.parse(string);     
+    dataset.data = results.data       
+    dataset.delimiter = results.meta.delimiter
+    dataset.linebreak = results.meta.linebreak
+
+    var columnIds = results.data[0]
+    if(dataset.firstRowIsHeader){
+      results.data.shift()
+    }
+    dataset.data = results.data  
+
+    for(let i = 0 ; i < dataset.columns.length ; i++){
+      dataset.columns[i].valuesUnique = [... new Set(dataset.data.map(d => d[i+1]))]
+      dataset.columns[i].valuesUnique.sort()
+      dataset.columns[i].hasIntendedDataType = RepresentationTypes.find(e => 
+        e.id === guessDataType(dataset.columns[i].valuesUnique)
+      )
+    }
+
+    done(dataset)
+  }
+
   static async parseDelimitedText(file, dataset, done){
     await Papa.parse(file, {
       complete: function(results) {

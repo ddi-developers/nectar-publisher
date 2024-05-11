@@ -13,7 +13,6 @@ function datasetToMarkdown(dataset){
     for(col of dataset.columns){
         md += `### ${col.id}  \n\n` +
               ` label: ${col.label}  \n` +
-              ` type: ${col.hasIntendedDataType.id}  \n` +
               `\n`
     }
 
