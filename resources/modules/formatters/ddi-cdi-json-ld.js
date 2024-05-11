@@ -170,7 +170,7 @@ function toDdiCdiJsonLd(input){
         }
     }
 
-    cdi['@graph'] = cdi['@graph'].concat(input.columns)
+    //cdi['@graph'] = cdi['@graph'].concat(input.columns)
     cdi['@graph'] = cdi['@graph'].concat(logicalRecord)
 
     cdi['@graph'] = cdi['@graph'].concat(physicalSegmentLayout)
