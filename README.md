@@ -56,7 +56,7 @@ Document your tabular datasets and create codebooks and machine actionable metad
   - [x] Column number (auto generated on file import)
   - [x] Name (set to column header if existing)
   - [ ] Label
-  - [ ] Description
+  - [x] Description
   - [ ] DataType
   - [ ] UnitCode
   - [ ] Min/Max value
