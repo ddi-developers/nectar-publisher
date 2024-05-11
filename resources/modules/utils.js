@@ -50,6 +50,31 @@ class Parser{
     }
   }
 
+  static async parseDelimtedTextString(string, dataset, done){
+    await Papa.parse(string, {
+      complete: function(result){
+        dataset.data = results.data       
+        
+        var columnIds = results.data[0]
+        if(dataset.firstRowIsHeader){
+          results.data.shift()
+        }
+        dataset.data = results.data
+
+        for(const [i, c] of columnIds.entries()){
+          var column = new DatasetColumn(c)
+          column.position = i
+          column.valuesUnique = [... new Set(dataset.data.map(d => d[i]))]
+          column.valuesUnique.sort()
+          column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique))
+          dataset.columns.push(column)
+        }
+
+        done(dataset)
+      }
+    })
+  }
+
   static async parseDelimitedText(file, dataset, done){
     await Papa.parse(file, {
       complete: function(results) {

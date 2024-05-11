@@ -177,9 +177,12 @@ class OpenCPU{
                                     column.label = value.label[0]
                                 }
         
+                                //TODO: this needs to be fixed, select the right one!
+                                column.hasIntendedDataType = RepresentationTypes[0]
                                 if(value.class){
                                     if(value.class[0] == "haven_labelled"){
-                                        column.hasIntendedDataType = "code"
+                                        // TODO: set as coded
+                                        //column.hasIntendedDataType = "code"
                                         if(codeLists[key]){
                                             for(const [k,v] of Object.entries(codeLists[key])){
                                                 var c = new CodeValue()
@@ -189,7 +192,8 @@ class OpenCPU{
                                             }
                                         }
                                     }else{
-                                        column.hasIntendedDataType = getVarIntendedDataType(value.class.slice(-1)[0])
+                                        // TODO: fix this
+                                        //column.hasIntendedDataType = getVarIntendedDataType(value.class.slice(-1)[0])
                                     }
                                     column.varFormat.schema = "R"
                                     column.varFormat.type = value.class.slice(-1)[0]
