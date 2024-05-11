@@ -300,22 +300,22 @@
 			</div>
 			<div class="tab-pane fade" id="json-tab-pane" role="tabpanel" aria-labelledby="json-tab" tabindex="0">
 				<div class="more">
-					<button class="btn btn-outline-primary" @click="saveFile(output.json, 'application/ld+json', output.filename + '.jsonld')">save</button>
-					<button class="btn btn-outline-primary" @click="copyToClipboard(output.json)">copy</button>
+					<button class="btn btn-outline-primary" @click="saveFile(output.cdi_data, 'application/ld+json', output.filename + '.jsonld')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.cdi_data)">copy</button>
 				</div>
 				<pre><code v-html="output.cdi"></code></pre>
 			</div>
 			<div class="tab-pane fade" id="ddi-l-tab-pane" role="tabpanel" aria-labelledby="ddi-l-tab" tabindex="0">
 				<div class="more">
-					<button class="btn btn-outline-primary" @click="saveFile(output.ddil, 'application/xml', output.filename + '.ddi-c.xml')">save</button>
-					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddil)">copy</button>
+					<button class="btn btn-outline-primary" @click="saveFile(output.ddil_data, 'application/xml', output.filename + '.ddi-c.xml')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddil_data)">copy</button>
 				</div>
 				<pre><code v-html="output.ddil"></code></pre>
 			</div>
 			<div class="tab-pane fade" id="ddi-c-tab-pane" role="tabpanel" aria-labelledby="ddi-c-tab" tabindex="0">
 				<div class="more">
-					<button class="btn btn-outline-primary" @click="saveFile(output.ddic, 'application/xml', output.filename + '.ddi-l.xml')">save</button>
-					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddic)">copy</button>
+					<button class="btn btn-outline-primary" @click="saveFile(output.ddic_data, 'application/xml', output.filename + '.ddi-l.xml')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddic_data)">copy</button>
 				</div>
 				<pre><code v-html="output.ddic"></code></pre>
 			</div>
