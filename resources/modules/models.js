@@ -54,6 +54,13 @@ const DataType = {
      * @public
      */
     codeValues = []
+    
+    /**
+     * varformat
+     * @type {VarFormat}
+     * @public
+     */
+    varFormat
 
     responseUnit
     valuesUnique
@@ -72,7 +79,14 @@ const DataType = {
       this.id = id
       this.name=id
       this.question = new Question()
+      this.varFormat = new VarFormat()
     }
+  }
+
+  class VarFormat{
+    type 
+    schema
+    otherCategory
   }
 
   class Question{
