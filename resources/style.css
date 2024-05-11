@@ -21,6 +21,26 @@
     }
 }
 
+.row .shrink {
+    width: 3ch;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding: .5em 0;
+}
+
+.row .shrink span {
+    display: flex;
+    width: 3ch;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background-color: #f5d302;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: .75em;
+}
+
 #exportTabs {
     margin-top: 2em;
 }

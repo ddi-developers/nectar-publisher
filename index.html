@@ -138,9 +138,8 @@
 				<div class="row" v-if="input.dataset.fileName != null">
 					<form class="mb-2" v-for="(column, index) in input.dataset.columns" :class="{ 'bg-light rounded': column.showDetails }">
 						<div class="row">
-							<div class="col-md-1">
-								<label class="form-label" :class="{notFirst: (index > 0)}">Position</label>
-								<input v-model="column.position" type="text" class="form-control" disabled>
+							<div class="shrink">
+								<span>{{column.position}}</span>
 							</div>
 							<div class="col-md-2">
 								<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
