@@ -40,6 +40,13 @@ const DataType = {
     frequency
     label
     isMissingValue
+
+    constructor(value, label, frequency = null, isMissingValue = null) {
+      this.value = value;
+      this.frequency = frequency;
+      this.label = label;
+      this.isMissingValue = isMissingValue;
+    }
   }
   class DatasetColumn{
     position
@@ -54,7 +61,8 @@ const DataType = {
      * @public
      */
     codeValues = []
-    
+    coded = false
+
     /**
      * varformat
      * @type {VarFormat}
@@ -81,10 +89,36 @@ const DataType = {
       this.question = new Question()
       this.varFormat = new VarFormat()
     }
+
+    getConceptScheme(){
+      var conceptScheme = {
+        '@id' : '#conceptScheme-'+this.id,
+        '@type' : "skos:ConceptScheme",
+        'skos:hasTopConcept' : []
+      }
+      for(const v of this.getUniqueValues()){
+        conceptScheme['skos:hasTopConcept'].push('#'+this.id + '-concept-' + v)
+      }
+      return conceptScheme
+    }
+
+    getUniqueValues(){
+      return [... new Set(this.values)]
+    }
+
+    createCodeList(){
+      if(!this.coded){
+        this.codeValues = []
+        return
+      }
+      for(const v of this.valuesUnique){
+        this.codeValues.push(new CodeValue(v, null, this.values.filter(e => e === v).length))
+      }
+    }
   }
 
   class VarFormat{
-    type 
+    type
     schema
     otherCategory
   }

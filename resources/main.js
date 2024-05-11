@@ -40,6 +40,7 @@ const app = createApp({
   },
   mounted() {},
   setup() {
+    const codeListVariableIndex = ref(null)
     const input = reactive({
       file: null,
       dataset: new Dataset()
@@ -66,7 +67,7 @@ const app = createApp({
     })
 
     return {
-      input, cv, appMetadata, output
+      input, cv, appMetadata, output, codeListVariableIndex
     }
   }
 }).mount("#app")

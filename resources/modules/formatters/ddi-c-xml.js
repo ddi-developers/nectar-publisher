@@ -55,12 +55,12 @@ function toDdiCXml(input){
                     catgry.appendChild(createTextNode(xmlDoc, ns, "labl", codeValue.label))
                 }
 
-                if(column.catStat){
-                    var catStat = createTextNode(xmlDoc, ns, "catStat", column.catStat[codeValue.notation])
+                if(codeValue.frequency){
+                    var catStat = createTextNode(xmlDoc, ns, "catStat", codeValue.frequency)
                     catStat.setAttribute("type", "freq")
                     catgry.appendChild(catStat)
                 }
-                
+
                 variable.appendChild(catgry)
             }
         }

@@ -47,16 +47,26 @@
 				"name": "Leibniz-Institute for the Social Science, GESIS"
 			}
 		},
-		{
-			"@type": "Person",
-			"id": "https://orcid.org/0009-0008-3750-273X",
-			"name": "Julie Lenoir",
-			"affiliation": {
-				"@type": "Organization",
-				"id": "https://ror.org/02cnsac56",
-				"name": "National Institute for Demographic Studies, Ined"
-			}
-		}
+		  {
+			  "@type": "Person",
+			  "id": "https://orcid.org/0009-0008-3750-273X",
+			  "name": "Julie Lenoir",
+			  "affiliation": {
+				  "@type": "Organization",
+				  "id": "https://ror.org/02cnsac56",
+				  "name": "National Institute for Demographic Studies, Ined"
+			  }
+		  },
+		  {
+			  "@type": "Person",
+			  "id": "https://orcid.org/0009-0007-4691-3162",
+			  "name": "Marc Iten",
+			  "affiliation": {
+				  "@type": "Organization",
+				  "id": "https://ror.org/032ymzc07",
+				  "name": "University of Applied Sciences of the Grisons, FHGR"
+			  }
+		  }
 	  ]
     }
   	</script>
@@ -155,7 +165,7 @@
 								<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
 								<input v-model="column.name" type="text" class="form-control" disabled readonly>
 							</div>
-							<div class="col-md-6">
+							<div class="col-md-5 label">
 								<label class="form-label" :class="{notFirst: (index > 0)}">Label</label>
 								<input v-model="column.label" type="text" class="form-control">
 							</div>
@@ -171,9 +181,30 @@
 								</div>
 							</div>
 							<div class="col-md-1">
-								<label class="form-label row button-label" :class="{notFirst: (index > 0)}">Details</label>
-								<button @click="column.showDetails = !column.showDetails" type="button" :class="{ 'bg-primary': column.showDetails }" class="btn btn-outline-secondary">⚙️</button>
+								<label class="form-label row codeCheckLabel"
+									   :class="{notFirst: (index > 0)}">Coded</label>
+								<div class="btn-group" role="group" aria-label="coded variable">
+									<input v-model="column.coded" @change="column.createCodeList()" type="checkbox"
+										   class="btn-check" :id="'coded-'+column.id" autocomplete="off">
+									<label class="btn btn-outline-secondary" :for="'coded-'+column.id">
+										<span v-if="!column.coded">☐</span>
+										<span v-if="column.coded">☒</span>
+									</label>
+									<button v-if="column.coded" @click="codeListVariableIndex=index"
+											data-bs-toggle="modal" data-bs-target="#codeListModal" type="button"
+											class="btn btn-outline-secondary">✏️
+									</button>
+								</div>
 							</div>
+							<div class="col-md-1">
+								<label class="form-label row button-label"
+									   :class="{notFirst: (index > 0)}">Details</label>
+								<button @click="column.showDetails = !column.showDetails" type="button"
+										:class="{ 'bg-primary': column.showDetails }"
+										class="btn btn-outline-secondary">⚙️
+								</button>
+							</div>
+
 						</div>
 						<Transition>
 							<div v-if="column.showDetails" class="row details mb-2">
@@ -308,7 +339,7 @@
 						<p>
 							<ul>
 								<li v-for="creator in appMetadata.creator">
-									<span>{{ creator.name }}, {{ creator.affiliation.name }}</span>
+									<span>{{ creator.name }}, {{ creator.affiliation.name }}&nbsp;</span>
 									<a :href="creator.id">
 										<img alt="ORCID logo"
 											src="resources/images/icons/orcid_16x16.png"
@@ -326,6 +357,34 @@
 			</div>
 		</div>
 
+		<!-- Code List Modal -->
+		<div class="modal modal-dialog-scrollable fade" id="codeListModal" tabindex="-1" aria-labelledby="codeListModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div v-if="codeListVariableIndex != null" class="modal-content">
+					<div class="modal-header">
+						<h1 class="modal-title fs-5" id="codeListModalLabel">📦Code list <span v-html="input.dataset.columns[codeListVariableIndex].name" class="badge bg-secondary"></span></h1>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form class="mb-4">
+							<div class="row" v-for="(code, index) in input.dataset.columns[codeListVariableIndex].codeValues">
+								<div class="col-md-4">
+									<label class="form-label" :class="{notFirst: (index > 0)}">Code</label>
+									<input v-model="code.value" type="text" class="form-control" disabled>
+								</div>
+								<div class="col-md-8">
+									<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
+									<input v-model="code.label" type="text" class="form-control">
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#codeListModal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
 
 		<!-- importViaServiceModal Modal -->
 		<div class="modal modal-dialog-scrollable fade" id="importViaServiceModal" tabindex="-2" aria-labelledby="importViaServiceModalLabel"

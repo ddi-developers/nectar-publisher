@@ -40,7 +40,8 @@ class Parser{
         for(const [i, c] of columnIds.entries()){
           var column = new DatasetColumn(c)
           column.position = i
-          column.valuesUnique = [... new Set(dataset.data.map(d => d[i]))]
+          column.values = dataset.data.map(d => d[i])
+          column.valuesUnique = [... new Set(column.values)]
           column.valuesUnique.sort()
           column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique))
           dataset.columns.push(column)
@@ -68,7 +69,8 @@ class Parser{
         for(const [i, c] of columnIds.entries()){
           var column = new DatasetColumn(c)
           column.position = i
-          column.valuesUnique = [... new Set(dataset.data.map(d => d[i]))]
+          column.values = dataset.data.map(d => d[i])
+          column.valuesUnique = [... new Set(column.values)]
           column.valuesUnique.sort()
           column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique))
           dataset.columns.push(column)
