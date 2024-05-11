@@ -16,7 +16,8 @@ Document your tabular datasets and create codebooks and machine actionable metad
 ### Dataset inputs
 - [x] CSV / TSV - files
 - [x] Excel / ODS spreadsheet
-- [ ] SPSS
+- [x] SPSS (via OpenCPU)
+- [ ] SPSS (local in browser parser)
 
 ### Metadata imports
 - [ ] DDI-C 2.5 variable documentation
