@@ -17,6 +17,7 @@
 	<link rel="manifest" href="manifest.json" />
 	<link rel="icon" href="resources/images/logo/nectar.svg">
 
+	<!-- MARK: Application metadata -->
 	<script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -84,7 +85,7 @@
 
 <body>
 	<div id="app" class="container">
-		<!-- top toolbar -->
+		<!-- MARK: Toolbar -->
 		<nav class="row navbar navbar-expand-lg bg-body-tertiary">
 			<div class="container-fluid">
 				<a class="navbar-brand" href="#"><img src="resources/images/logo/nectar.svg" alt="Nectar Publisher"
@@ -164,7 +165,7 @@
 		  </ul>
 		  <div class="tab-content" id="myTabContent" v-if="input.dataset.fileName != null">
 			<div class="tab-pane fade show active" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab" tabindex="0">
-				<!-- Columns in the dataset -->
+				<!-- #region datasetColumns -->
 				<div class="row" v-if="input.dataset.fileName != null">
 					<form class="mb-2" v-for="(column, index) in input.dataset.columns" :class="{ 'bg-light rounded': column.showDetails }">
 						<div class="row">
@@ -252,6 +253,7 @@
 						<hr class="mt-4" />
 					</form>
 				</div>
+				<!-- #endregion -->
 			</div>
 
 			<!-- Output tab -->
@@ -264,7 +266,7 @@
 		  </div>
 
 
-		<!-- Exports -->
+		<!-- MARK: Exports -->
 		<ul class="nav nav-tabs" id="exportTabs" role="tablist" v-if="input.dataset.fileName != null">
 			<li class="nav-item" role="presentation">
 				<button class="nav-link active" id="md-tab" data-bs-toggle="tab" data-bs-target="#md-tab-pane" type="button" role="tab" aria-controls="md-tab-pane" aria-selected="true">🅫 MarkDown</button>
@@ -321,7 +323,7 @@
 			</div>
 		</div>
 
-		<!-- About Modal -->
+		<!-- MARK: About Modal -->
 		<div class="modal modal-dialog-scrollable fade" id="aboutModal" tabindex="-2" aria-labelledby="aboutModalLabel"
 			aria-hidden="true">
 			<div class="modal-dialog">
@@ -367,7 +369,7 @@
 			</div>
 		</div>
 
-		<!-- Code List Modal -->
+		<!-- MARK: Code List Modal -->
 		<div class="modal modal-dialog-scrollable fade" id="codeListModal" tabindex="-1" aria-labelledby="codeListModalLabel" aria-hidden="true">
 			<div class="modal-dialog">
 				<div v-if="codeListVariableIndex != null" class="modal-content">
@@ -396,7 +398,7 @@
 			</div>
 		</div>
 
-		<!-- importViaServiceModal Modal -->
+		<!-- MARK: import via service Modal -->
 		<div class="modal modal-dialog-scrollable fade" id="importViaServiceModal" tabindex="-2" aria-labelledby="importViaServiceModalLabel"
 			aria-hidden="true">
 			<div class="modal-dialog">
