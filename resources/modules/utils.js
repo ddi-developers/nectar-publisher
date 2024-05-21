@@ -163,8 +163,6 @@ function median_of_arr(arr) {
       + sorted[middle - 0.5]) / 2 :
       sorted[middle - 1];
 }
-var arr = [1, 4, 7, 9];
-console.log(median_of_arr(arr));
 
 function getAppMetadata(){
   return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText);
@@ -203,6 +201,5 @@ const RepresentationTypes= [
   {id: "Base64Binary", label: "base64Binary", type: "string" },
   {id: "AnyURI", label: "anyURI", type: "string" },
   {id: "GeographicLocation", label: "Geographic location", type: "string"},
-  {id: "Code", label: "Code", type: "string"},
   {id: "Other", label: "Other" },
 ];

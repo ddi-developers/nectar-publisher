@@ -65,8 +65,11 @@ const app = createApp({
           ...input.dataset.data.map(e => e.join(input.dataset.delimiter))
         ].join('\n'),
         json: toDdiCdiJsonLd(input.dataset),
+        cdi_data : toDdiCdiJsonLd(input.dataset),
         cdi : (hljs.highlight(toDdiCdiJsonLd(input.dataset), { language: "json" }).value),
+        ddic_data : toDdiCXml(input.dataset),
         ddic : (hljs.highlight(toDdiCXml(input.dataset), { language: "xml" }).value),
+        ddil_data : toDdiLXml(input.dataset),
         ddil : (hljs.highlight(toDdiLXml(input.dataset), { language: "xml" }).value)
       }
     })
