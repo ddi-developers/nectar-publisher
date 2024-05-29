@@ -20,6 +20,7 @@ const DataType = {
      * @public
      */
     columns = []
+    uuid = window.crypto.randomUUID()
 
     constructor(input, fileName, mimeType, delimiter = undefined, firstRowIsHeader = true){
       this.fileName = fileName
@@ -40,6 +41,7 @@ const DataType = {
     frequency
     label
     isMissingValue
+    uuid = window.crypto.randomUUID()
 
     constructor(value, label, frequency = null, isMissingValue = null) {
       this.value = value;
@@ -82,6 +84,7 @@ const DataType = {
     question
     minValue
     maxValue
+    uuid = window.crypto.randomUUID()
 
     constructor(id){
       this.id = id
@@ -128,4 +131,5 @@ const DataType = {
     questionText
     postQuestionText
     interviewerInstructions
+    uuid = window.crypto.randomUUID()
   }
