@@ -28,183 +28,115 @@ curl https://cloud.opencpu.org/ocpu/tmp/IDREP3/R/.val/json
 
 
  */
-class OpenCPU{
+class OpenCPU {
+    static BASE_URL = "https://cloud.opencpu.org/ocpu/";
 
-    static async parseFile(file, doneCallback){
-        var dataset = new Dataset()
+    static async parseFile(file, doneCallback) {
+        var dataset = new Dataset();
+        dataset.fileName = file.name;
+        dataset.mimeType = file.type;
+        dataset.fileSize = file.size;
+        dataset.lastModified = new Date(file.lastModified).toISOString();
+        dataset.sha256 = await checksum(file, "SHA-256");
+        dataset.columns = [];
+        dataset.delimiter = null;
+        dataset.linebreak = null;
 
-        dataset.fileName = file.name
-        dataset.mimeType = file.type
-        dataset.fileSize = file.size
-        dataset.lastModified = new Date(file.lastModified).toISOString()
-        dataset.sha256 = await checksum(file, "SHA-256")
-        dataset.columns = []
-        dataset.delimiter = null
-        dataset.linebreak = null
+        try {
+            const id1 = await OpenCPU.readSavFile(file);
+            const id2 = await OpenCPU.getAttributes(id1);
+            const json = await OpenCPU.getJson(id2);
+            const id3 = await OpenCPU.getCodeLists(id1);
+            const codeLists = await OpenCPU.getJson(id3);
 
-        var base = "https://cloud.opencpu.org/ocpu/";
-        var data = new FormData()
-        data.append('file', file)
-
-        fetch(base + "library/haven/R/read_sav", {
-            method: 'POST',
-            body: data
-        })
-        .then(response => {
-            // Check if the response is successful
-            if (!response.ok) {
-              throw new Error('Network response was not ok ID1');
-            }
-            // Read the response content as text
-            return response.text();
-        })
-        .then(responseText => { 
-
-            console.log("RESULT FROM: " + base + "library/haven/R/read_sav")
-            var id1 = getId(responseText)
-
-            console.log("ID1: " +id1)
-
-            // Getting attributes for each variable
-            // curl https://cloud.opencpu.org/ocpu/library/base/R/lapply -d "X=IDREP&FUN=function(x) attributes(x)"
-            
-            var data = new FormData()
-            data.append('X', id1)
-            data.append('FUN', "function(x) attributes(x)")
-
-            fetch(base + "library/base/R/lapply", {
-                method: 'POST',
-                body: data
-            })
-            .then(response => {
-                // Check if the response is successful
-                if (!response.ok) {
-                  throw new Error('Network response was not ok ID2');
-                }
-                // Read the response content as text
-                return response.text();
-            })
-            .then(responseText => {
-                var id2 = getId(responseText)
-                console.log("ID2: " +id2)
-
-                fetch(base +`/tmp/${id2}/R/.val/json`)
-                .then(response => {
-                    // Check if the response is successful (HTTP status code 200)
-                    if (!response.ok) {
-                      throw new Error('Network response was not ok for stats');
-                    }
-                    // Parse the response body as JSON
-                    return response.json();
-                })
-                .then(json => {
-
-                    // Getting codeLists
-                    //curl https://cloud.opencpu.org/ocpu/library/base/R/lapply -d "X=IDREP&FUN=function(x) as.list(attributes(x)$labels)"
-                    var data = new FormData()
-                    data.append('X', id1)
-                    data.append('FUN', "function(x) as.list(attributes(x)$labels)")
-        
-                    fetch(base + "library/base/R/lapply", {
-                        method: 'POST',
-                        body: data
-                    }).then(response => {
-                        // Check if the response is successful
-                        if (!response.ok) {
-                          throw new Error('Network response was not ok ID3');
+            let i = 0;
+            for (const [key, value] of Object.entries(json)) {
+                const column = new DatasetColumn(key);
+                if (value.label) column.label = value.label[0];
+                column.hasIntendedDataType = RepresentationTypes[0];
+                if (value.class) {
+                    if (value.class[0] === "haven_labelled") {
+                        column.coded = true;
+                        if (codeLists[key]) {
+                            for (const [k, v] of Object.entries(codeLists[key])) {
+                                const c = new CodeValue();
+                                c.value = v[0];
+                                c.label = k;
+                                column.codeValues.push(c);
+                            }
                         }
-                        // Read the response content as text
-                        return response.text();
-                    })
-                    .then(responseText => {
-                        var id3 = getId(responseText)
-                        console.log("ID3: "+id3)
-                        fetch(base +`/tmp/${id3}/R/.val/json`)
-                        .then(response => {
-                            // Check if the response is successful (HTTP status code 200)
-                            if (!response.ok) {
-                              throw new Error('Network response was not ok for codelist');
-                            }
-                            // Parse the response body as JSON
-                            return response.json();
-                        })
-                        .then(codeLists => {
-                            var i = 0
-                            for (const [key, value] of Object.entries(json)) {
-                                var column = new DatasetColumn(key)
-                                if(value.label){
-                                    column.label = value.label[0]
-                                }
-        
-                                //TODO: this needs to be fixed, select the right one!
-                                column.hasIntendedDataType = RepresentationTypes[0]
-                                if(value.class){
-                                    if(value.class[0] == "haven_labelled"){
-                                        column.coded = true
+                    }
+                    column.varFormat.schema = "R";
+                    column.varFormat.type = value.class.slice(-1)[0];
+                    column.varFormat.otherCategory = getVarDataType(value.class.slice(-1)[0]);
+                }
+                column.position = i++;
+                dataset.columns.push(column);
+            }
 
-                                        if(codeLists[key]){
-                                            for(const [k,v] of Object.entries(codeLists[key])){
-                                                var c = new CodeValue()
-                                                c.value = v[0]
-                                                c.label = k
-                                                column.codeValues.push(c)
-                                            }
-                                        }
-                                    }
-                                    
-                                    column.varFormat.schema = "R"
-                                    column.varFormat.type = value.class.slice(-1)[0]
-                                    column.varFormat.otherCategory = getVarDataType(value.class.slice(-1)[0])
-                                }
-        
-                                column.position = i
-                                dataset.columns.push(column)
-                                i = i + 1
-                            }
+            const id4 = await OpenCPU.writeCsv(id1);
+            const csvContent = await OpenCPU.getCsv(id4);
 
-                            // Getting CSV from file
-                            //curl https://cloud.opencpu.org/ocpu/library/utils/R/write.csv -d "x=x0b8bd45a2e949b&file='test.csv'"
-                            //curl https://cloud.opencpu.org/ocpu/tmp/x0b17a01642b5cd/files/test.csv    
+            Parser.parseDelimtedTextString(csvContent, dataset, (d) => { dataset = d });
+            doneCallback(dataset);
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
-                            var data = new FormData()
-                            data.append('x', id1)
-                            data.append('file', "'data.csv'")
+    static async readSavFile(file) {
+        const data = new FormData();
+        data.append('file', file);
 
-                            fetch(base + "library/utils/R/write.csv", {
-                                method: 'POST',
-                                body: data
-                            })
-                            .then(response => {
-                                // Check if the response is successful
-                                if (!response.ok) {
-                                throw new Error('Network response was not ok for writeCSV');
-                                }
-                                // Read the response content as text
-                                return response.text();
-                            })
-                            .then(responseText => {
-                                var id4 = getId(responseText)
-                                console.log("ID4: " + id4)
+        const response = await fetch(OpenCPU.BASE_URL + "library/haven/R/read_sav", { method: 'POST', body: data });
+        if (!response.ok) throw new Error('Network response was not ok ID1');
+        const responseText = await response.text();
+        return getId(responseText);
+    }
 
-                                fetch(base +`/tmp/${id4}/files/data.csv`)
-                                .then(response => {
-                                    // Check if the response is successful (HTTP status code 200)
-                                    if (!response.ok) {
-                                    throw new Error('Network response was not ok for getCSV');
-                                    }
-                                    // Parse the response body as text
-                                    return response.text();
-                                })
-                                .then(csvContent => {
-                                    Parser.parseDelimtedTextString(csvContent, dataset, (d) => {dataset = d})
-                                    doneCallback(dataset)
-                                })
-                            })
-                        })
-                    })
-                })
-            })
-        })
+    static async getAttributes(id) {
+        const data = new FormData();
+        data.append('X', id);
+        data.append('FUN', "function(x) attributes(x)");
+
+        const response = await fetch(OpenCPU.BASE_URL + "library/base/R/lapply", { method: 'POST', body: data });
+        if (!response.ok) throw new Error('Network response was not ok ID2');
+        const responseText = await response.text();
+        return getId(responseText);
+    }
+
+    static async getJson(id) {
+        const response = await fetch(OpenCPU.BASE_URL + `/tmp/${id}/R/.val/json`);
+        if (!response.ok) throw new Error('Network response was not ok for stats');
+        return response.json();
+    }
+
+    static async getCodeLists(id) {
+        const data = new FormData();
+        data.append('X', id);
+        data.append('FUN', "function(x) as.list(attributes(x)$labels)");
+
+        const response = await fetch(OpenCPU.BASE_URL + "library/base/R/lapply", { method: 'POST', body: data });
+        if (!response.ok) throw new Error('Network response was not ok ID3');
+        const responseText = await response.text();
+        return getId(responseText);
+    }
+
+    static async writeCsv(id) {
+        const data = new FormData();
+        data.append('x', id);
+        data.append('file', "'data.csv'");
+
+        const response = await fetch(OpenCPU.BASE_URL + "library/utils/R/write.csv", { method: 'POST', body: data });
+        if (!response.ok) throw new Error('Network response was not ok for writeCSV');
+        const responseText = await response.text();
+        return getId(responseText);
+    }
+
+    static async getCsv(id) {
+        const response = await fetch(OpenCPU.BASE_URL + `/tmp/${id}/files/data.csv`);
+        if (!response.ok) throw new Error('Network response was not ok for getCSV');
+        return response.text();
     }
 }
 
