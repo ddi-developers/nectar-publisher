@@ -123,7 +123,7 @@ function toDdiLXml(input){
         var variableRepresentation = xmlDoc.createElementNS(nsl, "l:VariableRepresentation")
         if(column.coded) {
             var codeRepresentation = xmlDoc.createElementNS(nsr, "r:CodeRepresentation")
-            codeRepresentation.appendChild(createTextNode(xmlDoc, nsr, "r:RecommendedDataType", column.dataType))
+            codeRepresentation.appendChild(createTextNode(xmlDoc, nsr, "r:RecommendedDataType", column.hasIntendedDataType.id))
             var codeListReference = xmlDoc.createElementNS(nsr, "r:CodeListReference")
             codeListReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
             codeListReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.codeListUuid))
@@ -132,71 +132,89 @@ function toDdiLXml(input){
             codeRepresentation.appendChild(codeListReference)
             variableRepresentation.appendChild(codeRepresentation)
         }
-        
-
-
+        else if(column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal' || column.hasIntendedDataType.type == 'boolean') {
+            var numericRepresentation = xmlDoc.createElementNS(nsr, "r:NumericRepresentation")
+            numericRepresentation.appendChild(createTextNode(xmlDoc, nsr, "r:NumericTypeCode", column.hasIntendedDataType.id))
+            variableRepresentation.appendChild(numericRepresentation)
+        }
+        else if(column.hasIntendedDataType.type == 'string') {
+            var TextRepresentation = xmlDoc.createElementNS(nsr, "r:TextRepresentation")
+            numericRepresentation.appendChild(createTextNode(xmlDoc, nsr, "r:RecommendedDataType", column.hasIntendedDataType.id))
+            variableRepresentation.appendChild(numericRepresentation)
+        }
+        else if(column.hasIntendedDataType.type == 'datetime') {
+            var numericRepresentation = xmlDoc.createElementNS(nsr, "r:DateTimeRepresentation")
+            numericRepresentation.appendChild(createTextNode(xmlDoc, nsr, "r:RecommendedDataType", column.hasIntendedDataType.id))
+            variableRepresentation.appendChild(numericRepresentation)
+        }
         variable.appendChild(variableRepresentation)
         variableFragment.appendChild(variable)
         fragmentInstance.appendChild(variableFragment)
     }
 
     for(const column of input.columns){
-    	var codeListFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
-        var codeList = xmlDoc.createElementNS(nsl, "l:CodeList")
-        codeList.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
-        codeList.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.codeListUuid))
-        codeList.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
-        var categorySchemeReference = xmlDoc.createElementNS(nsr, "r:CategorySchemeReference")
-        categorySchemeReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
-        categorySchemeReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.categorySchemeUuid))
-        categorySchemeReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
-        categorySchemeReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "CategoryScheme"))
-        codeList.appendChild(categorySchemeReference)
-        for(const codeValue of column.codeValues){
-            var code = xmlDoc.createElementNS(nsl, "l:Code")
-            code.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
-            code.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.uuid))
-            code.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
-            var categoryReference = xmlDoc.createElementNS(nsr, "r:CategoryReference")
-            categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
-            categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.categoryUuid))
-            categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
-            categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "Category"))
-            code.appendChild(categoryReference)
-            code.appendChild(createTextNode(xmlDoc, nsl, "l:CodeValue", codeValue.value))
-            codeList.appendChild(code)
+        if(column.coded) {
+            var codeListFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
+            var codeList = xmlDoc.createElementNS(nsl, "l:CodeList")
+            codeList.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
+            codeList.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.codeListUuid))
+            codeList.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+            var categorySchemeReference = xmlDoc.createElementNS(nsr, "r:CategorySchemeReference")
+            categorySchemeReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
+            categorySchemeReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.categorySchemeUuid))
+            categorySchemeReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+            categorySchemeReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "CategoryScheme"))
+            codeList.appendChild(categorySchemeReference)
+            for(const codeValue of column.codeValues){
+                var code = xmlDoc.createElementNS(nsl, "l:Code")
+                code.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
+                code.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.uuid))
+                code.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+                var categoryReference = xmlDoc.createElementNS(nsr, "r:CategoryReference")
+                categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
+                categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.categoryUuid))
+                categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+                categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "Category"))
+                code.appendChild(categoryReference)
+                code.appendChild(createTextNode(xmlDoc, nsl, "l:CodeValue", codeValue.value))
+                codeList.appendChild(code)
+            }
+            codeListFragment.appendChild(codeList)
+            fragmentInstance.appendChild(codeListFragment)
         }
-        codeListFragment.appendChild(codeList)
-        fragmentInstance.appendChild(codeListFragment)
     }
 
     for(const column of input.columns){
-    	var categorySchemeFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
-        var categoryScheme = xmlDoc.createElementNS(nsl, "l:CatrgoryScheme")
-        categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
-        categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.categorySchemeUuid))
-        categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
-        for(const codeValue of column.codeValues){
-            var categoryReference = xmlDoc.createElementNS(nsr, "r:CategoryReference")
-            categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
-            categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.categoryUuid))
-            categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
-            categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "Category"))
-            categoryScheme.appendChild(categoryReference)
-        }
-        categorySchemeFragment.appendChild(categoryScheme)
-        fragmentInstance.appendChild(categorySchemeFragment)
-        for(const codeValue of column.codeValues){
-            var categoryFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
-            var category = xmlDoc.createElementNS(nsl, "l:Category")
-            category.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
-            category.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.categoryUuid))
-            category.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
-            var categoryLabel = xmlDoc.createElementNS(nsr, "r:Label")
-            var categoryLabelContent = xmlDoc.createElementNS(nsr, "r:Content")
-            categoryLabelContent.appendChild(createTextNode(xmlDoc, nsr, "r:Text", codeValue.label))
-            categoryLabel.appendChild(categoryLabelContent)
-            category.appendChild(categoryLabel)
+        if(column.coded) {
+            var categorySchemeFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
+            var categoryScheme = xmlDoc.createElementNS(nsl, "l:CatrgoryScheme")
+            categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
+            categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.categorySchemeUuid))
+            categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+            for(const codeValue of column.codeValues){
+                var categoryReference = xmlDoc.createElementNS(nsr, "r:CategoryReference")
+                categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
+                categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.categoryUuid))
+                categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+                categoryReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "Category"))
+                categoryScheme.appendChild(categoryReference)
+            }
+            categorySchemeFragment.appendChild(categoryScheme)
+            fragmentInstance.appendChild(categorySchemeFragment)
+            for(const codeValue of column.codeValues){
+                var categoryFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
+                var category = xmlDoc.createElementNS(nsl, "l:Category")
+                category.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
+                category.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.categoryUuid))
+                category.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+                var categoryLabel = xmlDoc.createElementNS(nsr, "r:Label")
+                var categoryLabelContent = xmlDoc.createElementNS(nsr, "r:Content")
+                categoryLabelContent.appendChild(createTextNode(xmlDoc, nsr, "r:Text", codeValue.label))
+                categoryLabel.appendChild(categoryLabelContent)
+                category.appendChild(categoryLabel)
+                categoryFragment.appendChild(category)
+                fragmentInstance.appendChild(categoryFragment)
+            }
         }
     }
 
