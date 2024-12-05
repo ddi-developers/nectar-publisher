@@ -45,6 +45,10 @@ function toDdiCXml(input){
             variable.appendChild(createTextNode(xmlDoc, ns, "labl", column.label))
         }
 
+        if(column.description){
+            variable.appendChild(createTextNode(xmlDoc, ns, "txt", column.description))
+        }
+
         if(column.codeValues){
             for(const codeValue of column.codeValues){
                 var catgry = xmlDoc.createElementNS(ns, "catgry")
