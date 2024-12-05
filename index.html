@@ -119,12 +119,9 @@
 			</div>
 		</nav>
 
-		<input ref="inputFile" id="inputFile" @change="importDataFromFile" type="file" accept=".csv,.tsv,.xlsx,.xls,.ods,text/csv"
-			style="display: none;">
-		<input ref="inputFileToRemote" id="inputFileToRemove" @change="importDataFromService" type="file" accept=".sav"
-		style="display: none;">
+		<input ref="inputFile" id="inputFile" @change="importDataFromFile" type="file" accept=".csv,.tsv,.xlsx,.xls,.ods,text/csv" style="display: none;">
+		<input ref="inputFileToRemote" id="inputFileToRemove" @change="importDataFromService" type="file" accept=".sav" style="display: none;">
 		<input ref="inputMetadata" id="inputMetadata" @change="importMetadata" type="file" accept=".xml" style="display: none;">
-
 
 		<div class="row card border border-danger text-danger" v-if="input.dataset.errors.length > 0">
 			<div class="card-body">
@@ -324,7 +321,7 @@
 		</div>
 
 		<!-- MARK: About Modal -->
-		<div class="modal modal-dialog-scrollable fade" id="aboutModal" tabindex="-2" aria-labelledby="aboutModalLabel"
+		<div class="modal modal-dialog-scrollable fade modal-lg" id="aboutModal" tabindex="-2" aria-labelledby="aboutModalLabel"
 			aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
