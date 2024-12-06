@@ -70,7 +70,9 @@ const app = createApp({
         ddic_data : toDdiCXml(input.dataset),
         ddic : (hljs.highlight(toDdiCXml(input.dataset), { language: "xml" }).value),
         ddil_data : toDdiLXml(input.dataset),
-        ddil : (hljs.highlight(toDdiLXml(input.dataset), { language: "xml" }).value)
+        ddil : (hljs.highlight(toDdiLXml(input.dataset), { language: "xml" }).value),
+        ddi40l_data : toDdi40LJson(input.dataset),
+        ddi40l : (hljs.highlight(toDdi40LJson(input.dataset), { language: "json" }).value)
       }
     })
 

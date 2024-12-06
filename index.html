@@ -280,6 +280,9 @@
 			<li class="nav-item" role="presentation">
 				<button class="nav-link" id="ddi-c-tab" data-bs-toggle="tab" data-bs-target="#ddi-c-tab-pane" type="button" role="tab" aria-controls="ddi-c-tab-pane" aria-selected="true"><> ddi-c (xml)</button>
 			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="ddi-40-l-tab" data-bs-toggle="tab" data-bs-target="#ddi-40-l-tab-pane" type="button" role="tab" aria-controls="ddi-40-l-tab-pane" aria-selected="true">⚗️ ddi-40-l (json)</button>
+			</li>
 		</ul>
 
 		<div class="tab-content exports" id="exportTabsContent" v-if="input.dataset.fileName != null">
@@ -317,6 +320,13 @@
 					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddic_data)">copy</button>
 				</div>
 				<pre><code v-html="output.ddic"></code></pre>
+			</div>
+			<div class="tab-pane fade" id="ddi-40-l-tab-pane" role="tabpanel" aria-labelledby="json-tab" tabindex="0">
+				<div class="more">
+					<button class="btn btn-outline-primary" @click="saveFile(output.ddi40l_data, 'application/json', output.filename + '.json')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddi40l_data)">copy</button>
+				</div>
+				<pre><code v-html="output.ddi40l"></code></pre>
 			</div>
 		</div>
 
@@ -448,6 +458,7 @@
 	<script src="resources/modules/formatters/ddi-cdi-json-ld.js"></script>
 	<script src="resources/modules/formatters/ddi-l-xml.js"></script>
 	<script src="resources/modules/formatters/ddi-c-xml.js"></script>
+	<script src="resources/modules/formatters/ddi-40-l-json.js"></script>
 	<script src="resources/modules/opencpu.js"></script>
 	<script src="resources/modules/importers/ddi-c-xml-importer.js"></script>
 	<script src="resources/main.js"></script>
