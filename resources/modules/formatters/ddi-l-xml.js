@@ -33,6 +33,7 @@ function toDdiLXml(input){
 	studyUnit.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
 	studyUnit.appendChild(createTextNode(xmlDoc, nsr, "r:ID", uuidSU))
 	studyUnit.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+	studyUnit.appendChild(createTextNode(xmlDoc, nsr, "r:Abstract", input.studyDescription))
 	var physicalInstanceReference = xmlDoc.createElementNS(nsr, "r:PhysicalInstanceReference")
 	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
 	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", uuidPI))
@@ -100,6 +101,7 @@ function toDdiLXml(input){
     for(const column of input.columns){
     	var variableFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
         var variable = xmlDoc.createElementNS(nsl, "l:Variable")
+    	variable.appendChild(createTextNode(xmlDoc, nsr, "r:URN", "urn:ddi:int.example:" + column.uuid + ":1.0.0"))
         variable.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
         variable.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.uuid))
         variable.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
@@ -156,6 +158,7 @@ function toDdiLXml(input){
         if(column.coded) {
             var codeListFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
             var codeList = xmlDoc.createElementNS(nsl, "l:CodeList")
+        	codeList.appendChild(createTextNode(xmlDoc, nsr, "r:URN", "urn:ddi:int.example:" + column.codeListUuid + ":1.0.0"))
             codeList.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
             codeList.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.codeListUuid))
             codeList.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
@@ -167,6 +170,7 @@ function toDdiLXml(input){
             codeList.appendChild(categorySchemeReference)
             for(const codeValue of column.codeValues){
                 var code = xmlDoc.createElementNS(nsl, "l:Code")
+            	code.appendChild(createTextNode(xmlDoc, nsr, "r:URN", "urn:ddi:int.example:" + codeValue.uuid + ":1.0.0"))
                 code.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
                 code.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.uuid))
                 code.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
@@ -188,6 +192,7 @@ function toDdiLXml(input){
         if(column.coded) {
             var categorySchemeFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
             var categoryScheme = xmlDoc.createElementNS(nsl, "l:CatrgoryScheme")
+        	categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:URN", "urn:ddi:int.example:" + column.categorySchemeUuid + ":1.0.0"))
             categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
             categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:ID", column.categorySchemeUuid))
             categoryScheme.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
@@ -204,6 +209,7 @@ function toDdiLXml(input){
             for(const codeValue of column.codeValues){
                 var categoryFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
                 var category = xmlDoc.createElementNS(nsl, "l:Category")
+            	category.appendChild(createTextNode(xmlDoc, nsr, "r:URN", "urn:ddi:int.example:" + codeValue.categoryUuid + ":1.0.0"))
                 category.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
                 category.appendChild(createTextNode(xmlDoc, nsr, "r:ID", codeValue.categoryUuid))
                 category.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))

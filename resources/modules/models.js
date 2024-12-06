@@ -5,6 +5,10 @@ const DataType = {
   class Dataset{
     data = [[]]
     fileName = null
+    studyName
+    studyDescription = "Please describe the content and Method of this study."
+    studyGroupName
+    studyGroupDescription = "Please describe the structure of this study group."
     fileSize
     mimeType
     sha256
