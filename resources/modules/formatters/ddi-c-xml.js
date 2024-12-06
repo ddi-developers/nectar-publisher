@@ -49,6 +49,22 @@ function toDdiCXml(input){
             variable.appendChild(createTextNode(xmlDoc, ns, "txt", column.description))
         }
 
+        if(column.hasIntendedDataType.type === "numeric"){
+
+            var columnValuesUnique = column.valuesUnique.map(Number)
+            var statsToCompute = [Math.min, Math.max]
+            var statsToComputeNames = ["min", "max"]
+
+            for (var i = 0; i < statsToCompute.length; ++i) {
+                var statComputed = statsToCompute[i](... columnValuesUnique);
+
+                var sumStat = createTextNode(xmlDoc, ns, "sumStat", statComputed)
+            sumStat.setAttribute("type", statsToComputeNames[i])
+            variable.appendChild(sumStat)
+            }
+
+        }
+
         if(column.codeValues){
             for(const codeValue of column.codeValues){
                 var catgry = xmlDoc.createElementNS(ns, "catgry")
