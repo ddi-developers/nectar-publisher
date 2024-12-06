@@ -3,6 +3,8 @@ class Parser{
     var dataset = new Dataset()
 
     dataset.fileName = file.name
+    dataset.studyName = file.name + " study"
+    dataset.studyGroupName = file.name + " group"
     dataset.mimeType = file.type
     dataset.fileSize = file.size
     dataset.lastModified = new Date(file.lastModified).toISOString()
