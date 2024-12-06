@@ -138,14 +138,14 @@ function toDdiLXml(input){
             variableRepresentation.appendChild(numericRepresentation)
         }
         else if(column.hasIntendedDataType.type == 'string') {
-            var TextRepresentation = xmlDoc.createElementNS(nsr, "r:TextRepresentation")
-            numericRepresentation.appendChild(createTextNode(xmlDoc, nsr, "r:RecommendedDataType", column.hasIntendedDataType.id))
-            variableRepresentation.appendChild(numericRepresentation)
+            var textRepresentation = xmlDoc.createElementNS(nsr, "r:TextRepresentation")
+            textRepresentation.appendChild(createTextNode(xmlDoc, nsr, "r:RecommendedDataType", column.hasIntendedDataType.id))
+            variableRepresentation.appendChild(textRepresentation)
         }
         else if(column.hasIntendedDataType.type == 'datetime') {
-            var numericRepresentation = xmlDoc.createElementNS(nsr, "r:DateTimeRepresentation")
-            numericRepresentation.appendChild(createTextNode(xmlDoc, nsr, "r:RecommendedDataType", column.hasIntendedDataType.id))
-            variableRepresentation.appendChild(numericRepresentation)
+            var datetimeRepresentation = xmlDoc.createElementNS(nsr, "r:DateTimeRepresentation")
+            datetimeRepresentation.appendChild(createTextNode(xmlDoc, nsr, "r:RecommendedDataType", column.hasIntendedDataType.id))
+            variableRepresentation.appendChild(datetimeRepresentation)
         }
         variable.appendChild(variableRepresentation)
         variableFragment.appendChild(variable)
