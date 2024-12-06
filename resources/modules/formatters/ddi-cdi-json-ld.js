@@ -15,9 +15,9 @@ TODOS:
       but the following seem to be relevant
 
         Violation 1 "Property may only have 1 value, but found 7" (cdi:DataStructure_has_PrimaryKey  of #datastructure) 
-        Violation 1 "Property needs to have at least 1 values, but found 0" (cdi:DataSet_has_DataPoint of #dataset)
+        Violation 1 "Property needs to have at least 1 values, but found 0" (cdi:wideDataset_has_DataPoint of #wideDataset)
         Violation 1 "Property needs to have at least 1 values, but found 0" (cdi:DataStore-allowsDuplicates of #dataStore)
-        Violation 1 "Property needs to have at least 1 values, but found 0" (cdi:PhysicalDataSet-allowsDuplicates of #physicalDataset)
+        Violation 1 "Property needs to have at least 1 values, but found 0" (cdi:PhysicalwideDataset-allowsDuplicates of #physicalwideDataset)
 
     * regaring the 2nd violation above, I believe that Flavio told me today that he was considering relaxing this constraint, 
       so it is probably moot (but you should check with him)
@@ -56,7 +56,7 @@ TODOS:
 function toDdiCdiJsonLd(input){
     var cdi = {
         '@context': "https://ddi-alliance.bitbucket.io/DDI-CDI/DDI-CDI_v1.0-rc1/encoding/json-ld/ddi-cdi.jsonld",
-        '@graph':[]
+        'DDICDIModels':[]
     }
 
     if(input.columns.filter(c => c.coded).length > 0){
@@ -65,134 +65,179 @@ function toDdiCdiJsonLd(input){
     var dataStore= {
         '@id' : '#dataStore',
         '@type' : 'DataStore',
-        'recordCount' : input.recordCount,
-        'has' : []
+        'allowsDuplicates' : false,
+        'has_LogicalRecord' : []
     }
-    dataStore['has'].push('#logicalRecord')
+    dataStore['has_LogicalRecord'].push('#logicalRecord')
     
     var physicalDataset = {
-        '@id' : "#physicalDataset",
+        '@id' : "#physicalDataset-" + input.uuid,
         '@type': "PhysicalDataset",
-        'formats' : '#dataStore',
+        'allowsDuplicates' : false,
         'physicalFileName' : input.fileName,
-        'has' : []
+        'correspondsTo_DataSet' : "#wideDataset-" + input.uuid,
+        'formats' : '#dataStore',
+        'has_PhysicalRecordSegment' : []
     }
+    physicalDataset['has_PhysicalRecordSegment'].push("#physicalRecordSegment")
     
     var physicalSegmentLayout = {
         '@id' : "#physicalSegmentLayout",
         '@type': "PhysicalSegmentLayout",
         'formats' : '#logicalRecord',
+        'allowsDuplicates': false,
         'isDelimited' : 'true',
+        'isFixedWidth' : false,
         'delimiter' : input.delimiter,
-        'has' : []
+        'has_ValueMappingPosition' : []
     }
 
     var physicalRecordSegment = {
         '@id' : "#physicalRecordSegment",
         '@type': "PhysicalRecordSegment",
         'mapsTo' : '#logicalRecord',
-        'has' : []
+        'allowsDuplicates' : false,
+        'has_PhysicalSegmentLayout': '#physicalSegmentLayout',
+        'has_DataPointPosition' : []
     }
-    physicalRecordSegment['has'].push('#physicalSegmentLayout')
-    physicalRecordSegment['has'].push('#physicalDataset')
 
     var logicalRecord = {
         '@id' : "#logicalRecord",
         '@type': "LogicalRecord",
-        'has' : []
+        'organizes': "#wideDataset",
+        'has_InstanceVariable' : []
     }
 
-    var dataset = {
-        '@id' : "#dataset",
-        '@type': "DimensionalDataSet",
-        "isStructuredBy": "#datastructure",
-        'has' : []
+    var wideDataset = {
+        '@id' : "#wideDataset-" + input.uuid,
+        '@type': "WideDataset",
+        "isStructuredBy": "#wideDataStructure"
     }
 
     var dimensionalKeys = []
 
-    var datastructure = {
-        '@id' : "#datastructure",
-        '@type': "DimensionalDataStructure",
-        'has' : []
+    var wideDataStructure = {
+        '@id' : "#wideDataStructure",
+        '@type': "WideDataStructure",
+        'has_DataStructureComponent' : []
     }
 
     var components = []
     var valueMappings = []
     var componentPositions = []
+    var instanceVariables = []
+    var substantiveValueDomains = []
 
     for(const c of input.columns){
-        logicalRecord['has'].push('#' + c.id)
+        logicalRecord['has_InstanceVariable'].push('#instanceVariable-' + c.uuid)
+
+        var instanceVariable = {
+            '@id' : '#instanceVariable-' + c.uuid,
+            '@type' : 'InstanceVariable',
+            'physicalDataType' : {
+                '@type' : 'ControlledVocabularyEntry',
+                'entryValue' : c.hasIntendedDataType.type
+            },
+            'name' : {
+                "@type": "ObjectName",
+                "name": c.id
+            }, 
+            "displayLabel": {
+                "@type": "LabelForDisplay",
+                "locationVariant": {
+                    "@type": "ControlledVocabularyEntry",
+                    "entryValue": c.label
+                }
+            },
+            'has_PhysicalSegmentLayout': "#physicalSegmentLayout",
+        } 
+        if (c.coded){
+            instanceVariable['takesSubstantiveValuesFrom_SubstantiveValueDomain'] = '#substantiveValueDomain-' + c.uuid
+
+            var substantiveValueDomain = {
+                '@id' : '#substantiveValueDomain-' + c.uuid,
+                '@type' : 'SubstantiveValueDomain',
+                'recommendedDataType': {
+                    '@type' : "ControlledVocabularyEntry",
+                    'entryValue' : 'ConceptScheme-' + c.uuid
+                }
+            }
+            substantiveValueDomains.push(substantiveValueDomain)
+
+            // {
+            //     "@id": "#substantiveValueDomain-cntry",
+            //     "@type": "SubstantiveValueDomain",
+            //     "recommendedDataType": {
+            //         "@type": "ControlledVocabularyEntry",
+            //         "entryValue": "https://www.w3.org/TR/xmlschema-2/#string"
+            //     },
+            //     "isDescribedBy": "#substantiveValueAndConceptDescription-cntry",
+            //     "takesValuesFrom": "#substantiveEnumerationDomain-cntry"
+            // },
+        }
+        instanceVariables.push(instanceVariable)
+
         valueMappings.push({
-            '@id' : '#valueMapping-' + c.id,
+            '@id' : '#valueMapping-' + c.uuid,
             '@type' : 'ValueMapping',
-            'has' : ['#' + c.id]
+            'defaultValue' : '',
+            'formats' : ['#instanceVariable-' + c.uuid]
         })
-        physicalSegmentLayout['has'].push('#valueMapping-' + c.id)
-        if(c.role == 'Dimension'){
-            var id = "#dimensionalKey-"+c.id
-            dimensionalKeys.push({
-                '@id' : id,
-                '@type' : 'DimensionalKey'
-            })
-            dataset['has'].push(id)
-            id = "#dimensionComponent-"+c.id
+
+        physicalSegmentLayout['has_ValueMappingPosition'].push('#valueMapping-' + c.uuid)
+        if(c.role == 'Identifier'){
+            var id = "#identifierComponent-" + c.uuid
             components.push({
                 '@id' : id,
-                '@type' : 'DimensionComponent',
-                'isDefinedBy' : '#' + c.id
+                '@type' : 'IdentifierComponent',
+                'isDefinedBy' : '#instanceVariable-' + c.uuid
             })
-            componentPositions.push({
-                '@id' : '#componentPosition-' + c.id,
-                '@type' : 'ComponentPosition',
-                'value' : c.position
-            })
-            datastructure['has'].push(id)
-            datastructure['has'].push('#componentPosition-' + c.id)
+            wideDataStructure['has_DataStructureComponent'].push(id)
         }
         if(c.role == 'Attribute'){
-            var id = "#attributeComponent-"+c.id
+            var id = "#attributeComponent-" + c.uuid
             components.push({
                 '@id' : id,
                 '@type' : 'AttributeComponent',
-                'isDefinedBy' : '#' + c.id
+                'isDefinedBy' : '#' + c.uuid
             })
-            datastructure['has'].push(id)
+            wideDataStructure['has_DataStructureComponent'].push(id)
         }
         if(c.role == 'Measure'){
-            var id = "#measureComponent-"+c.id
+            var id = "#measureComponent-" + c.uuid
             components.push({
                 '@id' : id,
                 '@type' : 'MeasureComponent',
-                'isDefinedBy' : '#' + c.id
+                'isDefinedBy' : '#' + c.uuid
             })
-            datastructure['has'].push(id)
-        }
+            wideDataStructure['has_DataStructureComponent'].push(id)
+        }     
     }
+      
 
-    
+    //cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(input.columns)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(logicalRecord)
 
-    //cdi['@graph'] = cdi['@graph'].concat(input.columns)
-    cdi['@graph'] = cdi['@graph'].concat(logicalRecord)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(physicalSegmentLayout)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(physicalRecordSegment)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(valueMappings)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(physicalDataset)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(dataStore)
 
-    cdi['@graph'] = cdi['@graph'].concat(physicalSegmentLayout)
-    cdi['@graph'] = cdi['@graph'].concat(physicalRecordSegment)
-    cdi['@graph'] = cdi['@graph'].concat(valueMappings)
-    cdi['@graph'] = cdi['@graph'].concat(physicalDataset)
-    cdi['@graph'] = cdi['@graph'].concat(dataStore)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(wideDataset)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(dimensionalKeys)
 
-    cdi['@graph'] = cdi['@graph'].concat(dataset)
-    cdi['@graph'] = cdi['@graph'].concat(dimensionalKeys)
-
-    cdi['@graph'] = cdi['@graph'].concat(datastructure)
-    cdi['@graph'] = cdi['@graph'].concat(components)
-    cdi['@graph'] = cdi['@graph'].concat(componentPositions)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(wideDataStructure)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(components)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(componentPositions)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(instanceVariables)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(substantiveValueDomains)
 
     for(const c of input.columns){
         //TODO: create concept scheme, connect it to the variable
         if(c.coded){
-            cdi['@graph'] = cdi['@graph'].concat(c.getConceptScheme())
-            cdi['@graph'] = cdi['@graph'].concat(c.codeList)
+            cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(c.getConceptScheme())
+            cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(c.codeList)
         }
     }
 

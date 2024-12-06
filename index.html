@@ -275,6 +275,14 @@
 									<label class="form-label">Accuracy</label>
 									<input v-model.number="column.accuracy" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
 								</div>
+								<div class="col-md-6">
+									<label class="form-label">Role</label>
+									<select v-model="column.role" name="role" id="role" class="form-select">
+										<option name="Identifier">Identifier</option>
+										<option name="Measure">Measure</option>
+										<option name="Attribute">Attribute</option>
+									</select>
+								</div>
 							</div>
 						</Transition>
 						<hr class="mt-4" />

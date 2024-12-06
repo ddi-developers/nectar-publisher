@@ -63,6 +63,7 @@ const DataType = {
     name
     label
     description
+    role
     values = []
     /**
      * list of code values
@@ -104,7 +105,7 @@ const DataType = {
 
     getConceptScheme(){
       var conceptScheme = {
-        '@id' : '#conceptScheme-'+this.id,
+        '@id' : '#conceptScheme-' + this.uuid,
         '@type' : "skos:ConceptScheme",
         'skos:hasTopConcept' : []
       }
