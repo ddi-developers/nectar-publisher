@@ -1,4 +1,3 @@
-
 /**
  * @param {string} refType
  * @param {string} refId
@@ -94,53 +93,62 @@ function toDdi40LJson(input) {
     logicalRecord.VariablesInRecord.VariableUsedReference = [];
 
     ddi.Variable = {};
+    const processedVariables = new Set();
+
     for(const column of input.columns) {
-        const variableReference = createRef("Variable", column.uuid);
-        variableReference.VariableName = [];
-        variableReference.VariableName.push({
-            String: [ createMultilingualStringValue(column.name) ]
-        });
-        if(column.label) {
-            variableReference.Label = [];
-            variableReference.Label.push({
-                Content: [ createMultilingualStringValue(column.label) ]
+        if (!processedVariables.has(column.uuid)) {
+            processedVariables.add(column.uuid);
+            
+            const variableReference = createRef("Variable", column.uuid);
+            variableReference.VariableName = [];
+            variableReference.VariableName.push({
+                String: [ createMultilingualStringValue(column.name) ]
             });
-        }
-        if(column.description) {
-            variableReference.Description = {
-                Content: [ createMultilingualStringValue(column.description) ]
+            if(column.label) {
+                variableReference.Label = [];
+                variableReference.Label.push({
+                    Content: [ createMultilingualStringValue(column.label) ]
+                });
             }
-        }
+            if(column.description) {
+                variableReference.Description = {
+                    Content: [ createMultilingualStringValue(column.description) ]
+                }
+            }
 
-        variableReference.VariableRepresentation = {};
-        if(column.coded) {
-            const codeRepresentation = {};
-            codeRepresentation.RecommendedDataType = column.hasIntendedDataType.id;
+            variableReference.VariableRepresentation = {};
+            if(column.coded) {
+                const codeRepresentation = {};
+                codeRepresentation.RecommendedDataType = column.hasIntendedDataType.id;
 
-            const codeListReference = createRef("CodeListReference", column.codeListUuid);
-            codeRepresentation.CodeListReference = codeListReference;
-            codeListReference.TypeOfObject = "CodeList";
+                const codeListReference = createRef("CodeListReference", column.codeListUuid);
+                codeRepresentation.CodeListReference = codeListReference;
+                codeListReference.TypeOfObject = "CodeList";
 
-            variableReference.VariableRepresentation.CodeRepresentation = codeRepresentation;
-        }
-        else if(column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal' || column.hasIntendedDataType.type == 'boolean') {
-            const numericRepresentation = {};
-            numericRepresentation.NumericTypeCode = column.hasIntendedDataType.id;
-            variableReference.NumericRepresentation = numericRepresentation;
-        }
-        else if(column.hasIntendedDataType.type == 'string') {
-            const textRepresentation = {};
-            textRepresentation.RecommendedDataType = column.hasIntendedDataType.id;
-            variableReference.TextRepresentation = textRepresentation;
-        }
-        else if(column.hasIntendedDataType.type == 'datetime') {
-            const datetimeRepresentation = {};
-            datetimeRepresentation.RecommendedDataType = column.hasIntendedDataType.id;
-            variableReference.DateTimeRepresentation = datetimeRepresentation;
-        }
+                variableReference.VariableRepresentation.CodeRepresentation = codeRepresentation;
+            }
+            else if(column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal' || column.hasIntendedDataType.type == 'boolean') {
+                const numericRepresentation = {};
+                numericRepresentation.NumericTypeCode = column.hasIntendedDataType.id;
+                variableReference.NumericRepresentation = numericRepresentation;
+            }
+            else if(column.hasIntendedDataType.type == 'string') {
+                const textRepresentation = {};
+                textRepresentation.RecommendedDataType = column.hasIntendedDataType.id;
+                variableReference.TextRepresentation = textRepresentation;
+            }
+            else if(column.hasIntendedDataType.type == 'datetime') {
+                const datetimeRepresentation = {};
+                datetimeRepresentation.RecommendedDataType = column.hasIntendedDataType.id;
+                variableReference.DateTimeRepresentation = datetimeRepresentation;
+            }
 
-        ddi.Variable[variableReference.URN] = variableReference;
-        logicalRecord.VariablesInRecord.VariableUsedReference.push(createBaseRef("Variable", variableReference.URN));
+            ddi.Variable[variableReference.URN] = variableReference;
+        }
+        
+        logicalRecord.VariablesInRecord.VariableUsedReference.push(
+            createBaseRef("Variable", `urn:ddi:${column.agency || 'int.example'}:${column.uuid}:${column.version || '1'}`)
+        );
     }
 
     return JSON.stringify(ddi, null, 2);
