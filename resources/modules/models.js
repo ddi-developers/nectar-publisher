@@ -25,8 +25,8 @@ const DataType = {
      */
     columns = []
     uuid = window.crypto.randomUUID()
-    instrumentUuid = window.crypto.randomUUID()
-    sequenceUuid = window.crypto.randomUUID()
+    dataCollectionUuid = window.crypto.randomUUID()
+    associatedQuestionnaire = new Questionnaire(questionnaireExample)
 
     constructor(input, fileName, mimeType, delimiter = undefined, firstRowIsHeader = true){
       this.fileName = fileName
@@ -42,21 +42,6 @@ const DataType = {
     }
   }
 
-  class CodeValue{
-    value
-    frequency
-    label
-    isMissingValue
-    uuid = window.crypto.randomUUID()
-    categoryUuid = window.crypto.randomUUID()
-
-    constructor(value, label, frequency = null, isMissingValue = null) {
-      this.value = value;
-      this.frequency = frequency;
-      this.label = label;
-      this.isMissingValue = isMissingValue;
-    }
-  }
   class DatasetColumn{
     position
     id
@@ -84,12 +69,6 @@ const DataType = {
     valuesUnique = []
     hasIntendedDataType
     dataType = DataType.Text
-    /**
-     * Question object for the variable
-     * @type {Question}
-     * @public
-     */
-    question
     minValue
     maxValue
     uuid = window.crypto.randomUUID()
@@ -99,7 +78,6 @@ const DataType = {
     constructor(id){
       this.id = id
       this.name=id
-      this.question = new Question()
       this.varFormat = new VarFormat()
     }
 
@@ -125,7 +103,7 @@ const DataType = {
         return
       }
       for(const v of this.valuesUnique){
-        this.codeValues.push(new CodeValue(v, null, this.values.filter(e => e === v).length))
+        this.codeValues.push(new CodeValue({"value": v, "label": null, "frequency": this.values.filter(e => e === v).length}))
       }
     }
   }
@@ -134,12 +112,4 @@ const DataType = {
     type
     schema
     otherCategory
-  }
-
-  class Question{
-    preQuestionText
-    questionText
-    postQuestionText
-    interviewerInstructions
-    uuid = window.crypto.randomUUID()
   }
