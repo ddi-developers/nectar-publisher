@@ -55,7 +55,7 @@ TODOS:
 
 function toDdiCdiJsonLd(input){
     var cdi = {
-        '@context': "https://ddi-alliance.bitbucket.io/DDI-CDI/DDI-CDI_v1.0-rc1/encoding/json-ld/ddi-cdi.jsonld",
+        '@context': "https://docs.ddialliance.org/DDI-CDI/1.0/model/encoding/json-ld/ddi-cdi.jsonld",
         'DDICDIModels':[]
     }
 
@@ -65,74 +65,52 @@ function toDdiCdiJsonLd(input){
     var dataStore= {
         '@id' : '#dataStore',
         '@type' : 'DataStore',
-        'allowsDuplicates' : false,
         'has_LogicalRecord' : []
     }
     dataStore['has_LogicalRecord'].push('#logicalRecord')
-    
-    var physicalDataset = {
-        '@id' : "#physicalDataset-" + input.uuid,
-        '@type': "PhysicalDataset",
-        'allowsDuplicates' : false,
-        'physicalFileName' : input.fileName,
-        'correspondsTo_DataSet' : "#wideDataset-" + input.uuid,
-        'formats' : '#dataStore',
-        'has_PhysicalRecordSegment' : []
-    }
-    physicalDataset['has_PhysicalRecordSegment'].push("#physicalRecordSegment")
-    
+
     var physicalSegmentLayout = {
-        '@id' : "#physicalSegmentLayout",
+        '@id' : "#physicalSegmentLayout-" + input.uuid,
         '@type': "PhysicalSegmentLayout",
         'formats' : '#logicalRecord',
-        'allowsDuplicates': false,
         'isDelimited' : 'true',
         'isFixedWidth' : false,
         'delimiter' : input.delimiter,
+        'has_ValueMapping' : [],
         'has_ValueMappingPosition' : []
-    }
-
-    var physicalRecordSegment = {
-        '@id' : "#physicalRecordSegment",
-        '@type': "PhysicalRecordSegment",
-        'mapsTo' : '#logicalRecord',
-        'allowsDuplicates' : false,
-        'has_PhysicalSegmentLayout': '#physicalSegmentLayout',
-        'has_DataPointPosition' : []
     }
 
     var logicalRecord = {
         '@id' : "#logicalRecord",
         '@type': "LogicalRecord",
-        'organizes': "#wideDataset",
+        'organizes': "#wideDataSet",
         'has_InstanceVariable' : []
     }
 
-    var wideDataset = {
-        '@id' : "#wideDataset-" + input.uuid,
-        '@type': "WideDataset",
+    var wideDataSet = {
+        '@id' : "#wideDataSet",
+        '@type': "WideDataSet",
         "isStructuredBy": "#wideDataStructure"
     }
-
-    var dimensionalKeys = []
 
     var wideDataStructure = {
         '@id' : "#wideDataStructure",
         '@type': "WideDataStructure",
         'has_DataStructureComponent' : []
     }
-
+    
     var components = []
     var valueMappings = []
-    var componentPositions = []
+    var valueMappingPositions = []
     var instanceVariables = []
     var substantiveValueDomains = []
 
+    column_index = 0
     for(const c of input.columns){
-        logicalRecord['has_InstanceVariable'].push('#instanceVariable-' + c.uuid)
+        logicalRecord['has_InstanceVariable'].push('#instanceVariable-' + c.name)
 
         var instanceVariable = {
-            '@id' : '#instanceVariable-' + c.uuid,
+            '@id' : '#instanceVariable-' + c.name,
             '@type' : 'InstanceVariable',
             'physicalDataType' : {
                 '@type' : 'ControlledVocabularyEntry',
@@ -149,95 +127,96 @@ function toDdiCdiJsonLd(input){
                     "entryValue": c.label
                 }
             },
-            'has_PhysicalSegmentLayout': "#physicalSegmentLayout",
+            'has_PhysicalSegmentLayout': "#physicalSegmentLayout-" + input.uuid,
+            'has_ValueMapping': [],
+            'takesSubstantiveValuesFrom_SubstantiveValueDomain': '#substantiveValueDomain-' + c.name
         } 
-        if (c.coded){
-            instanceVariable['takesSubstantiveValuesFrom_SubstantiveValueDomain'] = '#substantiveValueDomain-' + c.uuid
-
-            var substantiveValueDomain = {
-                '@id' : '#substantiveValueDomain-' + c.uuid,
-                '@type' : 'SubstantiveValueDomain',
-                'recommendedDataType': {
-                    '@type' : "ControlledVocabularyEntry",
-                    'entryValue' : 'ConceptScheme-' + c.uuid
-                }
-            }
-            substantiveValueDomains.push(substantiveValueDomain)
-
-            // {
-            //     "@id": "#substantiveValueDomain-cntry",
-            //     "@type": "SubstantiveValueDomain",
-            //     "recommendedDataType": {
-            //         "@type": "ControlledVocabularyEntry",
-            //         "entryValue": "https://www.w3.org/TR/xmlschema-2/#string"
-            //     },
-            //     "isDescribedBy": "#substantiveValueAndConceptDescription-cntry",
-            //     "takesValuesFrom": "#substantiveEnumerationDomain-cntry"
-            // },
-        }
+        instanceVariable['has_ValueMapping'].push('#valueMapping-' + c.name)
         instanceVariables.push(instanceVariable)
 
-        valueMappings.push({
-            '@id' : '#valueMapping-' + c.uuid,
-            '@type' : 'ValueMapping',
-            'defaultValue' : '',
-            'formats' : ['#instanceVariable-' + c.uuid]
-        })
+        var entryValue = ""
+        if (c.coded){
+            entryValue = '#conceptScheme-' + c.name
+        } else if (c.hasIntendedDataType.type == 'numeric' || c.hasIntendedDataType.type == 'decimal'){
+            entryValue = 'https://www.w3.org/TR/xmlschema-2/#decimal'
+        } else if (c.hasIntendedDataType.type == 'datetime'){
+            entryValue = 'https://www.w3.org/TR/xmlschema-2/#dateTime'
+        } else {
+            entryValue = 'https://www.w3.org/TR/xmlschema-2/#string'
+        }
 
-        physicalSegmentLayout['has_ValueMappingPosition'].push('#valueMapping-' + c.uuid)
+        substantiveValueDomains.push({
+            '@id' : '#substantiveValueDomain-' + c.name,
+            '@type' : 'SubstantiveValueDomain',
+            'recommendedDataType': {
+                '@type' : "ControlledVocabularyEntry",
+                'entryValue' : entryValue
+            }
+        })
+        
+        valueMappings.push({
+            '@id' : '#valueMapping-' + c.name,
+            '@type' : 'ValueMapping',
+            'defaultValue' : ''
+        })
+        physicalSegmentLayout['has_ValueMapping'].push('#valueMapping-' + c.name)
+
+        valueMappingPositions.push({
+            '@id' : '#valueMappingPosition-' + c.name,
+            '@type' : 'ValueMappingPosition',
+            'value' : column_index,
+            'indexes' : ['#valueMapping-' + c.name]
+        })
+        physicalSegmentLayout['has_ValueMappingPosition'].push('#valueMappingPosition-' + c.name)
+
         if(c.role == 'Identifier'){
-            var id = "#identifierComponent-" + c.uuid
+            var id = "#identifierComponent-" + c.name
             components.push({
                 '@id' : id,
                 '@type' : 'IdentifierComponent',
-                'isDefinedBy' : '#instanceVariable-' + c.uuid
+                'isDefinedBy_RepresentedVariable' : '#instanceVariable-' + c.name
             })
             wideDataStructure['has_DataStructureComponent'].push(id)
         }
         if(c.role == 'Attribute'){
-            var id = "#attributeComponent-" + c.uuid
+            var id = "#attributeComponent-" + c.name
             components.push({
                 '@id' : id,
                 '@type' : 'AttributeComponent',
-                'isDefinedBy' : '#' + c.uuid
+                'isDefinedBy_RepresentedVariable' : '#instanceVariable-' + c.name
             })
             wideDataStructure['has_DataStructureComponent'].push(id)
         }
         if(c.role == 'Measure'){
-            var id = "#measureComponent-" + c.uuid
+            var id = "#measureComponent-" + c.name
             components.push({
                 '@id' : id,
                 '@type' : 'MeasureComponent',
-                'isDefinedBy' : '#' + c.uuid
+                'isDefinedBy_RepresentedVariable' : '#instanceVariable-' + c.name
             })
             wideDataStructure['has_DataStructureComponent'].push(id)
-        }     
-    }
-      
+        } 
 
-    //cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(input.columns)
+        column_index += 1
+    }
+
     cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(logicalRecord)
 
     cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(physicalSegmentLayout)
-    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(physicalRecordSegment)
     cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(valueMappings)
-    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(physicalDataset)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(valueMappingPositions)
     cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(dataStore)
 
-    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(wideDataset)
-    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(dimensionalKeys)
-
-    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(wideDataStructure)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(wideDataSet)
+    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(wideDataStructure)  
     cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(components)
-    cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(componentPositions)
     cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(instanceVariables)
     cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(substantiveValueDomains)
 
     for(const c of input.columns){
-        //TODO: create concept scheme, connect it to the variable
         if(c.coded){
             cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(c.getConceptScheme())
-            cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(c.codeList)
+            cdi['DDICDIModels'] = cdi['DDICDIModels'].concat(c.getConcepts())
         }
     }
 

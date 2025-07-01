@@ -105,14 +105,33 @@ const DataType = {
 
     getConceptScheme(){
       var conceptScheme = {
-        '@id' : '#conceptScheme-' + this.uuid,
+        '@id' : '#conceptScheme-' + this.id,
         '@type' : "skos:ConceptScheme",
         'skos:hasTopConcept' : []
       }
-      for(const v of this.getUniqueValues()){
-        conceptScheme['skos:hasTopConcept'].push('#'+this.id + '-concept-' + v)
+      for(const v of this.codeValues){
+        conceptScheme['skos:hasTopConcept'].push('#'+this.id + '-concept-' + v.value)
       }
       return conceptScheme
+    }
+
+    getConcepts(){
+      var concepts = []
+      for(const v of this.codeValues){
+        concepts.push({
+          '@id' : '#'+this.id + '-concept-' + v.value,
+          '@type' : "skos:Concept",
+          'skos:notation' : {
+            '@type': 'TypedString',
+            'content': v.value
+          },
+          'skos:prefLabel' : {
+            '@type': 'TypedString',
+            'content': v.label
+          }
+        })
+      }
+      return concepts
     }
 
     getUniqueValues(){
