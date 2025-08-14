@@ -1,8 +1,5 @@
 
 function importDdiCMetadata(file, columns){
-    // console.log("in the function importMetadata()")
-    // console.log(file)
-
     var_dictionary= {};
 
     var reader = new FileReader();
@@ -13,7 +10,6 @@ function importDdiCMetadata(file, columns){
 
         for (const child of doc.documentElement.children) {
             if(child.nodeName === 'dataDscr') {
-                //console.log(child);
                 var gChildren = child.children;
                 for (var i = 0; i < gChildren.length; i++) {
                     if (gChildren[i].nodeName === 'var'){
@@ -34,8 +30,6 @@ function importDdiCMetadata(file, columns){
                 }
             }
         }
-
-        //console.log(var_dictionary);
 
         columns.forEach(item => {
             var_values = var_dictionary[item.name];
