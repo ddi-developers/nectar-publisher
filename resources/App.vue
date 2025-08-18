@@ -60,6 +60,7 @@ async function importDataFromFile(event) {
 }
 </script>
 <template>
+	<!-- Application toolbar -->
 	<nav class="row navbar navbar-expand-lg bg-body-tertiary">
 		<div class="container-fluid">
 			<a class="navbar-brand" href="#">
@@ -82,14 +83,14 @@ async function importDataFromFile(event) {
 				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 					<li class="nav-item">
 						<button 
-							@click="this.$refs.inputFile.click()" 
+							@click="$refs.inputFile.click()" 
 							type="button" 
 							class="btn btn-light"
 							title="open csv/tsv, R, Stata, SPSS, SAS or spreadsheet">📂 import data</button>
 					</li>
 					<li class="nav-item">
 						<button 
-							@click="this.$refs.inputMetadata.click()" 
+							@click="$refs.inputMetadata.click()" 
 							type="button" 
 							class="btn btn-light"
 							title="import metadata from DDI-C">📄 import metadata</button>
@@ -101,8 +102,8 @@ async function importDataFromFile(event) {
 								📤 export
 							</button>
 							<ul class="dropdown-menu">
-							<li><a class="dropdown-item" href="#">Dropdown link</a></li>
-							<li><a class="dropdown-item" href="#">Dropdown link</a></li>
+							<li><a class="dropdown-item" href="#">export option 1</a></li>
+							<li><a class="dropdown-item" href="#">export option 2</a></li>
 							</ul>
 						</div>
 					</li>
