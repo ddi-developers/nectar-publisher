@@ -15,7 +15,7 @@ function importDdiCMetadata(file, columns){
 }
 
 function readDDiCString(ddiCString){
-    var_dictionary = {};
+    var var_dictionary = {};
 
     var parser = new DOMParser();
     var doc = parser.parseFromString(ddiCString, "application/xml");
@@ -25,10 +25,10 @@ function readDDiCString(ddiCString){
             var gChildren = child.children;
             for (var i = 0; i < gChildren.length; i++) {
                 if (gChildren[i].nodeName === 'var'){
-                    gChild = gChildren[i];
-                
-                    var_labl ='';
-                    var_dscr ='';
+                    var gChild = gChildren[i];
+                    var var_labl ='';
+                    var var_dscr ='';
+
                     var ggChildren = gChild.children;
                     for (var j = 0; j < ggChildren.length; j++) {
                         if (ggChildren[j].nodeName === 'labl'){
@@ -37,7 +37,11 @@ function readDDiCString(ddiCString){
                             var_dscr = ggChildren[j].textContent.trim();
                         }
                     }
-                    var_dictionary[gChild.getAttribute("name").trim()] = [var_labl, var_dscr, gChild.getAttribute("representationType")]
+                    var_dictionary[gChild.getAttribute("name").trim()] = [
+                        var_labl, 
+                        var_dscr, 
+                        gChild.getAttribute("representationType")
+                    ]
                 }
             }
         }
@@ -46,3 +50,8 @@ function readDDiCString(ddiCString){
     return var_dictionary;
 
 }
+
+export {
+    importDdiCMetadata,
+    readDDiCString
+};

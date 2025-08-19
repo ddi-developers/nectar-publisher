@@ -1,6 +1,7 @@
 import Papa from 'papaparse';
 import { Dataset, DatasetColumn } from './models.js'
 import { WebR } from 'webr'
+import { readDDiCString } from './importers/ddi-c-xml-importer.js'
 
 const webR = new WebR();
 webR.init();
@@ -9,6 +10,7 @@ webR.installPackages(["DDIwR"]).then(() => {
   console.info('DDIwR package installed!');
   state.value = 'idle';
 });
+
 export class Parser{
   static async parseFile(file, doneCallback){
     var dataset = new Dataset()
@@ -31,7 +33,7 @@ export class Parser{
       await Parser.parseDDIwR(file, dataset, (d) => doneCallback(d))
     }
     else{
-        await Parser.parseDelimitedText(file, dataset, (d) => doneCallback(d))
+      await Parser.parseDelimitedText(file, dataset, (d) => doneCallback(d))
     }
   }
 
@@ -47,8 +49,8 @@ export class Parser{
       console.info('run convert with DDIwR...');
 
       // run the DDIwR conversion to extract DDI-C 2.6 metadata
-      let result = await webR.evalR(`DDIwR::convert("`+file.name+`", to="DDI", embed=FALSE)`);
-      let output = await result;
+      await webR.evalR(`DDIwR::convert("`+file.name+`", to="DDI", embed=FALSE)`);
+      
       console.debug('Files done, reading...');
       
       // read the DDI-C 2.6 XML file from the webR filesystem
@@ -63,7 +65,12 @@ export class Parser{
       console.log(csvString);
 
       console.info('DDI-C 2.6 metadata extracted successfully!');
-      
+
+      // TODO: this should not be done here
+      var vars = readDDiCString(ddiString);
+      console.log(vars);
+      // end TODO
+
     };
 
     await reader.readAsArrayBuffer(file);
