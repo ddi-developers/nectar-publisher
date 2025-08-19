@@ -1,5 +1,14 @@
 import Papa from 'papaparse';
 import { Dataset, DatasetColumn } from './models.js'
+import { WebR } from 'webr'
+
+const webR = new WebR();
+webR.init();
+console.info('Installing DDIwR package...');
+webR.installPackages(["DDIwR"]).then(() => {
+  console.info('DDIwR package installed!');
+  state.value = 'idle';
+});
 export class Parser{
   static async parseFile(file, doneCallback){
     var dataset = new Dataset()
@@ -13,13 +22,13 @@ export class Parser{
     dataset.sha256 = await checksum(file, "SHA-256")
 
     const sheetJsSuffixes = ['.xlsx', '.xls', '.ods']
-    const ddiwrSuffixes = ['.sav']
+    const ddiwrSuffixes = ['.sav', '.dta', '.sas7bdat']
 
     if (sheetJsSuffixes.some(suffix => file.name.endsWith(suffix))){
       await Parser.parseSpreadsheet(file, dataset, (d) => doneCallback(d))
     }
     else if (ddiwrSuffixes.some(suffix => file.name.endsWith(suffix))){
-
+      await Parser.parseDDIwR(file, dataset, (d) => doneCallback(d))
     }
     else{
         await Parser.parseDelimitedText(file, dataset, (d) => doneCallback(d))
@@ -27,7 +36,38 @@ export class Parser{
   }
 
   static async parseDDIwR(file, dataset, done){
+    const reader = new FileReader();
+    const basename  = file.name.substr(0, file.name.lastIndexOf('.'));
 
+    reader.onload = async (e) => {
+      const contents = e.target.result;
+      // write to the webR filesystem
+      await webR.FS.writeFile('/home/web_user/' + file.name, new Uint8Array(contents));
+      console.debug('File uploaded and written to /home/web_user/'+file.name);
+      console.info('run convert with DDIwR...');
+
+      // run the DDIwR conversion to extract DDI-C 2.6 metadata
+      let result = await webR.evalR(`DDIwR::convert("`+file.name+`", to="DDI", embed=FALSE)`);
+      let output = await result;
+      console.debug('Files done, reading...');
+      
+      // read the DDI-C 2.6 XML file from the webR filesystem
+      var readDdiResult = await webR.FS.readFile('/home/web_user/'+basename+'.xml');
+      var ddiString = new TextDecoder().decode(readDdiResult);
+      console.log(ddiString);
+
+      // read the CSV file from the webR filesystem
+      var readCsvResult = await webR.FS.readFile('/home/web_user/'+basename+'.csv');
+      var csvString = new TextDecoder().decode(readCsvResult);
+
+      console.log(csvString);
+
+      console.info('DDI-C 2.6 metadata extracted successfully!');
+      
+    };
+
+    await reader.readAsArrayBuffer(file);
+    done(dataset)
   }
 
   static async parseSpreadsheet(file, dataset, done){
@@ -261,7 +301,7 @@ function createTextNode(xmlDoc, ns, name, text){
 
 function saveFileBrowser(fileName, content){
 
-  var downloadLink = document.createElement("a")
+  var downloadLink = window.document.createElement("a")
   downloadLink.download = fileName
   downloadLink.innerHTML = "Download File"
   if (window.webkitURL != null) {
@@ -535,4 +575,4 @@ function guessDelimiter(csvContent){
   return ','
 }
 
-export { guessDataType, guessType, guessDelimiter, RepresentationTypes }
+export { formatXml, createTextNode, guessDataType, guessType, guessDelimiter, RepresentationTypes, saveFileBrowser, copyTextToClipboard }

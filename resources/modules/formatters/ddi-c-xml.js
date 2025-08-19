@@ -1,3 +1,5 @@
+import { createTextNode, formatXml } from "../utils";
+
 function toDdiCXml(input){
     var ns = "ddi:codebook:2_5"
 
@@ -114,3 +116,5 @@ function getVarRepresentationType(column){
 
     return "Other"
 }
+
+export { toDdiCXml}

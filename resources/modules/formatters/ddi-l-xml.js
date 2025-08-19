@@ -1,3 +1,5 @@
+import { createTextNode, formatXml } from "../utils";
+
 function toDdiLXml(input){
     var nsddi = "ddi:instance:3_3"
     var nss = "ddi:studyunit:3_3"
@@ -228,3 +230,5 @@ function toDdiLXml(input){
     var xmlString = new XMLSerializer().serializeToString(xmlDoc)
     return prolog + "\n" + formatXml(xmlString)
 }
+
+export { toDdiLXml }

@@ -4,26 +4,20 @@ import { RepresentationTypes, Parser } from './modules/utils.js'
 import { ref, reactive, computed } from 'vue'
 import { WebR } from 'webr'
 import About from './components/About.vue'
+import { toDdiCXml } from './modules/formatters/ddi-c-xml.js'
+import { toDdiLXml } from './modules/formatters/ddi-l-xml.js'
+import { saveFileBrowser, copyTextToClipboard } from './modules/utils.js'
 
-
-const ddi = ref('');
-const state = ref('init');
-
-
-const webR = new WebR();
-webR.init();
-console.info('Installing DDIwR package...');
-webR.installPackages(["DDIwR"]).then(() => {
-  console.info('DDIwR package installed!');
-  state.value = 'idle';
+const app = reactive({
+	debug: false,
+	state: 'init'
 });
 
 
 const codeListVariableIndex = ref(null)
 const input = reactive({
 	file: null,
-	dataset: new Dataset(),
-	debug: false
+	dataset: new Dataset()
 })
 const cv = {
 	representationType: RepresentationTypes
@@ -35,20 +29,17 @@ const appMetadata = computed(() => {
 const output = computed(() => {
 	return {
 		filename: input.file?.name?.split('.').slice(0, -1).join('.'),
-		markdown: datasetToMarkdown(input.dataset),
-		csv: [
-			input.dataset.columns.map(e => e.name).join(input.dataset.delimiter),
-			...input.dataset.data.map(e => e.join(input.dataset.delimiter))
-		].join('\n'),
-		json: toDdiCdiJsonLd(input.dataset),
-		cdi_data : toDdiCdiJsonLd(input.dataset),
-		cdi : (hljs.highlight(toDdiCdiJsonLd(input.dataset), { language: "json" }).value),
-		ddic_data : toDdiCXml(input.dataset),
-		ddic : (hljs.highlight(toDdiCXml(input.dataset), { language: "xml" }).value),
-		ddil_data : toDdiLXml(input.dataset),
-		ddil : (hljs.highlight(toDdiLXml(input.dataset), { language: "xml" }).value),
-		ddi40l_data : toDdi40LJson(input.dataset),
-		ddi40l : (hljs.highlight(toDdi40LJson(input.dataset), { language: "json" }).value)
+		//markdown: datasetToMarkdown(input.dataset),
+		//csv: [
+		//	input.dataset.columns.map(e => e.name).join(input.dataset.delimiter),
+		//	...input.dataset.data.map(e => e.join(input.dataset.delimiter))
+		//].join('\n'),
+		//cdi: toDdiCdiJsonLd(input.dataset),
+		
+		ddic : toDdiCXml(input.dataset),
+		ddil : toDdiLXml(input.dataset),
+		//ddi40l : toDdi40LJson(input.dataset),
+
 	}
 })
 
@@ -57,6 +48,11 @@ async function importDataFromFile(event) {
     document.title = `${input.file.name} - ${ appMetadata.name}`
     await Parser.parseFile(input.file, (d) => input.dataset = d)
 	console.log(input.dataset)
+}
+
+function saveFile(content, type, fileName) {
+	var fileAsBlob = new Blob([content], { type: type })
+	saveFileBrowser(fileName, fileAsBlob)
 }
 </script>
 <template>
@@ -102,8 +98,8 @@ async function importDataFromFile(event) {
 								📤 export
 							</button>
 							<ul class="dropdown-menu">
-							<li><a class="dropdown-item" href="#">export option 1</a></li>
-							<li><a class="dropdown-item" href="#">export option 2</a></li>
+							<li><a class="dropdown-item" href="#" @click="saveFile(output.ddic, 'application/xml', output.filename + '.ddi-c.xml')">DDI Codebook 2.5</a></li>
+							<li><a class="dropdown-item" href="#" @click="saveFile(output.ddil, 'application/xml', output.filename + '.ddi-l.xml')">DDI Lifecycle 3.3</a></li>
 							</ul>
 						</div>
 					</li>
@@ -118,8 +114,8 @@ async function importDataFromFile(event) {
 					</li>
 
 					<li class="nav-item">
-						<input v-model="input.debug" type="checkbox" class="btn-check" id="btn-debug" autocomplete="off">
-						<label class="btn btn-light" for="btn-debug"><span v-if="input.debug">☒</span><span v-if="!input.debug">☐</span> debug</label>
+						<input v-model="app.debug" type="checkbox" class="btn-check" id="btn-debug" autocomplete="off">
+						<label class="btn btn-light" for="btn-debug"><span v-if="app.debug">☒</span><span v-if="!app.debug">☐</span> debug</label>
 
 					</li>
 				</ul>
@@ -127,9 +123,38 @@ async function importDataFromFile(event) {
 		</div>
 	</nav>
 
+	<section id="debug" v-if="app.debug">
+		<ul class="nav nav-tabs" id="exportTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="ddi-c-tab" data-bs-toggle="tab" data-bs-target="#ddi-c-tab-pane" type="button" role="tab" aria-controls="ddi-c-tab-pane" aria-selected="true"> ddi-c (xml)</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="ddi-l-tab" data-bs-toggle="tab" data-bs-target="#ddi-l-tab-pane" type="button" role="tab" aria-controls="ddi-l-tab-pane" aria-selected="true"> ddi-l (xml)</button>
+			</li>
+		</ul>
+
+		<div class="tab-content exports">
+			<div class="tab-pane fade show active" id="ddi-c-tab-pane" role="tabpanel" aria-labelledby="ddi-c-tab" tabindex="0">
+				<div class="more">
+					<button class="btn btn-outline-primary" @click="saveFile(output.ddic, 'application/xml', output.filename + '.ddi-c.xml')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddic)">copy</button>
+				</div>
+				<highlightjs :code="output.ddic" language="xml"/>
+			</div>
+
+			<div class="tab-pane fade" id="ddi-l-tab-pane" role="tabpanel" aria-labelledby="ddi-l-tab" tabindex="1">
+				<div class="more">
+					<button class="btn btn-outline-primary" @click="saveFile(output.ddil, 'application/xml', output.filename + '.ddi-l.xml')">save</button>
+					<button class="btn btn-outline-primary" @click="copyToClipboard(output.ddil)">copy</button>
+				</div>
+				<highlightjs :code="output.ddil" language="xml"/>
+			</div>
+		</div>
+	</section>
+
+
 	<About :appMetadata="appMetadata" />
 
 	<input ref="inputFile" id="inputFile" @change="importDataFromFile" type="file" accept=".csv,.tsv,.xlsx,.xls,.ods,.sav,.dta,.sas7bdat,text/csv" style="display: none;">
-	<input ref="inputFileToRemote" id="inputFileToRemove" @change="importDataFromService" type="file" accept=".sav" style="display: none;">
 	<input ref="inputMetadata" id="inputMetadata" @change="importMetadata" type="file" accept=".xml" style="display: none;">
 </template>
