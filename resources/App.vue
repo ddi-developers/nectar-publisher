@@ -9,7 +9,7 @@ import About from './components/About.vue'
 const ddi = ref('');
 const state = ref('init');
 
-/*
+
 const webR = new WebR();
 webR.init();
 console.info('Installing DDIwR package...');
@@ -17,7 +17,7 @@ webR.installPackages(["DDIwR"]).then(() => {
   console.info('DDIwR package installed!');
   state.value = 'idle';
 });
-*/
+
 
 const codeListVariableIndex = ref(null)
 const input = reactive({
