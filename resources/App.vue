@@ -144,7 +144,7 @@ function saveFile(content, type, fileName) {
 								<option v-for="colType in cv.representationType" :value="colType">{{ colType.label }}</option>
 							</select>
 							<Transition>
-								<button v-if="column.hasIntendedDataType.id == 'Code'" class="btn btn-outline-secondary" type="button" title="document codelist">🧾</button>
+								<button v-if="column.hasIntendedDataType?.id == 'Code'" class="btn btn-outline-secondary" type="button" title="document codelist">🧾</button>
 							</Transition>
 						</div>
 					</div>
@@ -249,8 +249,39 @@ function saveFile(content, type, fileName) {
 		</div>
 	</section>
 
+	<!-- MARK: Code List Modal -->
+	<div class="modal modal-dialog-scrollable fade" id="codeListModal" tabindex="-1" aria-labelledby="codeListModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div v-if="codeListVariableIndex != null" class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="codeListModalLabel">📦Code list <span v-html="input.dataset.columns[codeListVariableIndex].name" class="badge bg-secondary"></span></h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form class="mb-4">
+						<div class="row" v-for="(code, index) in input.dataset.columns[codeListVariableIndex].codeValues">
+							<div class="col-md-4">
+								<label class="form-label" :class="{notFirst: (index > 0)}">Code</label>
+								<input v-model="code.value" type="text" class="form-control" disabled>
+							</div>
+							<div class="col-md-8">
+								<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
+								<input v-model="code.label" type="text" class="form-control">
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#codeListModal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 
 	<About :appMetadata="appMetadata" />
+
+
 
 	<input ref="inputFile" id="inputFile" @change="importDataFromFile" type="file" accept=".csv,.tsv,.xlsx,.xls,.ods,.sav,.dta,.sas7bdat,text/csv" style="display: none;">
 	<input ref="inputMetadata" id="inputMetadata" @change="importMetadata" type="file" accept=".xml" style="display: none;">

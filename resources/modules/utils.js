@@ -68,13 +68,14 @@ export class Parser{
 
       // TODO: this should not be done here
       var vars = readDDiCString(ddiString);
+      dataset.columns = vars;
       console.log(vars);
+      done(dataset)
       // end TODO
 
     };
 
     await reader.readAsArrayBuffer(file);
-    done(dataset)
   }
 
   static async parseSpreadsheet(file, dataset, done){

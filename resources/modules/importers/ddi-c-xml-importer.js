@@ -1,3 +1,4 @@
+import { DatasetColumn, CodeValue } from '../models.js';
 
 function importDdiCMetadata(file, columns){
     var_dictionary = {};
@@ -15,7 +16,7 @@ function importDdiCMetadata(file, columns){
 }
 
 function readDDiCString(ddiCString){
-    var var_dictionary = {};
+    var variables = [];
 
     var parser = new DOMParser();
     var doc = parser.parseFromString(ddiCString, "application/xml");
@@ -23,26 +24,37 @@ function readDDiCString(ddiCString){
     var vars = doc.getElementsByTagName('var');
     
     for (var i = 0; i < vars.length; i++) {
-        var gChild = vars[i];
-        var var_labl ='';
-        var var_dscr ='';
+        var id = vars[i].getAttribute("name").trim();
 
-        var ggChildren = gChild.children;
-        for (var j = 0; j < ggChildren.length; j++) {
-            if (ggChildren[j].nodeName === 'labl'){
-                var_labl = ggChildren[j].textContent.trim();
-            } else if (ggChildren[j].nodeName === 'txt'){
-                var_dscr = ggChildren[j].textContent.trim();
+        var variableLabel = '';
+        var variableDescription = '';
+        
+        var variable = new DatasetColumn(id);
+
+        for (var j = 0; j < vars[i].children.length; j++) {
+            switch(vars[i].children[j].nodeName) {
+                case 'labl':
+                    variableLabel = vars[i].children[j].textContent.trim();
+                    break;
+                case 'txt':
+                    variableDescription = vars[i].children[j].textContent.trim();
+                    break;
+                case 'catgry':
+                    var categoryLabel = vars[i].children[j].getElementsByTagName('labl')[0].textContent.trim();
+                    var categoryValue = vars[i].children[j].getElementsByTagName('catValu')[0].textContent.trim();
+                    var codeValue = new CodeValue(categoryValue, categoryLabel);
+                    variable.codeValues.push(codeValue);
+                    break;
             }
         }
-        var_dictionary[gChild.getAttribute("name").trim()] = [
-            var_labl, 
-            var_dscr, 
-            gChild.getAttribute("representationType")
-        ]
+
+        variable.label = variableLabel;
+        variable.description = variableDescription;
+        variable.hasIntendedDataType = {id: "Int", label: "Int", type: "numeric" };
+        variables.push(variable);
     }
 
-    return var_dictionary;
+    return variables;
 }
 
 export {
