@@ -58,20 +58,17 @@ export class Parser{
       // read the DDI-C 2.6 XML file from the webR filesystem
       var readDdiResult = await webR.FS.readFile('/home/web_user/'+basename+'.xml');
       var ddiString = new TextDecoder().decode(readDdiResult);
-      console.log(ddiString);
+      console.debug('DDI-C 2.6 XML read');
 
       // read the CSV file from the webR filesystem
       var readCsvResult = await webR.FS.readFile('/home/web_user/'+basename+'.csv');
       var csvString = new TextDecoder().decode(readCsvResult);
 
-      console.log(csvString);
-
-      console.info('DDI-C 2.6 metadata extracted successfully!');
+      console.debug('CSV read');
 
       // TODO: this should not be done here
       var vars = readDDiCString(ddiString);
       dataset.columns = vars;
-      console.log(vars);
       done(dataset)
       // end TODO
 

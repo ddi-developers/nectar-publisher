@@ -47,7 +47,6 @@ async function importDataFromFile(event) {
     input.file = event.target.files[0]
     document.title = `${input.file.name} - ${ appMetadata.name}`
     await Parser.parseFile(input.file, (d) => input.dataset = d)
-	console.log(input.dataset)
 }
 
 function saveFile(content, type, fileName) {
