@@ -6,10 +6,16 @@ import About from './components/About.vue'
 import { toDdiCXml } from './modules/formatters/ddi-c-xml.js'
 import { toDdiLXml } from './modules/formatters/ddi-l-xml.js'
 import { saveFileBrowser, copyTextToClipboard } from './helpers/browser.ts'
+import { watch } from 'vue'
+
 
 const app = reactive({
-	debug: false,
+	debug: localStorage.getItem('nectar-publisher-debug') === 'true',
 	state: 'init'
+});
+
+watch(() => app.debug, (newValue) => {
+	localStorage.setItem('nectar-publisher-debug', newValue);
 });
 
 const codeListVariableIndex = ref(null)
