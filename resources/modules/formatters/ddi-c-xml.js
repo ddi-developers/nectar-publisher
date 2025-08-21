@@ -1,4 +1,4 @@
-import { createTextNode, formatXml } from "../utils";
+import { createTextNode, formatXml } from "../../helpers/xml.ts";
 
 function toDdiCXml(input){
     var ns = "ddi:codebook:2_5"

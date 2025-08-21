@@ -1,11 +1,11 @@
 <script setup>
-import { Dataset } from './modules/models.js'
+import { Dataset } from './models/Dataset.ts'
 import { RepresentationTypes, Parser } from './modules/utils.js'
 import { ref, reactive, computed } from 'vue'
 import About from './components/About.vue'
 import { toDdiCXml } from './modules/formatters/ddi-c-xml.js'
 import { toDdiLXml } from './modules/formatters/ddi-l-xml.js'
-import { saveFileBrowser, copyTextToClipboard } from './modules/utils.js'
+import { saveFileBrowser, copyTextToClipboard } from './helpers/browser.ts'
 
 const app = reactive({
 	debug: false,
@@ -21,17 +21,19 @@ const cv = {
 	representationType: RepresentationTypes
 }
 const appMetadata = computed(() => {
-	return JSON.parse(document.head.querySelector('script[type="application/ld+json"]').innerText)
+	return JSON.parse(
+		document.head.querySelector('script[type="application/ld+json"]').innerText
+	)
 })
 
 const output = computed(() => {
 	return {
 		filename: input.file?.name?.split('.').slice(0, -1).join('.'),
 		//markdown: datasetToMarkdown(input.dataset),
-		//csv: [
-		//	input.dataset.columns.map(e => e.name).join(input.dataset.delimiter),
-		//	...input.dataset.data.map(e => e.join(input.dataset.delimiter))
-		//].join('\n'),
+		csv: [
+			input.dataset.columns.map(e => e.name).join(input.dataset.delimiter),
+			...input.dataset.data.map(e => e.join(input.dataset.delimiter))
+		].join('\n'),
 		//cdi: toDdiCdiJsonLd(input.dataset),
 		
 		ddic : toDdiCXml(input.dataset),
@@ -223,15 +225,26 @@ function saveFile(content, type, fileName) {
 	<section id="debug" v-if="app.debug">
 		<ul class="nav nav-tabs" id="exportTabs" role="tablist">
 			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="csv-tab" data-bs-toggle="tab" data-bs-target="#csv-tab-pane" type="button" role="tab" aria-controls="csv-tab-pane"> csv (text/csv)</button>
+			</li>
+			<li class="nav-item" role="presentation">
 				<button class="nav-link active" id="ddi-c-tab" data-bs-toggle="tab" data-bs-target="#ddi-c-tab-pane" type="button" role="tab" aria-controls="ddi-c-tab-pane" aria-selected="true"> ddi-c (xml)</button>
 			</li>
 			<li class="nav-item" role="presentation">
-				<button class="nav-link" id="ddi-l-tab" data-bs-toggle="tab" data-bs-target="#ddi-l-tab-pane" type="button" role="tab" aria-controls="ddi-l-tab-pane" aria-selected="true"> ddi-l (xml)</button>
+				<button class="nav-link" id="ddi-l-tab" data-bs-toggle="tab" data-bs-target="#ddi-l-tab-pane" type="button" role="tab" aria-controls="ddi-l-tab-pane"> ddi-l (xml)</button>
 			</li>
 		</ul>
 
 		<div class="tab-content exports">
-			<div class="tab-pane fade show active" id="ddi-c-tab-pane" role="tabpanel" aria-labelledby="ddi-c-tab" tabindex="0">
+			<div class="tab-pane fade" id="csv-tab-pane" role="tabpanel" aria-labelledby="csv-tab" tabindex="0">
+				<div class="more">
+					<button class="btn btn-outline-primary" @click="saveFile(output.csv, 'text/csv', output.filename + '.csv')">💾save</button>
+					<button class="btn btn-outline-primary" @click="copyTextToClipboard(output.csv)">📋copy</button>
+				</div>
+				<highlightjs :code="output.csv" language="csv"/>
+			</div>
+
+			<div class="tab-pane fade show active" id="ddi-c-tab-pane" role="tabpanel" aria-labelledby="ddi-c-tab" tabindex="1">
 				<div class="more">
 					<button class="btn btn-outline-primary" @click="saveFile(output.ddic, 'application/xml', output.filename + '.ddi-c.xml')">💾save</button>
 					<button class="btn btn-outline-primary" @click="copyTextToClipboard(output.ddic)">📋copy</button>
@@ -239,7 +252,7 @@ function saveFile(content, type, fileName) {
 				<highlightjs :code="output.ddic" language="xml"/>
 			</div>
 
-			<div class="tab-pane fade" id="ddi-l-tab-pane" role="tabpanel" aria-labelledby="ddi-l-tab" tabindex="1">
+			<div class="tab-pane fade" id="ddi-l-tab-pane" role="tabpanel" aria-labelledby="ddi-l-tab" tabindex="2">
 				<div class="more">
 					<button class="btn btn-outline-primary" @click="saveFile(output.ddil, 'application/xml', output.filename + '.ddi-l.xml')">💾save</button>
 					<button class="btn btn-outline-primary" @click="copyTextToClipboard(output.ddil)">📋copy</button>

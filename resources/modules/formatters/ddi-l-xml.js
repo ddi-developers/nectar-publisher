@@ -1,4 +1,4 @@
-import { createTextNode, formatXml } from "../utils";
+import { createTextNode, formatXml } from "../../helpers/xml.ts";
 
 function toDdiLXml(input){
     var nsddi = "ddi:instance:3_3"

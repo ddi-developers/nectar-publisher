@@ -1,4 +1,5 @@
-import { DatasetColumn, CodeValue } from '../models.js';
+import { DatasetColumn } from '../../models/DatasetColumn.ts';
+import { CodeValue } from '../../models/CodeValue.ts';
 
 function importDdiCMetadata(file, columns){
     var_dictionary = {};
@@ -44,6 +45,7 @@ function readDDiCString(ddiCString){
                     var categoryValue = vars[i].children[j].getElementsByTagName('catValu')[0].textContent.trim();
                     var codeValue = new CodeValue(categoryValue, categoryLabel);
                     variable.codeValues.push(codeValue);
+                    variable.coded = true;
                     break;
             }
         }
