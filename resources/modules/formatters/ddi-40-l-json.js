@@ -46,9 +46,8 @@ function createMultilingualStringValue(value, languageTag = "en") {
  * @param {Object} input
  * @returns {string}
  */
-function toDdi40LJson(input) {
+export function toDdi40LJson(input) {
     const ddi = {};
-    console.log(input);
 
     /**
      * PhysicalInstance

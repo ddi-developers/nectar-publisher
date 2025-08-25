@@ -3,9 +3,13 @@ import { Dataset } from './models/Dataset.ts'
 import { RepresentationTypes, Parser } from './modules/utils.js'
 import { ref, reactive, computed } from 'vue'
 import About from './components/About.vue'
+import LoadingSpinner from './components/LoadingSpinner.vue'
+import DebugSection from './components/DebugSection.vue'
 import { toDdiCXml } from './modules/formatters/ddi-c-xml.js'
 import { toDdiLXml } from './modules/formatters/ddi-l-xml.js'
-import { saveFileBrowser, copyTextToClipboard } from './helpers/browser.ts'
+import { toDdi40LJson } from './modules/formatters/ddi-40-l-json.js'
+import { toDdiCdiJsonLd } from './modules/formatters/ddi-cdi-json-ld.js'
+import { saveFileBrowser } from './helpers/browser.ts'
 import { watch } from 'vue'
 
 
@@ -40,11 +44,10 @@ const output = computed(() => {
 			input.dataset.columns.map(e => e.name).join(input.dataset.delimiter),
 			...input.dataset.data.map(e => e.join(input.dataset.delimiter))
 		].join('\n'),
-		//cdi: toDdiCdiJsonLd(input.dataset),
-		
+		ddiCdi: toDdiCdiJsonLd(input.dataset),
 		ddic : toDdiCXml(input.dataset),
 		ddil : toDdiLXml(input.dataset),
-		//ddi40l : toDdi40LJson(input.dataset),
+		ddi40l : toDdi40LJson(input.dataset),
 
 	}
 })
@@ -227,45 +230,7 @@ function saveFile(content, type, fileName) {
 		</div>
 	</section>
 
-	<section id="debug" v-if="app.debug">
-		<ul class="nav nav-tabs" id="exportTabs" role="tablist">
-			<li class="nav-item" role="presentation">
-				<button class="nav-link" id="csv-tab" data-bs-toggle="tab" data-bs-target="#csv-tab-pane" type="button" role="tab" aria-controls="csv-tab-pane"> csv (text/csv)</button>
-			</li>
-			<li class="nav-item" role="presentation">
-				<button class="nav-link active" id="ddi-c-tab" data-bs-toggle="tab" data-bs-target="#ddi-c-tab-pane" type="button" role="tab" aria-controls="ddi-c-tab-pane" aria-selected="true"> ddi-c (xml)</button>
-			</li>
-			<li class="nav-item" role="presentation">
-				<button class="nav-link" id="ddi-l-tab" data-bs-toggle="tab" data-bs-target="#ddi-l-tab-pane" type="button" role="tab" aria-controls="ddi-l-tab-pane"> ddi-l (xml)</button>
-			</li>
-		</ul>
-
-		<div class="tab-content exports">
-			<div class="tab-pane fade" id="csv-tab-pane" role="tabpanel" aria-labelledby="csv-tab" tabindex="0">
-				<div class="more">
-					<button class="btn btn-outline-primary" @click="saveFile(output.csv, 'text/csv', output.filename + '.csv')">💾save</button>
-					<button class="btn btn-outline-primary" @click="copyTextToClipboard(output.csv)">📋copy</button>
-				</div>
-				<highlightjs :code="output.csv" language="csv"/>
-			</div>
-
-			<div class="tab-pane fade show active" id="ddi-c-tab-pane" role="tabpanel" aria-labelledby="ddi-c-tab" tabindex="1">
-				<div class="more">
-					<button class="btn btn-outline-primary" @click="saveFile(output.ddic, 'application/xml', output.filename + '.ddi-c.xml')">💾save</button>
-					<button class="btn btn-outline-primary" @click="copyTextToClipboard(output.ddic)">📋copy</button>
-				</div>
-				<highlightjs :code="output.ddic" language="xml"/>
-			</div>
-
-			<div class="tab-pane fade" id="ddi-l-tab-pane" role="tabpanel" aria-labelledby="ddi-l-tab" tabindex="2">
-				<div class="more">
-					<button class="btn btn-outline-primary" @click="saveFile(output.ddil, 'application/xml', output.filename + '.ddi-l.xml')">💾save</button>
-					<button class="btn btn-outline-primary" @click="copyTextToClipboard(output.ddil)">📋copy</button>
-				</div>
-				<highlightjs :code="output.ddil" language="xml"/>
-			</div>
-		</div>
-	</section>
+	<DebugSection v-if="app.debug" :output="output" />
 
 	<!-- MARK: Code List Modal -->
 	<div class="modal modal-dialog-scrollable fade" id="codeListModal" tabindex="-1" aria-labelledby="codeListModalLabel" aria-hidden="true">
@@ -296,10 +261,7 @@ function saveFile(content, type, fileName) {
 		</div>
 	</div>
 
-
 	<About :appMetadata="appMetadata" />
-
-
 
 	<input ref="inputFile" id="inputFile" @change="importDataFromFile" type="file" accept=".csv,.tsv,.xlsx,.xls,.ods,.sav,.dta,.sas7bdat,text/csv" style="display: none;">
 	<input ref="inputMetadata" id="inputMetadata" @change="importMetadata" type="file" accept=".xml" style="display: none;">

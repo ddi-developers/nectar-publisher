@@ -53,7 +53,7 @@ TODOS:
     best
 */
 
-function toDdiCdiJsonLd(input){
+export function toDdiCdiJsonLd(input){
     var cdi = {
         '@context': "https://ddi-alliance.bitbucket.io/DDI-CDI/DDI-CDI_v1.0-rc1/encoding/json-ld/ddi-cdi.jsonld",
         'DDICDIModels':[]
