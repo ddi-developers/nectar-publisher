@@ -17,16 +17,16 @@ Document your tabular datasets and create codebooks and machine actionable metad
 - [x] CSV / TSV - files
 - [x] Excel / ODS spreadsheet
 - [x] SPSS (via OpenCPU)
-- [ ] SPSS (local in browser parser)
+- [ ] SPSS (local in browser via [WebR](https://www.npmjs.com/package/webr) with [DDIwR](https://cran.r-project.org/web/packages/DDIwR/))
 
 ### Metadata imports
-- [ ] DDI-C 2.5 variable documentation
-- [ ] DDI-L 3.3 variable documentation
+- [ ] DDI-Codebook 2.5 variable documentation
+- [ ] DDI-Lifecycle 3.3 variable documentation
 
 ### Output
 - [ ] Metadata
-  - [ ] DDI-C 2.5 XML
-  - [ ] DDI-L 3.3 XML
+  - [ ] DDI-Codebook 2.5 XML
+  - [ ] DDI-Lifecycle 3.3 XML
   - [ ] DDI-CDI JSON-LD
 - [ ] Codebook
   - [ ] Markdown
@@ -57,7 +57,7 @@ Document your tabular datasets and create codebooks and machine actionable metad
   - [x] Name (set to column header if existing)
   - [ ] Label
   - [x] Description
-  - [ ] DataType
+  - [x] DataType
   - [ ] UnitCode
   - [ ] Min/Max value
   - [ ] CollectionMethod
@@ -73,10 +73,10 @@ Document your tabular datasets and create codebooks and machine actionable metad
 
 ## Build instructions
 
-No build tools required.  
-Nectar Publisher aims for easy development & deployment without the need for any special tools or processes.  
-Open any source file; edit, save see changes in the browser [KISS Principle](https://en.wikipedia.org/wiki/KISS_principle).
+1. Colone this repository
+2. Install dependecies with `npm install`
+3. Build with `npm run build`
 
 ## License
 
-MIT
+[MIT](LICENSE)
