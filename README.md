@@ -16,8 +16,7 @@ Document your tabular datasets and create codebooks and machine actionable metad
 ### Dataset inputs
 - [x] CSV / TSV - files
 - [x] Excel / ODS spreadsheet
-- [x] SPSS (via OpenCPU)
-- [ ] SPSS (local in browser via [WebR](https://www.npmjs.com/package/webr) with [DDIwR](https://cran.r-project.org/web/packages/DDIwR/))
+- [x] SPSS (local in browser via [WebR](https://www.npmjs.com/package/webr) with [DDIwR](https://cran.r-project.org/web/packages/DDIwR/))
 
 ### Metadata imports
 - [ ] DDI-Codebook 2.5 variable documentation
