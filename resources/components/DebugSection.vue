@@ -27,6 +27,8 @@ const currentExport = computed(() => {
       return { content: out.ddi40l || '', mime: 'application/json', filename: (out.filename || 'export') + '.ddi-ddi-lifecycle-4.0.json' };
     case 'ddi-cdi':
       return { content: out.ddiCdi || '', mime: 'application/json', filename: (out.filename || 'export') + '.ddi-cdi.json' };
+    case 'markdown':
+      return { content: out.markdown || '', mime: 'text/markdown', filename: (out.filename || 'export') + '.markdown.md' };
     case 'ddi-c':
     default:
       return { content: out.ddic || '', mime: 'application/xml', filename: (out.filename || 'export') + '.ddi-codebook.2.6.xml' };
@@ -64,6 +66,9 @@ function copyCurrent() {
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="ddi-cdi-tab" data-bs-toggle="tab" data-bs-target="#ddi-cdi-tab-pane" type="button" role="tab" aria-controls="ddi-cdi-tab-pane" @click="currentTab = 'ddi-cdi'"> ddi-cdi (json)</button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="markdown-tab" data-bs-toggle="tab" data-bs-target="#markdown-pane" type="button" role="tab" aria-controls="markdown-pane" @click="currentTab = 'markdown'"> markdown (md)</button>
+      </li>
 
       <li class="nav-item ms-auto" role="presentation">
         <button class="nav-link" type="button" title="Save current" @click.prevent="saveCurrent">💾</button>
@@ -92,6 +97,10 @@ function copyCurrent() {
 
       <div class="tab-pane fade" id="ddi-cdi-tab-pane" role="tabpanel" aria-labelledby="ddi-cdi-tab">
         <highlightjs :code="output.ddiCdi" language="json"/>
+      </div>
+
+      <div class="tab-pane fade" id="markdown-pane" role="tabpanel" aria-labelledby="markdown-tab">
+        <highlightjs :code="output.markdown" language="md"/>
       </div>
     </div>
   </section>

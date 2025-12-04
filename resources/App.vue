@@ -9,6 +9,7 @@ import { toDdiCXml } from './modules/formatters/ddi-c-xml.js'
 import { toDdiLXml } from './modules/formatters/ddi-l-xml.js'
 import { toDdi40LJson } from './modules/formatters/ddi-40-l-json.js'
 import { toDdiCdiJsonLd } from './modules/formatters/ddi-cdi-json-ld.js'
+import { toMarkdown} from './modules/formatters/markdown.js'
 import { saveFileBrowser } from './helpers/browser.ts'
 import { watch } from 'vue'
 
@@ -39,7 +40,6 @@ const appMetadata = computed(() => {
 const output = computed(() => {
 	return {
 		filename: input.file?.name?.split('.').slice(0, -1).join('.'),
-		//markdown: datasetToMarkdown(input.dataset),
 		csv: [
 			input.dataset.columns.map(e => e.name).join(input.dataset.delimiter),
 			...input.dataset.data.map(e => e.join(input.dataset.delimiter))
@@ -48,6 +48,7 @@ const output = computed(() => {
 		ddic : toDdiCXml(input.dataset),
 		ddil : toDdiLXml(input.dataset),
 		ddi40l : toDdi40LJson(input.dataset),
+		markdown: toMarkdown(input.dataset),
 
 	}
 })
