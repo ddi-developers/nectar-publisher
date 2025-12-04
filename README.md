@@ -1,5 +1,9 @@
 # Nectar Publisher 🐝
 
+> [!NOTE]
+> **The branch with [WebR](https://github.com/ddi-developers/nectar-publisher/tree/web-r) (to import SPSS etc) also have better support for importing npm packages us this branch as a base during the hackathon**
+
+
 Document your tabular datasets and create codebooks and machine actionable metadata using DDI.
 
 > [!NOTE]
