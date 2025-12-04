@@ -227,3 +227,47 @@ const questionnaireExample = {
 		}
     ]
 }
+const questionnaireEmpty = {
+	"intervInstrSchemeUuid": "iis123",
+	"respInstrSchemeUuid": "ris123",
+	"progInstrSchemeUuid": "pis123",
+	"questionSchemeUuid": "qs123",
+    "interviewerInstructions": [
+    ],
+    "respondentInstructions": [
+    ],
+    "programmingInstructions": [
+    ],
+    "questions": [
+		{
+    	    "uuid": "q123",
+    	    "answerType": "coded",
+			"multipleItems": false,
+			"multipleAnswers": false,
+    		"questionName": "Q1",
+			"concept": "",
+        	"questionText": "",
+    		"answerCodesReference": "a123"
+    	},
+    ],
+    "items": [
+    ],
+    "answers": [
+	    {
+			"uuid": "a123",
+			"name": "Dichotom",
+			"codeValues": [
+				{
+        			"uuid": "e223",
+				    "value": "0",
+				    "label": "no"
+			    },
+				{
+        			"uuid": "e224",
+				    "value": "1",
+				    "label": "yes"
+			    }
+			]
+		}
+    ]
+}

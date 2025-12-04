@@ -26,7 +26,8 @@ const DataType = {
     columns = []
     uuid = window.crypto.randomUUID()
     dataCollectionUuid = window.crypto.randomUUID()
-    associatedQuestionnaire = new Questionnaire(questionnaireExample)
+    //associatedQuestionnaire = new Questionnaire(questionnaireExample)
+    associatedQuestionnaire = new Questionnaire(questionnaireEmpty)
 
     constructor(input, fileName, mimeType, delimiter = undefined, firstRowIsHeader = true){
       this.fileName = fileName
