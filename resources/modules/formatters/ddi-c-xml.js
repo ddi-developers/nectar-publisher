@@ -14,7 +14,7 @@ function toDdiCXml(input){
     var stdyDscr = xmlDoc.createElementNS(ns, "stdyDscr")
     var citation = xmlDoc.createElementNS(ns, "citation")
     var titlStmt = xmlDoc.createElementNS(ns, "titlStmt")
-    titlStmt.appendChild(createTextNode(xmlDoc, ns, "titl", input.fileName))
+    titlStmt.appendChild(createTextNode(xmlDoc, ns, "titl", input.studyName))
     citation.appendChild(titlStmt)
     stdyDscr.appendChild(citation)
     codeBook.appendChild(stdyDscr)
