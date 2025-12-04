@@ -328,6 +328,14 @@
 									  class="btn btn-outline-secondary">⚙️
 							  </button>
 						  </div>
+						  <div class="col-md-1">
+							  <label class="form-label row button-label"
+									 :class="{notFirst: (index > 0)}">Delete</label>
+							  <button @click="deleteQuestion(question.uuid)" type="button"
+									  :class="{ 'bg-primary': question.delete }"
+									  class="btn btn-outline-secondary">🗑
+							  </button>
+						  </div>
 
 					  </div>
 					  <Transition>
