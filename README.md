@@ -76,6 +76,11 @@ Document your tabular datasets and create codebooks and machine actionable metad
 2. Install dependecies with `npm install`
 3. Build with `npm run build`
 
+## Run locally for development
+1. run `npm install`
+2. run `npm run dev`
+3. Open `http://localhost:5173` in your browser
+
 ## License
 
 [MIT](LICENSE)
