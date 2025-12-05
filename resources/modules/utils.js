@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 import { Dataset } from '../models/Dataset.ts'
 import { DatasetColumn } from '../models/DatasetColumn.ts'
 import { WebR } from 'webr'
@@ -91,40 +92,38 @@ export class Parser{
       dataset.data = results.data;
     };
 
-    await reader.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer(file);
   }
 
   static async parseSpreadsheet(file, dataset, done){
     var reader = new FileReader();
     reader.readAsArrayBuffer(file);
-    reader.onload = function (e) {
-        var fileReaderData = new Uint8Array(reader.result);
-        var workbook = XLSX.read(fileReaderData, {type: 'array'});
-        var sheet = workbook.Sheets[workbook.SheetNames[0]];
+    reader.onload = () => {
+      var fileReaderData = new Uint8Array(reader.result);
+      var workbook = XLSX.read(fileReaderData, { type: 'array' });
+      var sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        var arr = XLSX.utils.sheet_to_json(sheet, {header: 1});
+      var arr = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        dataset.columns = []
-        dataset.delimiter = null
-        dataset.linebreak = null
+      dataset.columns = [];
 
-        var columnIds = arr[0]
-        if(dataset.firstRowIsHeader){
-          arr.shift()
-        }
-        dataset.data = arr
+      var columnIds = arr[0];
+      if (dataset.firstRowIsHeader) {
+        arr.shift();
+      }
+      dataset.data = arr;
 
-        for(const [i, c] of columnIds.entries()){
-          var column = new DatasetColumn(c)
-          column.position = i
-          column.values = dataset.data.map(d => d[i])
-          column.valuesUnique = [... new Set(column.values)]
-          column.valuesUnique.sort(function(a, b){return a-b})
-          column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique))
-          dataset.columns.push(column)
-        }
+      for (const [i, c] of columnIds.entries()) {
+        var column = new DatasetColumn(c);
+        column.position = i;
+        column.values = dataset.data.map(d => d[i]);
+        column.valuesUnique = [...new Set(column.values)];
+        column.valuesUnique.sort((a, b) => a - b);
+        column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique));
+        dataset.columns.push(column);
+      }
 
-        done(dataset)
+      done(dataset);
     }
   }
 
@@ -152,31 +151,31 @@ export class Parser{
   }
 
   static async parseDelimitedText(file, dataset, done){
-    await Papa.parse(file, {
-      complete: function(results) {
-        dataset.columns = []
-        dataset.errors = results.errors
+    Papa.parse(file, {
+      complete: function (results) {
+        dataset.columns = [];
+        dataset.errors = results.errors;
 
-        dataset.delimiter = results.meta.delimiter
-        dataset.linebreak = results.meta.linebreak
+        dataset.delimiter = results.meta.delimiter;
+        dataset.linebreak = results.meta.linebreak;
 
-        var columnIds = results.data[0]
-        if(dataset.firstRowIsHeader){
-          results.data.shift()
+        var columnIds = results.data[0];
+        if (dataset.firstRowIsHeader) {
+          results.data.shift();
         }
-        dataset.data = results.data
+        dataset.data = results.data;
 
-        for(const [i, c] of columnIds.entries()){
-          var column = new DatasetColumn(c)
-          column.position = i
-          column.values = dataset.data.map(d => d[i])
-          column.valuesUnique = [... new Set(column.values)]
-          column.valuesUnique.sort(function(a, b){return a-b})
-          column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique))
-          dataset.columns.push(column)
+        for (const [i, c] of columnIds.entries()) {
+          var column = new DatasetColumn(c);
+          column.position = i;
+          column.values = dataset.data.map(d => d[i]);
+          column.valuesUnique = [...new Set(column.values)];
+          column.valuesUnique.sort(function (a, b) { return a - b; });
+          column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique));
+          dataset.columns.push(column);
         }
 
-        done(dataset)
+        done(dataset);
       }
     })
   }
