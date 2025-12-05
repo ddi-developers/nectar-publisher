@@ -406,13 +406,28 @@ function guessDataType(values) {
   // Boolean
   if (values.every(i => (/^(?:true|false|1|0)$/i.test(String(i))) || isEmpty(i))) return 'Boolean';
 
-  // Year (check before other numeric types to avoid false positives)
-  // Integer-valued year, e.g., 2005.
-  if (values.every(i => {
-    if (isEmpty(i)) return true;
-    const str = String(i);
-    return /^(19|20)?\d{2}$/.test(str);
-  })) return 'Year';
+  // Year (check before other numeric types, but only if it's clearly a year pattern)
+  // Integer-valued year, e.g., 2005. Can be 4-digit (1900-2099) or 2-digit (00-99)
+  // Only recognize as Year if at least one value is a 4-digit year to avoid false positives
+  const yearValues = values.filter(i => !isEmpty(i));
+  if (yearValues.length > 0) {
+    const allMatchYearPattern = yearValues.every(i => {
+      const str = String(i);
+      return /^(19|20)?\d{2}$/.test(str);
+    });
+    if (allMatchYearPattern) {
+      // Check if at least one is a 4-digit year (1900-2099)
+      const hasFourDigitYear = yearValues.some(i => {
+        const str = String(i);
+        return /^(19|20)\d{2}$/.test(str) && str.length === 4;
+      });
+      // Only return Year if we have at least one 4-digit year
+      // This prevents 2-digit numbers like [10, 12, 32] from being misidentified as Year
+      if (hasFourDigitYear) {
+        return 'Year';
+      }
+    }
+  }
 
   // Byte (signed, most restrictive)
   // Whole numbers in the range -128 - 127.
@@ -469,9 +484,11 @@ function guessDataType(values) {
       NonNegativeInteger: /^\d+$/,
       NonPositiveInteger: /^(0|-\d+)$/,
       Integer: /^-?\d+$/,
-      Decimal: /^[+-]?\d*([.,]\d+)?$/,
-      // Double / Float
-      Double: /^(- ?)?(\d+([.,]\d+([eE]-?\d+)?|([eE]\d+))?|INF)$/,
+      // Decimal: Must have at least one digit, allows optional sign and decimal separator (comma or dot)
+      Decimal: /^[+-]?(\d+([.,]\d+)?|[.,]\d+)$/,
+      // Double / Float: Supports scientific notation, INF, and optional sign with space
+      // Pattern: optional sign+space, then either: number with optional decimal and scientific notation, or INF
+      Double: /^(- ?)?(\d+([.,]\d+)?([eE][+-]?\d+)?|\d+[eE][+-]?\d+|INF)$/,
 
       DateTime: /^(19|20)(\d{2})-(0\d|1[0-2])-([0-2]\d|3[01])[T ]([0-1]\d|2[0-3]):([0-5]\d)(:([0-5]\d)(\.\d{1,3})?)?(Z|[+-]([0-1]\d|2[0-3]):([0-5]\d))?$/,
       // Date
@@ -481,11 +498,11 @@ function guessDataType(values) {
       // Left-truncated dateTime, e.g., 13:20:00-05:00 (1:20 pm for Eastern Standard Time U.S.).
       Time: /^([0-1]?\d|2[0-3]):([0-5]\d)(:([0-5]\d)(\.\d{1,3})?)?([+-]([0-1]?\d|2[0-3]):([0-5]\d))?( ?(a|p)\.?m\.?)?$/,
       // YearMonth
-      // Integer-valued year and month, e.g., 2004-11.
-      GYearMonth: /^(19|20)\d{2}-(0?\d|1[0-2])$/,
+      // Integer-valued year and month, e.g., 2004-11. Month must be 1-12 (allows single or double digit)
+      GYearMonth: /^(19|20)\d{2}-(0?[1-9]|1[0-2])$/,
       // MonthDay
-      // Integer-valued month and day, e.g., 12-31.
-      GMonthDay: /^(0?\d|1[0-2])-([0-2]?\d|3[01])$/,
+      // Integer-valued month and day, e.g., 12-31. Month 1-12, Day 1-31 (allows single or double digit, note: doesn't validate day count per month)
+      GMonthDay: /^(0?[1-9]|1[0-2])-([0-2]?\d|3[01])$/,
 
       HexBinary: /^(?:[0-9a-fA-F]{2})+$/,
       Base64Binary: /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/,
