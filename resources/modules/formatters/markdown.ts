@@ -1,8 +1,8 @@
-/**
- * @param {Dataset} dataset
- */
-function toMarkdown(dataset) {
-    var md = `# "${dataset.fileName}" Codebook   \n\n`
+import type { Dataset } from "../../models/Dataset"
+import type { DatasetColumn } from "../../models/DatasetColumn";
+
+function toMarkdown(dataset: Dataset) {
+    let md = `# "${dataset.fileName}" Codebook   \n\n`
 
     md += printFileDescription(dataset)
 
@@ -15,8 +15,8 @@ function toMarkdown(dataset) {
     return md
 }
 
-function printFileDescription(dataset) {
-    var mdText = `## File Description \n`
+function printFileDescription(dataset: Dataset) {
+    let mdText = `## File Description \n`
     mdText += `**ID:** ${dataset.fileName}  \n`
     mdText += `**Type:** ${dataset.mimeType}  \n`
     mdText += `**Size:** ${dataset.fileSize} bytes  \n`
@@ -26,30 +26,30 @@ function printFileDescription(dataset) {
     return mdText
 }
 
-function printDimensions(dataset) {
-    var mdText = `## File Dimensions \n`
+function printDimensions(dataset: Dataset) {
+    let mdText = `## File Dimensions \n`
     mdText += `**Number of cases or observations:** ${dataset.data.length}  \n`
     mdText += `**Number of variables:** ${dataset.columns.length}  \n`
     mdText += '\n'
     return mdText
 }
 
-function printVariableStats(col) {
-    var mdText = ''
-    var columnValuesUnique = col.valuesUnique.map(Number)
-    var statsToCompute = [Math.min, Math.max]
-    var statsToComputeNames = ["Min. value", "Max. value"]
+function printVariableStats(col: DatasetColumn) {
+    let mdText = ''
+    let columnValuesUnique = col.valuesUnique.map(Number)
+    let statsToCompute = [Math.min, Math.max]
+    let statsToComputeNames = ["Min. value", "Max. value"]
 
-    for (var i = 0; i < statsToCompute.length; ++i) {
-        var statComputed = statsToCompute[i](...columnValuesUnique);
+    for (let i = 0; i < statsToCompute.length; ++i) {
+        let statComputed = statsToCompute[i](...columnValuesUnique);
         mdText += ` - **${statsToComputeNames[i]}:** ${statComputed}  \n`
     }
     return mdText
 }
 
 
-function printVariableCodeValues(col) {
-    var mdText = ''
+function printVariableCodeValues(col: DatasetColumn) {
+    let mdText = ''
     mdText += " > | Code | Name | Frequency |   \n"
     mdText += " > | :---- | :----: | ---------: |   \n"
     for (const codeValue of col.codeValues) {
@@ -60,8 +60,8 @@ function printVariableCodeValues(col) {
 }
 
 
-function printVariables(dataset) {
-    var mdText = `## Variables   \n`
+function printVariables(dataset: Dataset) {
+    let mdText = `## Variables   \n`
 
     var ii=0
     for (var col of dataset.columns) {
@@ -95,7 +95,7 @@ function printVariables(dataset) {
 }
 
 
-function getVarRepresentationType(column) {
+function getVarRepresentationType(column: DatasetColumn) {
     if (column.coded) {
         return "Coded"
     } else if (column.hasIntendedDataType) {
