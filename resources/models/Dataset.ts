@@ -1,5 +1,13 @@
 import { DatasetColumn } from './DatasetColumn.js';
 
+// Helper function for UUID generation, that works in both browser and Node.js
+function getRandomUUID(): string {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 15);
+}
+
 export class Dataset {
   public data: any[][] = [[]];
   public fileName: string | null = null;
@@ -17,9 +25,9 @@ export class Dataset {
   public firstRowIsHeader: boolean = true;
   public errors: any[] = [];
   public columns: DatasetColumn[] = [];
-  public uuid: string = window.crypto.randomUUID();
-  public instrumentUuid: string = window.crypto.randomUUID();
-  public sequenceUuid: string = window.crypto.randomUUID();
+  public uuid: string = getRandomUUID();
+  public instrumentUuid: string = getRandomUUID();
+  public sequenceUuid: string = getRandomUUID();
 
   constructor(
     input: string | undefined,

@@ -158,33 +158,36 @@ export class Parser{
   }
 
   static async parseDelimitedText(file, dataset, done){
-    Papa.parse(file, {
-      complete: function (results) {
-        dataset.columns = [];
-        dataset.errors = results.errors;
-
-        dataset.delimiter = results.meta.delimiter;
-        dataset.linebreak = results.meta.linebreak;
-
-        var columnIds = results.data[0];
-        if (dataset.firstRowIsHeader) {
-          results.data.shift();
+    return new Promise((resolve) => {
+      Papa.parse(file, {
+        complete: function (results) {
+          dataset.columns = [];
+          dataset.errors = results.errors;
+  
+          dataset.delimiter = results.meta.delimiter;
+          dataset.linebreak = results.meta.linebreak;
+  
+          var columnIds = results.data[0];
+          if (dataset.firstRowIsHeader) {
+            results.data.shift();
+          }
+          dataset.data = results.data;
+  
+          for (const [i, c] of columnIds.entries()) {
+            var column = new DatasetColumn(c);
+            column.position = i;
+            column.values = dataset.data.map(d => d[i]);
+            column.valuesUnique = [...new Set(column.values)];
+            column.valuesUnique.sort(function (a, b) { return a - b; });
+            column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique));
+            dataset.columns.push(column);
+          }
+  
+          done(dataset);
+          resolve(dataset);
         }
-        dataset.data = results.data;
-
-        for (const [i, c] of columnIds.entries()) {
-          var column = new DatasetColumn(c);
-          column.position = i;
-          column.values = dataset.data.map(d => d[i]);
-          column.valuesUnique = [...new Set(column.values)];
-          column.valuesUnique.sort(function (a, b) { return a - b; });
-          column.hasIntendedDataType = RepresentationTypes.find(e => e.id === guessDataType(column.valuesUnique));
-          dataset.columns.push(column);
-        }
-
-        done(dataset);
-      }
-    })
+      })
+    });
   }
 }
 
