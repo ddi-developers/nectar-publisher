@@ -31,7 +31,7 @@ export class Dataset {
     this.fileName = fileName;
     this.mimeType = mimeType;
     this.firstRowIsHeader = firstRowIsHeader;
-    if (delimiter === undefined) {
+    if (!delimiter) {
       this.delimiter = ","; //should use the detector
     } else {
       this.delimiter = delimiter;
