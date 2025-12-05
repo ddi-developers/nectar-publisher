@@ -16,7 +16,7 @@ export class Dataset {
   public studyGroupName: string | undefined;
   public studyGroupDescription: string = "Please describe the structure of this study group.";
   public fileSize: number | undefined;
-  public mimeType: string;
+  public mimeType: string | undefined;
   public sha256: string | undefined;
   public delimiter: string;
   public linebreak: string | undefined;

@@ -1,54 +1,67 @@
 import { createTextNode, formatXml } from "../../helpers/xml.ts";
+import type { Dataset } from "../../models/Dataset.ts";
+import type { DatasetColumn } from "../../models/DatasetColumn.ts";
+import type { VarFormat } from "../../models/VarFormat.ts";
 
-function toDdiCXml(input){
-    var ns = "ddi:codebook:2_5"
+function toDdiCXml(input: Dataset){
+    const ns = "ddi:codebook:2_5"
 
-    var xmlDoc = document.implementation.createDocument(ns, "codeBook", null);
+    const xmlDoc = document.implementation.createDocument(ns, "codeBook", null);
 
-    var codeBook = xmlDoc.getElementsByTagName("codeBook")[0]
+    const codeBook = xmlDoc.documentElement;
 
     codeBook.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
     codeBook.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema")
     codeBook.setAttribute("xsi:schemaLocation", "ddi:codebook:2_5 http://www.ddialliance.org/Specification/DDI-Codebook/2.5/XMLSchema/codebook.xsd")
 
-    var stdyDscr = xmlDoc.createElementNS(ns, "stdyDscr")
-    var citation = xmlDoc.createElementNS(ns, "citation")
-    var titlStmt = xmlDoc.createElementNS(ns, "titlStmt")
-    titlStmt.appendChild(createTextNode(xmlDoc, ns, "titl", input.studyName))
-    citation.appendChild(titlStmt)
-    stdyDscr.appendChild(citation)
-    codeBook.appendChild(stdyDscr)
+    if (input.studyName) {
+        const stdyDscr = xmlDoc.createElementNS(ns, "stdyDscr")
+        const citation = xmlDoc.createElementNS(ns, "citation")
+        const titlStmt = xmlDoc.createElementNS(ns, "titlStmt")
+        titlStmt.appendChild(createTextNode(xmlDoc, ns, "titl", input.studyName))
+        citation.appendChild(titlStmt)
+        stdyDscr.appendChild(citation)
+        codeBook.appendChild(stdyDscr)
+    }
 
-    var fileDscr = xmlDoc.createElementNS(ns, "fileDscr")
-    fileDscr.setAttribute("ID", input.fileName)
+    const fileDscr = xmlDoc.createElementNS(ns, "fileDscr")
+    const fileTxt = xmlDoc.createElementNS(ns, "fileTxt")
 
-    var fileTxt = xmlDoc.createElementNS(ns, "fileTxt")
-    fileTxt.appendChild(createTextNode(xmlDoc, ns, "fileName", input.fileName))
+    if (input.fileName) {
+        fileDscr.setAttribute("ID", input.fileName)
+        fileTxt.appendChild(createTextNode(xmlDoc, ns, "fileName", input.fileName))
+    }
 
-    var dataFingerprint = xmlDoc.createElementNS(ns, "dataFingerprint")
-    dataFingerprint.setAttribute("type", "dataFile")
-    dataFingerprint.appendChild(createTextNode(xmlDoc, ns, "digitalFingerprintValue", input.sha256))
-    dataFingerprint.appendChild(createTextNode(xmlDoc, ns, "algorithmSpecification", "SHA-256"))
-    fileTxt.appendChild(dataFingerprint)
+    if (input.sha256) {
+        const dataFingerprint = xmlDoc.createElementNS(ns, "dataFingerprint")
+        dataFingerprint.setAttribute("type", "dataFile")
+        dataFingerprint.appendChild(createTextNode(xmlDoc, ns, "digitalFingerprintValue", input.sha256))
+        dataFingerprint.appendChild(createTextNode(xmlDoc, ns, "algorithmSpecification", "SHA-256"))
+        fileTxt.appendChild(dataFingerprint)
+    }
 
-    var dimensns = xmlDoc.createElementNS(ns,"dimensns")
-    dimensns.appendChild(createTextNode(xmlDoc, ns, "caseQnty", input.data.length))
-    dimensns.appendChild(createTextNode(xmlDoc, ns, "varQnty", input.columns.length))
+    const dimensns = xmlDoc.createElementNS(ns,"dimensns")
+    dimensns.appendChild(createTextNode(xmlDoc, ns, "caseQnty", String(input.data.length)))
+    dimensns.appendChild(createTextNode(xmlDoc, ns, "varQnty", String(input.columns.length)))
     fileTxt.appendChild(dimensns)
 
-    fileTxt.appendChild(createTextNode(xmlDoc, ns, "fileType", input.mimeType))
+    if (input.mimeType) {
+        fileTxt.appendChild(createTextNode(xmlDoc, ns, "fileType", input.mimeType))
+    }
 
     fileDscr.appendChild(fileTxt)
     codeBook.appendChild(fileDscr)
 
-    var dataDscr = xmlDoc.createElementNS(ns, "dataDscr")
+    const dataDscr = xmlDoc.createElementNS(ns, "dataDscr")
     dataDscr.setAttribute("source", "producer")
 
     for(const column of input.columns){
-        var variable = xmlDoc.createElementNS(ns, "var")
+        const variable = xmlDoc.createElementNS(ns, "var")
         variable.setAttribute("ID", column.id)
         variable.setAttribute("name", column.name)
-        variable.setAttribute("files", input.fileName)
+        if (input.fileName) {
+            variable.setAttribute("files", input.fileName)
+        }
         const representationType = getVarRepresentationType(column);
         variable.setAttribute("representationType", representationType);
         if (representationType === "other" && column.hasIntendedDataType) {
@@ -74,25 +87,22 @@ function toDdiCXml(input){
             variable.appendChild(createTextNode(xmlDoc, ns, "txt", column.description))
         }
 
-        if(column.hasIntendedDataType.type === "numeric"){
+        if(column.hasIntendedDataType?.type === "numeric"){
 
-            var columnValuesUnique = column.valuesUnique.map(Number)
-            var statsToCompute = [Math.min, Math.max]
-            var statsToComputeNames = ["min", "max"]
+            const columnValuesUnique = column.valuesUnique.map(Number)
 
-            for (var i = 0; i < statsToCompute.length; ++i) {
-                var statComputed = statsToCompute[i](... columnValuesUnique);
+            const minStat = createTextNode(xmlDoc, ns, "sumStat", String(Math.min(...columnValuesUnique)))
+            minStat.setAttribute("type", "min")
+            variable.appendChild(minStat)
 
-                var sumStat = createTextNode(xmlDoc, ns, "sumStat", statComputed)
-            sumStat.setAttribute("type", statsToComputeNames[i])
-            variable.appendChild(sumStat)
-            }
-
+            const maxStat = createTextNode(xmlDoc, ns, "sumStat", String(Math.max(...columnValuesUnique)))
+            maxStat.setAttribute("type", "max")
+            variable.appendChild(maxStat)
         }
 
         if(column.codeValues){
             for(const codeValue of column.codeValues){
-                var catgry = xmlDoc.createElementNS(ns, "catgry")
+                const catgry = xmlDoc.createElementNS(ns, "catgry")
 
                 catgry.appendChild(createTextNode(xmlDoc, ns, "catValu", codeValue.value))
 
@@ -101,7 +111,7 @@ function toDdiCXml(input){
                 }
 
                 if(codeValue.frequency){
-                    var catStat = createTextNode(xmlDoc, ns, "catStat", codeValue.frequency)
+                    const catStat = createTextNode(xmlDoc, ns, "catStat", String(codeValue.frequency))
                     catStat.setAttribute("type", "freq")
                     catgry.appendChild(catStat)
                 }
@@ -119,12 +129,12 @@ function toDdiCXml(input){
 
     codeBook.appendChild(dataDscr)
 
-    var prolog = '<?xml version="1.0" encoding="UTF-8"?>'
-    var xmlString = new XMLSerializer().serializeToString(xmlDoc)
+    const prolog = '<?xml version="1.0" encoding="UTF-8"?>'
+    const xmlString = new XMLSerializer().serializeToString(xmlDoc)
     return prolog + "\n" + formatXml(xmlString)
 }
 
-function getVarRepresentationType(column) {
+function getVarRepresentationType(column: DatasetColumn) {
     if (column.coded) return "code";
 
     const dt =
@@ -144,7 +154,7 @@ function getVarRepresentationType(column) {
     return "other"
 }
 
-function hasAnyVarFormatInfo(vf) {
+function hasAnyVarFormatInfo(vf: VarFormat) {
     if (!vf) return false;
     const hasType = typeof vf.type === "string" && vf.type.trim() !== "";
     const hasSchema = typeof vf.schema === "string" && vf.schema.trim() !== "";
@@ -152,7 +162,7 @@ function hasAnyVarFormatInfo(vf) {
     return hasType || hasSchema || hasOtherCat;
 }
 
-function createVarFormatElement(varFormat, xmlDoc, ns) {
+function createVarFormatElement(varFormat: VarFormat, xmlDoc: Document, ns: string) {
     const formatTypes = new Set(["character", "numeric"]);
     const formatSchemas = new Set(["SAS", "SPSS", "IBM", "ANSI", "ISO", "XML-DATA"]);
     const formatCategories = new Set(["date", "time", "currency", "other"]);
@@ -179,4 +189,4 @@ function createVarFormatElement(varFormat, xmlDoc, ns) {
     return el;
 }
 
-export { toDdiCXml}
+export { toDdiCXml }
