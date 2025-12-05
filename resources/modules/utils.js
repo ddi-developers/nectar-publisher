@@ -6,24 +6,6 @@ import { readDDiCString } from './importers/ddi-c-xml-importer.js'
 import { checksum } from '../helpers/checksum.ts'
 
 const webR = new WebR();
-await webR.init();
-console.info('Installing R packages...');
-
-const data = await fetch('resources/libs/r/library.data.gz');
-const metadata = await fetch('resources/libs/r/library.js.metadata');
-
-const options = {
-  packages: [{
-    blob: await data.blob(),
-    metadata: await metadata.json()
-  }]
-};
-const rLibraryPath = '/my-library';
-await webR.FS.mkdir(rLibraryPath);
-await webR.FS.mount("WORKERFS", options, rLibraryPath);
-await webR.evalRVoid(`.libPaths(c(.libPaths(), "${rLibraryPath}"))`);
-await webR.evalR('library("DDIwR")');
-console.info('R packages installed');
 
 export class Parser{
   static async parseFile(file, doneCallback){
@@ -51,7 +33,32 @@ export class Parser{
     }
   }
 
+  static async installRPackages() {
+    await webR.init();
+    console.info('Installing R packages...');
+    
+    const data = await fetch('resources/libs/r/library.data.gz');
+    const metadata = await fetch('resources/libs/r/library.js.metadata');
+    
+    const options = {
+      packages: [{
+        blob: await data.blob(),
+        metadata: await metadata.json()
+      }]
+    };
+    const rLibraryPath = '/my-library';
+    await webR.FS.mkdir(rLibraryPath);
+    await webR.FS.mount("WORKERFS", options, rLibraryPath);
+    await webR.evalRVoid(`.libPaths(c(.libPaths(), "${rLibraryPath}"))`);
+    await webR.evalR('library("DDIwR")');
+    console.info('R packages installed');
+  }
+
   static async parseDDIwR(file, dataset, done){
+    if (!webR.initialized) {
+      await Parser.installRPackages();
+    }
+    
     const reader = new FileReader();
     const basename  = file.name.substr(0, file.name.lastIndexOf('.'));
 
