@@ -2,7 +2,7 @@
  * @param {Dataset} dataset
  */
 function toMarkdown(dataset) {
-    var md = `# "${dataset.fileName}" Codebook documentation\n\n`
+    var md = `# "${dataset.fileName}" Codebook   \n\n`
 
     md += printFileDescription(dataset)
 
@@ -28,8 +28,8 @@ function printFileDescription(dataset) {
 
 function printDimensions(dataset) {
     var mdText = `## File Dimensions \n`
-    mdText += `**Number of cases or observations:**: ${dataset.data.length}\n`
-    mdText += `**Number of variables:**: ${dataset.columns.length}\n`
+    mdText += `**Number of cases or observations:** ${dataset.data.length}  \n`
+    mdText += `**Number of variables:** ${dataset.columns.length}  \n`
     mdText += '\n'
     return mdText
 }
@@ -42,47 +42,50 @@ function printVariableStats(col) {
 
     for (var i = 0; i < statsToCompute.length; ++i) {
         var statComputed = statsToCompute[i](...columnValuesUnique);
-        mdText += `**${statsToComputeNames[i]}:** ${statComputed}\n`
+        mdText += ` - **${statsToComputeNames[i]}:** ${statComputed}  \n`
     }
     return mdText
 }
 
 
 function printVariableCodeValues(col) {
-    var mdText = `#### Code values \n`
-    mdText+= "| Code | Name | Frequency | \n"
-    mdText+= "| ---- | ---- | --------- | \n"
-     for (const codeValue of col.codeValues) {
-        mdText+=`| ${codeValue.value} |  ${codeValue.label} |  ${codeValue.frequency}| \n`
+    var mdText = ''
+    mdText += " > | Code | Name | Frequency |   \n"
+    mdText += " > | :---- | :----: | ---------: |   \n"
+    for (const codeValue of col.codeValues) {
+        mdText += " > |```" + ` ${codeValue.value}` + "```" + ` |  ${codeValue.label} |  ${codeValue.frequency}|   \n`
     }
+    mdText += "\n"
     return mdText
 }
 
 
 function printVariables(dataset) {
-    var mdText = `## Variables \n`
+    var mdText = `## Variables   \n`
 
-    for (const col of dataset.columns) {
-        mdText += `### var '${col.id}' \n`
-        mdText += `**Variable name:** ${col.name} \n`
-        mdText += `**Variable representation type:** ${getVarRepresentationType(col)} \n`
+    var ii=0
+    for (var col of dataset.columns) {
+        mdText += `#### ${ii}. '${col.id}'   \n`
+        mdText += ` - **Variable name:** ${col.name}   \n`
+        mdText += ` - **Variable representation type:** ${getVarRepresentationType(col)}   \n`
         if (col.label) {
-            mdText += `**Label:** ${col.label} \n`
+            mdText += ` - **Label:** ${col.label}   \n`
         }
         if (col.description) {
-            mdText += `**Variable description:** ${col.description} \n`
+            mdText += ` - **Variable description:** ${col.description}   \n`
         }
 
         if (col.hasIntendedDataType.type === "numeric") {
             mdText += printVariableStats(col)
         }
 
+
         if (col.codeValues && col.codeValues.length > 0) {
             mdText += printVariableCodeValues(col)
         }
 
-        mdText += '\n'
-
+        mdText += '  \n'
+        ii++
 
 
     }
