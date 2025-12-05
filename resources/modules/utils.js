@@ -7,24 +7,6 @@ import { readDDiCString } from './importers/ddi-c-xml-importer.js'
 import { checksum } from '../helpers/checksum.ts'
 
 const webR = new WebR();
-await webR.init();
-console.info('Installing R packages...');
-
-const data = await fetch('resources/libs/r/library.data.gz');
-const metadata = await fetch('resources/libs/r/library.js.metadata');
-
-const options = {
-  packages: [{
-    blob: await data.blob(),
-    metadata: await metadata.json()
-  }]
-};
-const rLibraryPath = '/my-library';
-await webR.FS.mkdir(rLibraryPath);
-await webR.FS.mount("WORKERFS", options, rLibraryPath);
-await webR.evalRVoid(`.libPaths(c(.libPaths(), "${rLibraryPath}"))`);
-await webR.evalR('library("DDIwR")');
-console.info('R packages installed');
 
 export class Parser{
   static async parseFile(file, doneCallback){
@@ -52,7 +34,32 @@ export class Parser{
     }
   }
 
+  static async installRPackages() {
+    await webR.init();
+    console.info('Installing R packages...');
+    
+    const data = await fetch('resources/libs/r/library.data.gz');
+    const metadata = await fetch('resources/libs/r/library.js.metadata');
+    
+    const options = {
+      packages: [{
+        blob: await data.blob(),
+        metadata: await metadata.json()
+      }]
+    };
+    const rLibraryPath = '/my-library';
+    await webR.FS.mkdir(rLibraryPath);
+    await webR.FS.mount("WORKERFS", options, rLibraryPath);
+    await webR.evalRVoid(`.libPaths(c(.libPaths(), "${rLibraryPath}"))`);
+    await webR.evalR('library("DDIwR")');
+    console.info('R packages installed');
+  }
+
   static async parseDDIwR(file, dataset, done){
+    if (!webR.initialized) {
+      await Parser.installRPackages();
+    }
+    
     const reader = new FileReader();
     const basename  = file.name.substr(0, file.name.lastIndexOf('.'));
 
@@ -65,9 +72,9 @@ export class Parser{
 
       // run the DDIwR conversion to extract DDI-C 2.6 metadata
       await webR.evalR(`DDIwR::convert("`+file.name+`", to="DDI", embed=FALSE)`);
-      
+
       console.debug('Files done, reading...');
-      
+
       // read the DDI-C 2.6 XML file from the webR filesystem
       var readDdiResult = await webR.FS.readFile('/home/web_user/'+basename+'.xml');
       var ddiString = new TextDecoder().decode(readDdiResult);
@@ -128,8 +135,8 @@ export class Parser{
   }
 
   static parseDelimtedTextString(string, dataset, done){
-    var results = Papa.parse(string);     
-    dataset.data = results.data       
+    var results = Papa.parse(string);
+    dataset.data = results.data
     dataset.delimiter = results.meta.delimiter
     dataset.linebreak = results.meta.linebreak
 
@@ -137,12 +144,12 @@ export class Parser{
     if(dataset.firstRowIsHeader){
       results.data.shift()
     }
-    dataset.data = results.data  
+    dataset.data = results.data
 
     for(let i = 0 ; i < dataset.columns.length ; i++){
       dataset.columns[i].valuesUnique = [... new Set(dataset.data.map(d => d[i+1]))]
       dataset.columns[i].valuesUnique.sort(function(a, b){return a-b})
-      dataset.columns[i].hasIntendedDataType = RepresentationTypes.find(e => 
+      dataset.columns[i].hasIntendedDataType = RepresentationTypes.find(e =>
         e.id === guessDataType(dataset.columns[i].valuesUnique)
       )
     }
@@ -250,6 +257,7 @@ const RepresentationTypes= [
   {id: "Date", label: "Date", type: "datetime" },
   {id: "GYearMonth", label: "YearMonth", type: "datetime" },
   {id: "GYear", label: "Year", type: "datetime" },
+  {id: "Year", label: "Year", type: "datetime" },
   {id: "GMonthDay", label: "MonthDay", type: "datetime" },
   {id: "GDay", label: "Day", type: "datetime" },
   {id: "GMonth", label: "Month", type: "datetime" },
@@ -398,42 +406,107 @@ function guessDataType(values) {
   // Other
   */
 
-  // Boolean
-  if (values.every(i => (/^(?:true|false|1|0)$/i.test(i)) || isEmpty(i))) return 'Boolean';
+  // Handle empty arrays
+  if (!values || values.length === 0) {
+    return 'String';
+  }
 
-  // Unasigned byte
+  // Helper function to convert value to number for range checks
+  const toNumber = (val) => {
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+      const num = Number(val);
+      return isNaN(num) ? null : num;
+    }
+    return null;
+  };
+
+  // Boolean
+  if (values.every(i => (/^(?:true|false|1|0)$/i.test(String(i))) || isEmpty(i))) return 'Boolean';
+
+  // Year (check before other numeric types, but only if it's clearly a year pattern)
+  // Integer-valued year, e.g., 2005. Can be 4-digit (1900-2099) or 2-digit (00-99)
+  // Only recognize as Year if at least one value is a 4-digit year to avoid false positives
+  const yearValues = values.filter(i => !isEmpty(i));
+  if (yearValues.length > 0) {
+    const allMatchYearPattern = yearValues.every(i => {
+      const str = String(i);
+      return /^(19|20)?\d{2}$/.test(str);
+    });
+    if (allMatchYearPattern) {
+      // Check if at least one is a 4-digit year (1900-2099)
+      const hasFourDigitYear = yearValues.some(i => {
+        const str = String(i);
+        return /^(19|20)\d{2}$/.test(str) && str.length === 4;
+      });
+      // Only return Year if we have at least one 4-digit year
+      // This prevents 2-digit numbers like [10, 12, 32] from being misidentified as Year
+      if (hasFourDigitYear) {
+        return 'Year';
+      }
+    }
+  }
+
+  // Byte (signed, most restrictive)
+  // Whole numbers in the range -128 - 127.
+  if (values.every(i => {
+    if (isEmpty(i)) return true;
+    const num = toNumber(i);
+    return num !== null && num >= -128 && num <= 127 && Number.isInteger(num);
+  })) return 'Byte';
+
+  // Unsigned byte
   // Whole numbers in the range 0 - 255.
-  if (values.every(i => (/^\d+$/.test(i) && i >= 0 && i <= 255) || isEmpty(i))) return 'UnsignedByte';
+  if (values.every(i => {
+    if (isEmpty(i)) return true;
+    const num = toNumber(i);
+    return num !== null && num >= 0 && num <= 255 && Number.isInteger(num);
+  })) return 'UnsignedByte';
+
+  // Short (signed)
+  // Whole numbers in the range -32768 - 32767.
+  if (values.every(i => {
+    if (isEmpty(i)) return true;
+    const num = toNumber(i);
+    return num !== null && num >= -32768 && num <= 32767 && Number.isInteger(num);
+  })) return 'Short';
 
   // Unsigned short
   // Whole numbers in the range 0 - 65535.
-  if (values.every(i => (/^\d+$/.test(i) && i >= 0 && i <= 65535) || isEmpty(i))) return 'UnsignedShort';
+  if (values.every(i => {
+    if (isEmpty(i)) return true;
+    const num = toNumber(i);
+    return num !== null && num >= 0 && num <= 65535 && Number.isInteger(num);
+  })) return 'UnsignedShort';
 
   // Unsigned int
   // Whole numbers in the range 0 - 4294967295.
-  if (values.every(i => (/^\d+$/.test(i) && i >= 0 && i <= 4294967295) || isEmpty(i))) return 'UnsignedInt';
+  if (values.every(i => {
+    if (isEmpty(i)) return true;
+    const num = toNumber(i);
+    return num !== null && num >= 0 && num <= 4294967295 && Number.isInteger(num);
+  })) return 'UnsignedInt';
 
   // Unsigned long
   // Whole numbers in the range 0 - 18446744073709551615.
-  if (values.every(i => (/^\d+$/.test(i) && i >= 0 && i <= 18446744073709551615) || isEmpty(i))) return 'UnsignedLong';
-
-  // Byte
-  // Whole numbers in the range -128 - 127.
-  if (values.every(i => (/^-?\d+$/.test(i) && i >= -128 && i <= 127) || isEmpty(i))) return 'Byte';
-
-  // Short
-  // Whole numbers in the range -32768 - 32767.
-  if (values.every(i => (/^-?\d+$/.test(i) && i >= -32768 && i <= 32767) || isEmpty(i))) return 'Short';
+  // Note: JavaScript can only safely represent integers up to Number.MAX_SAFE_INTEGER
+  if (values.every(i => {
+    if (isEmpty(i)) return true;
+    const num = toNumber(i);
+    return num !== null && num >= 0 && num <= Number.MAX_SAFE_INTEGER && Number.isInteger(num);
+  })) return 'UnsignedLong';
 
   const regex = {
-      NonNegativeInteger: /^[1-9]\d*$/,
-      NonPositiveInteger: /^-[1-9]\d*$/,
-      PositiveInteger: /^\d+$/,
+      PositiveInteger: /^[1-9]\d*$/,
       NegativeInteger: /^-\d+$/,
+      NonNegativeInteger: /^\d+$/,
+      NonPositiveInteger: /^(0|-\d+)$/,
       Integer: /^-?\d+$/,
-      Decimal: /^[+-]?\d*([.,]\d+)?$/,
-      // Double / Float
-      Double: /^(- ?)?(\d+([.,]\d+([eE]-?\d+)?|([eE]\d+))?|INF)$/,
+      // Decimal: Must have at least one digit, allows optional sign and decimal separator (comma or dot)
+      Decimal: /^[+-]?(\d+([.,]\d+)?|[.,]\d+)$/,
+      // Double / Float: Supports scientific notation, INF, and optional sign with space
+      // Pattern: optional sign+space, then either: number with optional decimal and scientific notation, or INF
+      Double: /^(- ?)?(\d+([.,]\d+)?([eE][+-]?\d+)?|\d+[eE][+-]?\d+|INF)$/,
 
       DateTime: /^(19|20)(\d{2})-(0\d|1[0-2])-([0-2]\d|3[01])[T ]([0-1]\d|2[0-3]):([0-5]\d)(:([0-5]\d)(\.\d{1,3})?)?(Z|[+-]([0-1]\d|2[0-3]):([0-5]\d))?$/,
       // Date
@@ -441,26 +514,50 @@ function guessDataType(values) {
       Date: /^(19|20)(\d{2})-(0\d|1[0-2])-([0-2]\d|3[01])(-([0-1]\d|2[0-3]):([0-5]\d))?$/,
       // Time
       // Left-truncated dateTime, e.g., 13:20:00-05:00 (1:20 pm for Eastern Standard Time U.S.).
-      Time: /^([0-1]\d|2[0-3]):([0-5]\d)(:([0-5]\d)(\.\d{1,3})?)?([+-]([0-1]\d|2[0-3]):([0-5]\d))?$/,
+      Time: /^([0-1]?\d|2[0-3]):([0-5]\d)(:([0-5]\d)(\.\d{1,3})?)?([+-]([0-1]?\d|2[0-3]):([0-5]\d))?( ?(a|p)\.?m\.?)?$/,
       // YearMonth
-      // Integer-valued year and month, e.g., 2004-11.
-      GYearMonth: /^(19|20)\d{2}-(0\d|1[0-2])$/,
-      // Year
-      // Integer-valued year, e.g., 2005.
-      GYear: /^(19|20)\d{2}$/,
+      // Integer-valued year and month, e.g., 2004-11. Month must be 1-12 (allows single or double digit)
+      GYearMonth: /^(19|20)\d{2}-(0?[1-9]|1[0-2])$/,
       // MonthDay
-      // Integer-valued month and day, e.g., 12-31.
-      GMonthDay: /^(0\d|1[0-2])-([0-2]\d|3[01])$/,
+      // Integer-valued month and day, e.g., 12-31. Month 1-12, Day 1-31 (allows single or double digit, note: doesn't validate day count per month)
+      GMonthDay: /^(0?[1-9]|1[0-2])-([0-2]?\d|3[01])$/,
 
       HexBinary: /^(?:[0-9a-fA-F]{2})+$/,
-      Base64Binary: /^(?:[A-Za-z0-9+/]{4})*$/,
-      AnyURI: /^(?:ftps?|https?|wss?):\/\/(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(?:\/\S*)?$/,
-      Duration: /^(-)?P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)(?:\.(\d+))?S)?)?$/,
+      Base64Binary: /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/,
+      AnyURI: /^(?:(?:ftps?|https?|wss?):\/\/(?:(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d+)?(?:\/\S*)?|mailto:[^\s@]+@[^\s@]+\.[^\s@]+)$/,
+      Duration: /^-?P(?!T?$)(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?!$)(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/,
   }
 
+  // Check Date instances before regex matching (Date objects should be converted to strings for regex)
+  if (values.every(i => {
+    if (isEmpty(i)) return true;
+    if (i instanceof Date) return true;
+    const str = String(i);
+    return regex['DateTime'].test(str);
+  })) return 'DateTime';
+
+  if (values.every(i => {
+    if (isEmpty(i)) return true;
+    if (i instanceof Date) return true;
+    const str = String(i);
+    return regex['Date'].test(str);
+  })) return 'Date';
+
+  if (values.every(i => {
+    if (isEmpty(i)) return true;
+    if (i instanceof Date) return true;
+    const str = String(i);
+    return regex['Time'].test(str);
+  })) return 'Time';
+
+  // Check other regex patterns
   let result = null;
   for (let regexKey in regex) {
-      if (values.every(i => regex[regexKey].test(i) || isEmpty(i))) {
+      if (values.every(i => {
+        if (isEmpty(i)) return true;
+        const str = String(i);
+        return regex[regexKey].test(str);
+      })) {
           result = regexKey;
           break;
       }
@@ -473,7 +570,7 @@ function guessDataType(values) {
   // Finite sequences of characters. A character is an atomic unit of written communication; it is not further specified except to note that every character has a corresponding Universal Character Set code point (which is an integer).
   if(values.every(i => typeof i === "string" || isEmpty(i))) return 'String';
 
-  return null;
+  return 'Other';
 }
 
 function guessDelimiter(csvContent){
