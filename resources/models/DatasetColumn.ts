@@ -15,7 +15,7 @@ export class DatasetColumn {
   public varFormat: VarFormat;
   public responseUnit: string | undefined;
   public valuesUnique: any[] = [];
-  public hasIntendedDataType: boolean | undefined;
+  public hasIntendedDataType: { id: string, label: string, type: string } | undefined;
   public dataType: string = "text";
   public question: Question;
   public minValue: number | undefined;
@@ -23,6 +23,8 @@ export class DatasetColumn {
   public uuid: string = window.crypto.randomUUID();
   public codeListUuid: string = window.crypto.randomUUID();
   public categorySchemeUuid: string = window.crypto.randomUUID();
+  public agency?: string;
+  public version?: string;
 
   constructor(id: string) {
     this.id = id;
@@ -31,7 +33,7 @@ export class DatasetColumn {
     this.varFormat = new VarFormat();
   }
 
-  public getConceptScheme(): any {
+  public getConceptScheme() {
     const conceptScheme: {
       "@id": string;
       "@type": string;
@@ -58,7 +60,7 @@ export class DatasetColumn {
     }
     for (const v of this.valuesUnique) {
       this.codeValues.push(
-        new CodeValue(v, null, this.values.filter((e) => e === v).length)
+        new CodeValue(v, undefined, this.values.filter((e) => e === v).length)
       );
     }
   }
