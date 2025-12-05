@@ -2,6 +2,7 @@
 import { Dataset } from './models/Dataset.ts'
 import { RepresentationTypes, Parser } from './modules/utils.js'
 import { ref, reactive, computed } from 'vue'
+import { Marked } from 'marked';
 import About from './components/About.vue'
 import LoadingSpinner from './components/LoadingSpinner.vue'
 import DebugSection from './components/DebugSection.vue'
@@ -12,6 +13,8 @@ import { toDdiCdiJsonLd } from './modules/formatters/ddi-cdi-json-ld.js'
 import { toMarkdown} from './modules/formatters/markdown.js'
 import { saveFileBrowser } from './helpers/browser.ts'
 import { watch } from 'vue'
+
+
 
 
 const app = reactive({
@@ -37,8 +40,12 @@ const appMetadata = computed(() => {
 	)
 })
 
+const marked = new Marked({ gfm: true });
+
 const output = computed(() => {
 	return {
+
+		
 		filename: input.file?.name?.split('.').slice(0, -1).join('.'),
 		csv: [
 			input.dataset.columns.map(e => e.name).join(input.dataset.delimiter),
@@ -49,6 +56,7 @@ const output = computed(() => {
 		ddil : toDdiLXml(input.dataset),
 		ddi40l : toDdi40LJson(input.dataset),
 		markdown: toMarkdown(input.dataset),
+		html: marked.parse(toMarkdown(input.dataset)) // html is generated from the markdown through the "marked" library
 
 	}
 })
