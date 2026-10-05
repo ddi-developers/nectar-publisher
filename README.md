@@ -1,9 +1,5 @@
 # Nectar Publisher 🐝
 
-> [!NOTE]
-> **The branch with [WebR](https://github.com/ddi-developers/nectar-publisher/tree/web-r) (to import SPSS etc) also have better support for importing npm packages us this branch as a base during the hackathon**
-
-
 Document your tabular datasets and create codebooks and machine actionable metadata using DDI.
 
 > [!NOTE]
@@ -27,13 +23,13 @@ Document your tabular datasets and create codebooks and machine actionable metad
 - [ ] DDI-Lifecycle 3.3 variable documentation
 
 ### Output
-- [ ] Metadata
-  - [ ] DDI-Codebook 2.5 XML
-  - [ ] DDI-Lifecycle 3.3 XML
-  - [ ] DDI-CDI JSON-LD
+- [x] Metadata
+  - [x] DDI-Codebook 2.5 XML
+  - [x] DDI-Lifecycle 3.3 XML
+  - [x] DDI-CDI JSON-LD
 - [ ] Codebook
-  - [ ] Markdown
-  - [ ] Html
+  - [x] Markdown
+  - [x] Html
   - [ ] Pdf
 
 ### Plugin system to push metadata & data to external repository
@@ -84,6 +80,9 @@ Document your tabular datasets and create codebooks and machine actionable metad
 1. run `npm install`
 2. run `npm run dev`
 3. Open `http://localhost:5173` in your browser
+
+## Run tests
+`npm run test`
 
 ## License
 
