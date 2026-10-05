@@ -16,7 +16,7 @@ Document your tabular datasets and create codebooks and machine actionable metad
 ### Dataset inputs
 - [x] CSV / TSV - files
 - [x] Excel / ODS spreadsheet
-- [x] SPSS (local in browser via [WebR](https://www.npmjs.com/package/webr) with [DDIwR](https://cran.r-project.org/web/packages/DDIwR/))
+- [x] SPSS, Stata, SAS (local in browser via [WebR](https://www.npmjs.com/package/webr) with [DDIwR](https://cran.r-project.org/web/packages/DDIwR/))
 
 ### Metadata imports
 - [ ] DDI-Codebook 2.5 variable documentation
@@ -69,6 +69,11 @@ Document your tabular datasets and create codebooks and machine actionable metad
       - [ ] label
       - [ ] isMissingValue
       - [ ] frequency
+
+## Requirements
+
+* [Node.js](https://nodejs.org/) 24 or newer
+* npm 11 or newer (included with Node.js 24)
 
 ## Build instructions
 
