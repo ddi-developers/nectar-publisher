@@ -1,4 +1,6 @@
-import { DatasetColumn } from './DatasetColumn.js';
+import { DatasetColumn } from './DatasetColumn.ts';
+import { Questionnaire } from '../modules/questionnaire-model.js';
+import { questionnaireEmpty } from '../modules/questionnaire-example.js';
 
 // Helper function for UUID generation, that works in both browser and Node.js
 function getRandomUUID(): string {
@@ -26,8 +28,8 @@ export class Dataset {
   public errors: any[] = [];
   public columns: DatasetColumn[] = [];
   public uuid: string = getRandomUUID();
-  public instrumentUuid: string = getRandomUUID();
-  public sequenceUuid: string = getRandomUUID();
+  public dataCollectionUuid: string = getRandomUUID();
+  public associatedQuestionnaire: Questionnaire = new Questionnaire(questionnaireEmpty);
 
   constructor(
     input: string | undefined,

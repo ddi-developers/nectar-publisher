@@ -1,4 +1,3 @@
-import { Question } from './Question.ts';
 import { VarFormat } from './VarFormat.ts';
 import { CodeValue } from './CodeValue.ts';
 
@@ -17,7 +16,6 @@ export class DatasetColumn {
   public valuesUnique: any[] = [];
   public hasIntendedDataType: { id: string, label: string, type: string } | undefined;
   public dataType: string = "text";
-  public question: Question;
   public minValue: number | undefined;
   public maxValue: number | undefined;
   public uuid: string = window.crypto.randomUUID();
@@ -29,7 +27,6 @@ export class DatasetColumn {
   constructor(id: string) {
     this.id = id;
     this.name = id;
-    this.question = new Question();
     this.varFormat = new VarFormat();
   }
 
@@ -60,7 +57,7 @@ export class DatasetColumn {
     }
     for (const v of this.valuesUnique) {
       this.codeValues.push(
-        new CodeValue(v, undefined, this.values.filter((e) => e === v).length)
+        new CodeValue({ value: v, frequency: this.values.filter((e) => e === v).length })
       );
     }
   }

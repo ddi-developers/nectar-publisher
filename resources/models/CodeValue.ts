@@ -1,15 +1,33 @@
+export interface CodeValueInit {
+  value: any;
+  label?: string;
+  frequency?: number | string | null;
+  isMissingValue?: boolean;
+  uuid?: string;
+  categoryUuid?: string;
+}
+
 export class CodeValue {
   public value: any;
-  public frequency: number | undefined;
+  public frequency: number | string | null;
   public label: string | undefined;
-  public isMissingValue: boolean | undefined;
-  public uuid: string = window.crypto.randomUUID();
-  public categoryUuid: string = window.crypto.randomUUID();
+  public isMissingValue: boolean;
+  public uuid: string;
+  public categoryUuid: string;
 
-  constructor(value: any, label?: string, frequency?: number, isMissingValue?: boolean) {
+  constructor({
+    value,
+    label,
+    frequency = null,
+    isMissingValue = false,
+    uuid = window.crypto.randomUUID(),
+    categoryUuid = window.crypto.randomUUID(),
+  }: CodeValueInit) {
+    this.uuid = uuid;
+    this.categoryUuid = categoryUuid;
     this.value = value;
-    this.frequency = frequency;
     this.label = label;
+    this.frequency = frequency;
     this.isMissingValue = isMissingValue;
   }
 }

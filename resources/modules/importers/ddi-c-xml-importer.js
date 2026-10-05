@@ -44,8 +44,7 @@ function readDDiCString(ddiCString){
                     var categoryLabel = vars[i].children[j].getElementsByTagName('labl')[0].textContent.trim();
                     var categoryValue = vars[i].children[j].getElementsByTagName('catValu')[0].textContent.trim();
                     var catStat = vars[i].children[j].getElementsByTagName('catStat')[0];
-                    var codeValue = new CodeValue(categoryValue, categoryLabel);
-                    codeValue.frequency = catStat ? catStat.textContent.trim() : null;
+                    var codeValue = new CodeValue({ value: categoryValue, label: categoryLabel, frequency: catStat ? catStat.textContent.trim() : null });
                     variable.codeValues.push(codeValue);
                     variable.coded = true;
                     
