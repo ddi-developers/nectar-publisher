@@ -1,4 +1,6 @@
-export const questionnaireExample = {
+import type { QuestionnaireInit } from './Questionnaire.ts';
+
+export const questionnaireExample: QuestionnaireInit = {
 	"intervInstrSchemeUuid": "iis123",
 	"respInstrSchemeUuid": "ris123",
 	"progInstrSchemeUuid": "pis123",
@@ -227,7 +229,7 @@ export const questionnaireExample = {
 		}
     ]
 }
-export const questionnaireEmpty = {
+export const questionnaireEmpty: QuestionnaireInit = {
 	"intervInstrSchemeUuid": "iis123",
 	"respInstrSchemeUuid": "ris123",
 	"progInstrSchemeUuid": "pis123",

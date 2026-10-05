@@ -1,6 +1,6 @@
 import { DatasetColumn } from './DatasetColumn.ts';
-import { Questionnaire } from '../modules/questionnaire-model.js';
-import { questionnaireEmpty } from '../modules/questionnaire-example.js';
+import { Questionnaire } from './Questionnaire.ts';
+import { questionnaireEmpty } from './questionnaireExample.ts';
 
 // Helper function for UUID generation, that works in both browser and Node.js
 function getRandomUUID(): string {
