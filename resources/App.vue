@@ -125,6 +125,12 @@ function saveFile(content, type, fileName) {
 							<ul class="dropdown-menu">
 								<li><a class="dropdown-item" href="#" @click="saveFile(output.ddic, 'application/xml', output.filename + '.ddi-c.xml')">DDI Codebook 2.5</a></li>
 								<li><a class="dropdown-item" href="#" @click="saveFile(output.ddil, 'application/xml', output.filename + '.ddi-l.xml')">DDI Lifecycle 3.3</a></li>
+								<li><a class="dropdown-item" href="#" @click="saveFile(output.ddiCdi, 'application/ld+json', output.filename + '.jsonld')">DDI-CDI (JSON-LD)</a></li>
+								<li><a class="dropdown-item" href="#" @click="saveFile(output.ddi40l, 'application/json', output.filename + '.ddi-4.0-l.json')">DDI Lifecycle 4.0 (JSON)</a></li>
+								<li><hr class="dropdown-divider"></li>
+								<li><a class="dropdown-item" href="#" @click="saveFile(output.markdown, 'text/markdown', output.filename + '.md')">Markdown</a></li>
+								<li><a class="dropdown-item" href="#" @click="saveFile(output.html, 'text/html', output.filename + '.html')">HTML</a></li>
+								<li><a class="dropdown-item" href="#" @click="saveFile(output.csv, 'text/csv', output.filename + '.csv')">CSV</a></li>
 							</ul>
 						</div>
 					</li>
