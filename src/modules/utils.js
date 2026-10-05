@@ -8,6 +8,17 @@ import { checksum } from '../helpers/checksum.ts'
 
 const webR = new WebR();
 var webRLoaded = false;
+
+// The R library is a gzip-compressed Emscripten data package. Hosts that don't send
+// "Content-Encoding: gzip" (e.g. GitHub Pages) deliver it still compressed, which
+// breaks the file offsets used when mounting it, so decompress it here if needed.
+async function gunzipIfNeeded(blob) {
+  const magic = new Uint8Array(await blob.slice(0, 2).arrayBuffer());
+  if (magic[0] !== 0x1f || magic[1] !== 0x8b) {
+    return blob;
+  }
+  return await new Response(blob.stream().pipeThrough(new DecompressionStream('gzip'))).blob();
+}
 var rObjectExists = false;
 
 export class Parser{
@@ -45,7 +56,7 @@ export class Parser{
     
     const options = {
       packages: [{
-        blob: await data.blob(),
+        blob: await gunzipIfNeeded(await data.blob()),
         metadata: await metadata.json()
       }]
     };
