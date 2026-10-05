@@ -40,8 +40,8 @@ export class Parser{
     await webR.init();
     console.info('Installing R packages...');
     
-    const data = await fetch('resources/libs/r/library.data.gz');
-    const metadata = await fetch('resources/libs/r/library.js.metadata');
+    const data = await fetch(import.meta.env.BASE_URL + 'libs/r/library.data.gz');
+    const metadata = await fetch(import.meta.env.BASE_URL + 'libs/r/library.js.metadata');
     
     const options = {
       packages: [{
