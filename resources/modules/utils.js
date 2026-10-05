@@ -186,10 +186,6 @@ export class Parser{
   }
 
   static async parseDelimitedText(file, dataset, done){
-    if (!webRLoaded) {
-      await Parser.installRPackages();
-    }
-
     return new Promise((resolve) => {
       Papa.parse(file, {
         complete: async function (results) {
@@ -205,19 +201,6 @@ export class Parser{
           }
           dataset.data = results.data;
 
-          const basename  = file.name.substr(0, file.name.lastIndexOf('.'));
-          const textEncoder = new TextEncoder();
-          const encoded = textEncoder.encode(results.data.join('\n'));
-
-          await webR.FS.writeFile(`/home/web_user/`+ basename +`.csv`, encoded);
-          console.debug('parseDelimitedText: File uploaded and written to /home/web_user/'+ basename + '.csv');
-
-          var loadRObjectResult = await webR.evalR(`robject <- read.csv('/home/web_user/`+basename+`.csv')`);
-          var dataFrameRender = await webR.evalR(`print(head(robject, n = 3L))`);
-
-          console.debug('parseDelimitedText: Dataframe loaded. head(robject, n = 3L) contains -^');
-          console.debug(await dataFrameRender.toJs());
-  
           for (const [i, c] of columnIds.entries()) {
             var column = new DatasetColumn(c);
             column.position = i;
