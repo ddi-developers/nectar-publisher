@@ -26,6 +26,7 @@ watch(() => app.debug, (newValue) => {
 	localStorage.setItem('nectar-publisher-debug', newValue);
 });
 
+const loading = ref(false)
 const codeListVariableIndex = ref(null)
 const input = reactive({
 	file: null,
@@ -64,7 +65,12 @@ const output = computed(() => {
 async function importDataFromFile(event) {
     input.file = event.target.files[0]
     document.title = `${input.file.name} - ${ appMetadata.name}`
-    await Parser.parseFile(input.file, (d) => input.dataset = d)
+    loading.value = true
+    try {
+        await Parser.parseFile(input.file, (d) => input.dataset = d)
+    } finally {
+        loading.value = false
+    }
 }
 
 function deleteQuestion(uuid) {
@@ -78,6 +84,11 @@ function saveFile(content, type, fileName) {
 }
 </script>
 <template>
+	<div v-if="loading" class="loading-overlay" role="status" aria-live="polite">
+		<LoadingSpinner text="Loading" />
+		<p class="mt-3 mb-0">Importing file, the first import of some formats can take a while...</p>
+	</div>
+
 	<!-- Application toolbar -->
 	<nav class="row navbar navbar-expand-lg bg-body-tertiary">
 		<div class="container-fluid">
