@@ -16,7 +16,7 @@ defineProps({
 				<div class="modal-body">
 					<p>
 						Nectar Publisher aims to be a lightweight simple documentation tool for tabular data.<br>
-						Currenty supports CSV, TSV and XLSX.
+						Currenty supports CSV, TSV, XLS, XLSX and SPSS files.
 					</p>
 					
 					Libraries used:
