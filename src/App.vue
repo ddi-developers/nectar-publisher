@@ -274,7 +274,7 @@ function saveFile(content, type, fileName) {
 
 			  <!-- Questionnaire tab -->
 			  <div class="tab-pane fade" id="questionnaire-tab-pane" role="tabpanel" aria-labelledby="questionnaire-tab" tabindex="0">
-				  <form class="mb-2" v-for="(question, index) in input.dataset.associatedQuestionnaire.questions" :class="{ 'bg-light rounded': question.showDetails }">
+				  <form class="mb-2" v-for="(question, index) in input.dataset.associatedQuestionnaire.questions" :key="question.uuid" :class="{ 'bg-light rounded': question.showDetails }">
 					  <div class="row">
 						  <div class="shrink">
 							  <span>{{index}}</span>
@@ -404,6 +404,9 @@ function saveFile(content, type, fileName) {
 					  </Transition>
 					  <hr class="mt-4" />
 				  </form>
+				  <button @click="input.dataset.associatedQuestionnaire.addQuestion()" type="button"
+						  class="btn btn-outline-secondary">➕ add question
+				  </button>
 			  </div>
 
 	</div>

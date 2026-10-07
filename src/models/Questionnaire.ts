@@ -201,4 +201,16 @@ export class Questionnaire {
     this.items = items.map((i) => new CodeList(i));
     this.answers = answers.map((a) => new CodeList(a));
   }
+
+  addQuestion(): void {
+    this.questions.push(
+      new Question({
+        questionNr: String(this.questions.length + 1),
+        questionName: "",
+        answerType: "text",
+        multipleItems: false,
+        multipleAnswers: false,
+      })
+    );
+  }
 }
