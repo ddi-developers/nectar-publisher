@@ -1,5 +1,11 @@
 import { createTextNode, formatXml } from "../../helpers/xml.ts";
 import type { Dataset } from "../../models/Dataset.ts";
+import { DdiVocabularies, ContributorRoles, TimeMethods, SamplingProcedures, CollectionModes } from "../../models/StudyInformation.ts";
+
+// only keep entries with content
+function filled(list: string[]): string[] {
+    return list.map(e => (e ?? "").trim()).filter(e => e != "")
+}
 
 function toDdiLXml(input: Dataset){
     const nsddi = "ddi:instance:3_3"
@@ -33,30 +39,37 @@ function toDdiLXml(input: Dataset){
 	fragmentInstance.appendChild(topLevelReference)
 			
 	let studyUnitFragment = xmlDoc.createElementNS(nsddi, "ddi:Fragment")
-	let studyUnit = xmlDoc.createElementNS(nspi, "s:StudyUnit")
+	let studyUnit = xmlDoc.createElementNS(nss, "s:StudyUnit")
 	studyUnit.appendChild(createTextNode(xmlDoc, nsr, "r:URN", "urn:ddi:int.example:" + uuidSU + ":1.0.0"))
 	studyUnit.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
 	studyUnit.appendChild(createTextNode(xmlDoc, nsr, "r:ID", uuidSU))
 	studyUnit.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
-	studyUnit.appendChild(createTextNode(xmlDoc, nsr, "r:Abstract", input.studyDescription))
+	studyUnit.appendChild(createCitation())
+	let studyAbstract = xmlDoc.createElementNS(nsr, "r:Abstract")
+	studyAbstract.appendChild(createTextNode(xmlDoc, nsr, "r:Content", input.studyDescription))
+	studyUnit.appendChild(studyAbstract)
+	const coverage = createCoverage()
+	if (coverage) {
+		studyUnit.appendChild(coverage)
+	}
 	let dataCollectionReference = xmlDoc.createElementNS(nsr, "r:DataCollectionReference")
 	dataCollectionReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
 	dataCollectionReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", input.dataCollectionUuid))
 	dataCollectionReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
 	dataCollectionReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "DataCollection"))
 	studyUnit.appendChild(dataCollectionReference)
-	let physicalInstanceReference = xmlDoc.createElementNS(nsr, "r:PhysicalInstanceReference")
-	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
-	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", uuidPI))
-	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
-	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "PhysicalInstance"))
-	studyUnit.appendChild(physicalInstanceReference)
 	let logicalProductReference = xmlDoc.createElementNS(nsr, "r:LogicalProductReference")
 	logicalProductReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
 	logicalProductReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", uuidLP))
 	logicalProductReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
 	logicalProductReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "LogicalProduct"))
 	studyUnit.appendChild(logicalProductReference)
+	let physicalInstanceReference = xmlDoc.createElementNS(nsr, "r:PhysicalInstanceReference")
+	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
+	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", uuidPI))
+	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+	physicalInstanceReference.appendChild(createTextNode(xmlDoc, nsr, "r:TypeOfObject", "PhysicalInstance"))
+	studyUnit.appendChild(physicalInstanceReference)
 	studyUnitFragment.appendChild(studyUnit)
 	fragmentInstance.appendChild(studyUnitFragment)
 
@@ -253,6 +266,13 @@ function toDdiLXml(input: Dataset){
 	dataCollection.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
 	dataCollection.appendChild(createTextNode(xmlDoc, nsr, "r:ID", input.dataCollectionUuid))
 	dataCollection.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+	const methodology = createMethodology()
+	if (methodology) {
+		dataCollection.appendChild(methodology)
+	}
+	for (const collectionEvent of createCollectionEvents()) {
+		dataCollection.appendChild(collectionEvent)
+	}
 	let instrumentReference = xmlDoc.createElementNS(nsr, "r:InstrumentReference")
 	instrumentReference.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
 	instrumentReference.appendChild(createTextNode(xmlDoc, nsr, "r:ID", input.associatedQuestionnaire.uuid))
@@ -659,6 +679,158 @@ function toDdiLXml(input: Dataset){
             piFragment.appendChild(pi)
             fragmentInstance.appendChild(piFragment)
         }
+    }
+
+    // adds URN, Agency, ID and Version to an identifiable or versionable element
+    function identify(element: Element, uuid: string = window.crypto.randomUUID()): Element {
+        element.appendChild(createTextNode(xmlDoc, nsr, "r:URN", "urn:ddi:" + agency + ":" + uuid + ":1.0.0"))
+        element.appendChild(createTextNode(xmlDoc, nsr, "r:Agency", agency))
+        element.appendChild(createTextNode(xmlDoc, nsr, "r:ID", uuid))
+        element.appendChild(createTextNode(xmlDoc, nsr, "r:Version", "1.0.0"))
+        return element
+    }
+
+    // creates a CodeValueType element, that references a DDI controlled vocabulary if the value is part of it
+    function createCodeValue(ns: string, name: string, value: string, vocabulary: { id: string, version: string }, terms: string[]): Element {
+        const element = createTextNode(xmlDoc, ns, name, value)
+        if (terms.includes(value)) {
+            element.setAttribute("controlledVocabularyID", vocabulary.id)
+            element.setAttribute("controlledVocabularyAgencyName", "DDI Alliance")
+            element.setAttribute("controlledVocabularyVersionID", vocabulary.version)
+        }
+        return element
+    }
+
+    function createBibliographicName(name: string, elementName: string, affiliation: string): Element {
+        const element = xmlDoc.createElementNS(nsr, elementName)
+        if (affiliation.trim()) {
+            element.setAttribute("affiliation", affiliation.trim())
+        }
+        element.appendChild(createTextNode(xmlDoc, nsr, "r:String", name.trim()))
+        return element
+    }
+
+    function createCitation(): Element {
+        const study = input.studyInformation
+        const citation = xmlDoc.createElementNS(nsr, "r:Citation")
+        const title = xmlDoc.createElementNS(nsr, "r:Title")
+        title.appendChild(createTextNode(xmlDoc, nsr, "r:String", input.studyName ?? ""))
+        citation.appendChild(title)
+        for (const [titleType, elementName] of [["Subtitle", "r:SubTitle"], ["AlternativeTitle", "r:AlternateTitle"]] as [string, string][]) {
+            for (const altTitle of study.alternativeTitles.filter(t => t.type == titleType && t.title.trim())) {
+                const element = xmlDoc.createElementNS(nsr, elementName)
+                element.appendChild(createTextNode(xmlDoc, nsr, "r:String", altTitle.title.trim()))
+                citation.appendChild(element)
+            }
+        }
+        for (const person of study.principalInvestigators.filter(p => p.name.trim())) {
+            const creator = xmlDoc.createElementNS(nsr, "r:Creator")
+            creator.appendChild(createBibliographicName(person.name, "r:CreatorName", person.institution))
+            citation.appendChild(creator)
+        }
+        for (const name of filled(study.publishers)) {
+            const publisher = xmlDoc.createElementNS(nsr, "r:Publisher")
+            publisher.appendChild(createBibliographicName(name, "r:PublisherName", ""))
+            citation.appendChild(publisher)
+        }
+        for (const person of study.contributors.filter(p => p.name.trim())) {
+            const contributor = xmlDoc.createElementNS(nsr, "r:Contributor")
+            contributor.appendChild(createBibliographicName(person.name, "r:ContributorName", person.institution))
+            if (person.role) {
+                contributor.appendChild(createCodeValue(nsr, "r:ContributorRole", person.role, DdiVocabularies.contributorRole, ContributorRoles))
+            }
+            citation.appendChild(contributor)
+        }
+        if (study.publicationYear) {
+            const publicationDate = xmlDoc.createElementNS(nsr, "r:PublicationDate")
+            publicationDate.appendChild(createTextNode(xmlDoc, nsr, "r:SimpleDate", String(study.publicationYear)))
+            citation.appendChild(publicationDate)
+        }
+        return citation
+    }
+
+    function createCoverage(): Element | null {
+        const study = input.studyInformation
+        const subjects = filled(study.subjects)
+        const keywords = filled(study.topicKeywords)
+        const thesozKeywords = filled(study.thesozKeywords)
+        const countries = filled(study.countries)
+        if (subjects.length + keywords.length + thesozKeywords.length + countries.length == 0) {
+            return null
+        }
+        const coverage = xmlDoc.createElementNS(nsr, "r:Coverage")
+        if (subjects.length + keywords.length + thesozKeywords.length > 0) {
+            const topicalCoverage = identify(xmlDoc.createElementNS(nsr, "r:TopicalCoverage"))
+            for (const subject of subjects) {
+                topicalCoverage.appendChild(createTextNode(xmlDoc, nsr, "r:Subject", subject))
+            }
+            for (const keyword of keywords) {
+                topicalCoverage.appendChild(createTextNode(xmlDoc, nsr, "r:Keyword", keyword))
+            }
+            for (const keyword of thesozKeywords) {
+                const element = createTextNode(xmlDoc, nsr, "r:Keyword", keyword)
+                element.setAttribute("controlledVocabularyName", "TheSoz")
+                topicalCoverage.appendChild(element)
+            }
+            coverage.appendChild(topicalCoverage)
+        }
+        if (countries.length > 0) {
+            const spatialCoverage = identify(xmlDoc.createElementNS(nsr, "r:SpatialCoverage"))
+            for (const country of countries) {
+                spatialCoverage.appendChild(createTextNode(xmlDoc, nsr, "r:CountryCode", country))
+            }
+            coverage.appendChild(spatialCoverage)
+        }
+        return coverage
+    }
+
+    function createMethodology(): Element | null {
+        const study = input.studyInformation
+        const timeMethods = filled(study.timeMethods)
+        const samplingProcedures = filled(study.samplingProcedures)
+        if (timeMethods.length + samplingProcedures.length == 0) {
+            return null
+        }
+        const methodology = identify(xmlDoc.createElementNS(nsd, "d:Methodology"))
+        for (const value of timeMethods) {
+            const timeMethod = identify(xmlDoc.createElementNS(nsd, "d:TimeMethod"))
+            timeMethod.appendChild(createCodeValue(nsd, "d:TypeOfTimeMethod", value, DdiVocabularies.timeMethod, TimeMethods))
+            methodology.appendChild(timeMethod)
+        }
+        for (const value of samplingProcedures) {
+            const samplingProcedure = identify(xmlDoc.createElementNS(nsd, "d:SamplingProcedure"))
+            samplingProcedure.appendChild(createCodeValue(nsd, "d:TypeOfSamplingProcedure", value, DdiVocabularies.samplingProcedure, SamplingProcedures))
+            methodology.appendChild(samplingProcedure)
+        }
+        return methodology
+    }
+
+    // one collection event per collection period, the modes of collection are added to each event
+    function createCollectionEvents(): Element[] {
+        const study = input.studyInformation
+        const modes = filled(study.collectionModes)
+        const periods = study.collectionPeriods.filter(p => p.start.trim() || p.end.trim())
+        const events: Element[] = []
+        for (const period of (periods.length > 0 ? periods : (modes.length > 0 ? [null] : []))) {
+            const collectionEvent = identify(xmlDoc.createElementNS(nsd, "d:CollectionEvent"))
+            if (period) {
+                const collectionDate = xmlDoc.createElementNS(nsd, "d:DataCollectionDate")
+                if (period.start.trim() && period.end.trim()) {
+                    collectionDate.appendChild(createTextNode(xmlDoc, nsr, "r:StartDate", period.start.trim()))
+                    collectionDate.appendChild(createTextNode(xmlDoc, nsr, "r:EndDate", period.end.trim()))
+                } else {
+                    collectionDate.appendChild(createTextNode(xmlDoc, nsr, "r:SimpleDate", (period.start || period.end).trim()))
+                }
+                collectionEvent.appendChild(collectionDate)
+            }
+            for (const value of modes) {
+                const modeOfCollection = identify(xmlDoc.createElementNS(nsd, "d:ModeOfCollection"))
+                modeOfCollection.appendChild(createCodeValue(nsd, "d:TypeOfModeOfCollection", value, DdiVocabularies.modeOfCollection, CollectionModes))
+                collectionEvent.appendChild(modeOfCollection)
+            }
+            events.push(collectionEvent)
+        }
+        return events
     }
 
     const prolog = '<?xml version="1.0" encoding="UTF-8"?>'

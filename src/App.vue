@@ -6,6 +6,9 @@ import { Marked } from 'marked';
 import About from './components/About.vue'
 import LoadingSpinner from './components/LoadingSpinner.vue'
 import DebugSection from './components/DebugSection.vue'
+import RepeatableField from './components/RepeatableField.vue'
+import { TitleTypes, Availabilities, ContributorRoles, TimeMethods, SamplingProcedures, CollectionModes, CollectionDateFormats,
+	AlternativeTitle, Agent, Contributor, CollectionPeriod, Publication } from './models/StudyInformation.ts'
 import { toDdiCXml } from './modules/formatters/ddi-c-xml.js'
 import { toDdiLXml } from './modules/formatters/ddi-l-xml.js'
 import { toDdi40LJson } from './modules/formatters/ddi-40-l-json.js'
@@ -41,7 +44,14 @@ const input = reactive({
 	dataset: new Dataset()
 })
 const cv = {
-	representationType: RepresentationTypes
+	representationType: RepresentationTypes,
+	titleTypes: TitleTypes,
+	availabilities: Availabilities,
+	contributorRoles: ContributorRoles,
+	timeMethods: TimeMethods,
+	samplingProcedures: SamplingProcedures,
+	collectionModes: CollectionModes,
+	collectionDateFormats: CollectionDateFormats
 }
 const appMetadata = computed(() => {
 	return JSON.parse(
@@ -191,6 +201,163 @@ function saveFile(content, type, fileName) {
 		</li>
 	</ul>
 	<div class="tab-content" id="myTabContent" v-if="input.dataset.fileName != null">
+
+	<!-- Dataset tab -->
+	<div class="tab-pane fade" id="dataset-tab-pane" role="tabpanel" aria-labelledby="dataset-tab" tabindex="0">
+		<form class="mb-2">
+			<div class="col-md-12 label">
+				<label class="form-label" for="filename">File name</label>
+				<input v-model="input.dataset.fileName" type="text" class="form-control" id="filename" disabled readonly>
+			</div>
+			<div class="col-md-12 label">
+				<label class="form-label" for="studyname">Study name</label>
+				<input v-model="input.dataset.studyName" type="text" class="form-control" id="studyname">
+			</div>
+			<div class="col-md-12 label">
+				<label class="form-label" for="studydescription">Study description</label>
+				<textarea v-model="input.dataset.studyDescription" class="form-control" id="studydescription" rows="4"></textarea>
+			</div>
+			<div class="col-md-12 label">
+				<label class="form-label" for="studygroupname">Study group name</label>
+				<input v-model="input.dataset.studyGroupName" type="text" class="form-control" id="studygroupname">
+			</div>
+			<div class="col-md-12 label">
+				<label class="form-label" for="studygroupdescription">Study group description (only if study group has a name)</label>
+				<textarea v-model="input.dataset.studyGroupDescription" class="form-control" id="studygroupdescription" rows="4"></textarea>
+			</div>
+
+			<!-- Basic information -->
+			<h5 class="mt-4">Basic information</h5>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="alternativeTitle-0">Further titles</label>
+				<div class="input-group mb-1" v-for="(altTitle, index) in input.dataset.studyInformation.alternativeTitles">
+					<input v-model="altTitle.title" :id="'alternativeTitle-' + index" type="text" class="form-control" placeholder="Title">
+					<select v-model="altTitle.type" class="form-select" title="type of title">
+						<option value="" disabled>Type of title</option>
+						<option v-for="titleType in cv.titleTypes" :value="titleType">{{ titleType }}</option>
+					</select>
+					<button @click="input.dataset.studyInformation.alternativeTitles.splice(index, 1)" type="button" class="btn btn-outline-secondary" title="remove entry">🗑</button>
+				</div>
+				<button @click="input.dataset.studyInformation.alternativeTitles.push(new AlternativeTitle())" type="button" class="btn btn-outline-secondary btn-sm" title="add entry">➕</button>
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="principalInvestigator-0">Principal investigators</label>
+				<div class="input-group mb-1" v-for="(person, index) in input.dataset.studyInformation.principalInvestigators">
+					<input v-model="person.name" :id="'principalInvestigator-' + index" type="text" class="form-control" placeholder="Last name, first name">
+					<input v-model="person.institution" type="text" class="form-control" placeholder="Institution">
+					<button @click="input.dataset.studyInformation.principalInvestigators.splice(index, 1)" type="button" class="btn btn-outline-secondary" title="remove entry">🗑</button>
+				</div>
+				<button @click="input.dataset.studyInformation.principalInvestigators.push(new Agent())" type="button" class="btn btn-outline-secondary btn-sm" title="add entry">➕</button>
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="publisher-0">Publishers</label>
+				<RepeatableField id="publisher" :list="input.dataset.studyInformation.publishers" />
+			</div>
+			<div class="row mb-2">
+				<div class="col-md-6">
+					<label class="form-label" for="publicationYear">Publication year</label>
+					<input v-model.number="input.dataset.studyInformation.publicationYear" type="number" step="1" min="1900" placeholder="yyyy" class="form-control" id="publicationYear">
+				</div>
+				<div class="col-md-6">
+					<label class="form-label" for="availability">Availability</label>
+					<select v-model="input.dataset.studyInformation.availability" class="form-select" id="availability">
+						<option v-for="availability in cv.availabilities" :value="availability">{{ availability }}</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="contributor-0">Contributors</label>
+				<div class="input-group mb-1" v-for="(person, index) in input.dataset.studyInformation.contributors">
+					<input v-model="person.name" :id="'contributor-' + index" type="text" class="form-control" placeholder="Last name, first name">
+					<input v-model="person.institution" type="text" class="form-control" placeholder="Institution">
+					<select v-model="person.role" class="form-select" title="type of contribution">
+						<option value="" disabled>Type of contribution</option>
+						<option v-for="role in cv.contributorRoles" :value="role">{{ role }}</option>
+					</select>
+					<button @click="input.dataset.studyInformation.contributors.splice(index, 1)" type="button" class="btn btn-outline-secondary" title="remove entry">🗑</button>
+				</div>
+				<button @click="input.dataset.studyInformation.contributors.push(new Contributor())" type="button" class="btn btn-outline-secondary btn-sm" title="add entry">➕</button>
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="funder-0">Funders</label>
+				<RepeatableField id="funder" :list="input.dataset.studyInformation.funders" />
+			</div>
+
+			<!-- Content description -->
+			<h5 class="mt-4">Content description</h5>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="subject-0">Subjects</label>
+				<RepeatableField id="subject" :list="input.dataset.studyInformation.subjects" />
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="topicKeyword-0">Topic keywords</label>
+				<RepeatableField id="topicKeyword" :list="input.dataset.studyInformation.topicKeywords" />
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="thesozKeyword-0">TheSoz keywords</label>
+				<RepeatableField id="thesozKeyword" :list="input.dataset.studyInformation.thesozKeywords" />
+			</div>
+
+			<!-- Methodology -->
+			<h5 class="mt-4">Methodology</h5>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="country-0">Geographic coverage – country (ISO 3166)</label>
+				<RepeatableField id="country" :list="input.dataset.studyInformation.countries" placeholder="e.g. DE" />
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="region-0">Geographic coverage – region</label>
+				<RepeatableField id="region" :list="input.dataset.studyInformation.regions" />
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="timeMethod-0">Time dimension</label>
+				<RepeatableField id="timeMethod" :list="input.dataset.studyInformation.timeMethods" :options="cv.timeMethods" select />
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="universe">Universe</label>
+				<input v-model="input.dataset.studyInformation.universe" type="text" class="form-control" id="universe">
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="samplingProcedure-0">Sampling procedures</label>
+				<RepeatableField id="samplingProcedure" :list="input.dataset.studyInformation.samplingProcedures" :options="cv.samplingProcedures" placeholder="Choose an option" />
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="collectionMode-0">Modes of data collection</label>
+				<RepeatableField id="collectionMode" :list="input.dataset.studyInformation.collectionModes" :options="cv.collectionModes" placeholder="Choose an option" />
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="collectionDateFormat">Date format of collection period</label>
+				<select v-model="input.dataset.studyInformation.collectionDateFormat" class="form-select" id="collectionDateFormat">
+					<option v-for="dateFormat in cv.collectionDateFormats" :value="dateFormat">{{ dateFormat }}</option>
+				</select>
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="collectionStart-0">Collection period (start – end)</label>
+				<div class="input-group mb-1" v-for="(period, index) in input.dataset.studyInformation.collectionPeriods">
+					<input v-model="period.start" :id="'collectionStart-' + index" :placeholder="input.dataset.studyInformation.collectionDateFormat" type="text" class="form-control" title="start of data collection">
+					<input v-model="period.end" :placeholder="input.dataset.studyInformation.collectionDateFormat" type="text" class="form-control" title="end of data collection">
+					<button @click="input.dataset.studyInformation.collectionPeriods.splice(index, 1)" type="button" class="btn btn-outline-secondary" title="remove entry">🗑</button>
+				</div>
+				<button @click="input.dataset.studyInformation.collectionPeriods.push(new CollectionPeriod())" type="button" class="btn btn-outline-secondary btn-sm" title="add entry">➕</button>
+			</div>
+
+			<!-- Further notes -->
+			<h5 class="mt-4">Further notes</h5>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="publicationCitation-0">Publications</label>
+				<div class="input-group mb-1" v-for="(publication, index) in input.dataset.studyInformation.publications">
+					<textarea v-model="publication.citation" :id="'publicationCitation-' + index" class="form-control" rows="2" placeholder="Citation"></textarea>
+					<input v-model="publication.identifier" type="text" class="form-control" placeholder="Publication ID (e.g. DOI)">
+					<button @click="input.dataset.studyInformation.publications.splice(index, 1)" type="button" class="btn btn-outline-secondary" title="remove entry">🗑</button>
+				</div>
+				<button @click="input.dataset.studyInformation.publications.push(new Publication())" type="button" class="btn btn-outline-secondary btn-sm" title="add entry">➕</button>
+			</div>
+			<div class="col-md-12 label mb-2">
+				<label class="form-label" for="studyNotes">Notes on project/data</label>
+				<textarea v-model="input.dataset.studyInformation.notes" class="form-control" id="studyNotes" rows="4"></textarea>
+			</div>
+		</form>
+	</div>
+
 	<div class="tab-pane fade show active" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab" tabindex="0">
 	<section id="variables">
 		<div class="row">

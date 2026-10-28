@@ -54,6 +54,51 @@ TODOS:
 */
 
 import type { Dataset } from "../../models/Dataset"
+import type { Agent, Contributor } from "../../models/StudyInformation"
+
+// InternationalString with one language specific string; written as value object, so it is not read as IRI
+function internationalString(text: string, type: string = 'InternationalString') {
+    return {
+        '@type': type,
+        'languageSpecificString': { '@value': text }
+    }
+}
+
+function agentInRole(agent: Agent | Contributor) {
+    const agentName: Record<string, any> = internationalString(agent.name.trim(), 'BibliographicName')
+    if (agent.institution.trim()) {
+        agentName['affiliation'] = agent.institution.trim()
+    }
+    const role = 'role' in agent && agent.role ? {
+        '@type': 'PairedControlledVocabularyEntry',
+        'term': {
+            '@type': 'ControlledVocabularyEntry',
+            'entryValue': agent.role
+        }
+    } : undefined
+    return {
+        '@type': 'AgentInRole',
+        'agentName': agentName,
+        'role': role
+    }
+}
+
+function catalogDetails(input: Dataset) {
+    const study = input.studyInformation
+    const titlesOfType = (type: string) => study.alternativeTitles
+        .filter(t => t.type == type && t.title.trim())
+        .map(t => internationalString(t.title.trim()))
+    return {
+        '@type': 'CatalogDetails',
+        'title': input.studyName ? internationalString(input.studyName) : undefined,
+        'subTitle': titlesOfType('Subtitle'),
+        'alternativeTitle': titlesOfType('AlternativeTitle'),
+        'summary': input.studyDescription ? internationalString(input.studyDescription) : undefined,
+        'creator': study.principalInvestigators.filter(p => p.name.trim()).map(agentInRole),
+        'contributor': study.contributors.filter(p => p.name.trim()).map(agentInRole),
+        'publisher': study.publishers.filter(p => p.trim()).map(name => agentInRole({ name: name, institution: '' }))
+    }
+}
 
 export function toDdiCdiJsonLd(input: Dataset){
     const dataStore = {
@@ -103,7 +148,8 @@ export function toDdiCdiJsonLd(input: Dataset){
     const wideDataset = {
         '@id' : "#wideDataset-" + input.uuid,
         '@type': "WideDataset",
-        "isStructuredBy": "#wideDataStructure"
+        "isStructuredBy": "#wideDataStructure",
+        "catalogDetails": catalogDetails(input)
     }
 
     const wideDataStructure = {

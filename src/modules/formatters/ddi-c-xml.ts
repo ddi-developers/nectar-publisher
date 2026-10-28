@@ -2,6 +2,12 @@ import { createTextNode, formatXml } from "../../helpers/xml.ts";
 import type { Dataset } from "../../models/Dataset.ts";
 import type { DatasetColumn } from "../../models/DatasetColumn.ts";
 import type { VarFormat } from "../../models/VarFormat.ts";
+import { DdiVocabularies, vocabularyUri, TimeMethods, SamplingProcedures, CollectionModes } from "../../models/StudyInformation.ts";
+
+// only keep entries with content
+function filled(list: string[]): string[] {
+    return list.map(e => (e ?? "").trim()).filter(e => e != "")
+}
 
 function toDdiCXml(input: Dataset){
     const ns = "ddi:codebook:2_5"
@@ -14,15 +20,7 @@ function toDdiCXml(input: Dataset){
     codeBook.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema")
     codeBook.setAttribute("xsi:schemaLocation", "ddi:codebook:2_5 http://www.ddialliance.org/Specification/DDI-Codebook/2.5/XMLSchema/codebook.xsd")
 
-    if (input.studyName) {
-        const stdyDscr = xmlDoc.createElementNS(ns, "stdyDscr")
-        const citation = xmlDoc.createElementNS(ns, "citation")
-        const titlStmt = xmlDoc.createElementNS(ns, "titlStmt")
-        titlStmt.appendChild(createTextNode(xmlDoc, ns, "titl", input.studyName))
-        citation.appendChild(titlStmt)
-        stdyDscr.appendChild(citation)
-        codeBook.appendChild(stdyDscr)
-    }
+    codeBook.appendChild(createStdyDscr())
 
     const fileDscr = xmlDoc.createElementNS(ns, "fileDscr")
     const fileTxt = xmlDoc.createElementNS(ns, "fileTxt")
@@ -128,6 +126,166 @@ function toDdiCXml(input: Dataset){
     }
 
     codeBook.appendChild(dataDscr)
+
+    // creates a conceptual text element, values of a DDI controlled vocabulary are wrapped in a concept element
+    function createConceptualText(name: string, value: string, vocabulary: { id: string, version: string }, terms: string[]): Element {
+        if (!terms.includes(value)) {
+            return createTextNode(xmlDoc, ns, name, value)
+        }
+        const element = xmlDoc.createElementNS(ns, name)
+        const concept = createTextNode(xmlDoc, ns, "concept", value)
+        concept.setAttribute("vocab", vocabulary.id)
+        concept.setAttribute("vocabURI", vocabularyUri(vocabulary))
+        element.appendChild(concept)
+        return element
+    }
+
+    function createStdyDscr(): Element {
+        const study = input.studyInformation
+        const stdyDscr = xmlDoc.createElementNS(ns, "stdyDscr")
+
+        // citation
+        const citation = xmlDoc.createElementNS(ns, "citation")
+        const titlStmt = xmlDoc.createElementNS(ns, "titlStmt")
+        titlStmt.appendChild(createTextNode(xmlDoc, ns, "titl", input.studyName ?? ""))
+        for (const [titleType, elementName] of [["Subtitle", "subTitl"], ["AlternativeTitle", "altTitl"], ["TranslatedTitle", "parTitl"]] as [string, string][]) {
+            for (const altTitle of study.alternativeTitles.filter(t => t.type == titleType && t.title.trim())) {
+                titlStmt.appendChild(createTextNode(xmlDoc, ns, elementName, altTitle.title.trim()))
+            }
+        }
+        citation.appendChild(titlStmt)
+        const principalInvestigators = study.principalInvestigators.filter(p => p.name.trim())
+        const contributors = study.contributors.filter(p => p.name.trim())
+        if (principalInvestigators.length + contributors.length > 0) {
+            const rspStmt = xmlDoc.createElementNS(ns, "rspStmt")
+            for (const person of principalInvestigators) {
+                const authEnty = createTextNode(xmlDoc, ns, "AuthEnty", person.name.trim())
+                if (person.institution.trim()) {
+                    authEnty.setAttribute("affiliation", person.institution.trim())
+                }
+                rspStmt.appendChild(authEnty)
+            }
+            for (const person of contributors) {
+                const othId = createTextNode(xmlDoc, ns, "othId", person.name.trim())
+                if (person.role) {
+                    othId.setAttribute("role", person.role)
+                }
+                if (person.institution.trim()) {
+                    othId.setAttribute("affiliation", person.institution.trim())
+                }
+                rspStmt.appendChild(othId)
+            }
+            citation.appendChild(rspStmt)
+        }
+        const funders = filled(study.funders)
+        if (funders.length > 0) {
+            const prodStmt = xmlDoc.createElementNS(ns, "prodStmt")
+            for (const funder of funders) {
+                prodStmt.appendChild(createTextNode(xmlDoc, ns, "fundAg", funder))
+            }
+            citation.appendChild(prodStmt)
+        }
+        stdyDscr.appendChild(citation)
+
+        // study info
+        const stdyInfo = xmlDoc.createElementNS(ns, "stdyInfo")
+        const subjects = filled(study.subjects)
+        const keywords = filled(study.topicKeywords)
+        const thesozKeywords = filled(study.thesozKeywords)
+        if (subjects.length + keywords.length + thesozKeywords.length > 0) {
+            const subject = xmlDoc.createElementNS(ns, "subject")
+            for (const keyword of keywords) {
+                subject.appendChild(createTextNode(xmlDoc, ns, "keyword", keyword))
+            }
+            for (const keyword of thesozKeywords) {
+                const element = createTextNode(xmlDoc, ns, "keyword", keyword)
+                element.setAttribute("vocab", "TheSoz")
+                subject.appendChild(element)
+            }
+            for (const topic of subjects) {
+                subject.appendChild(createTextNode(xmlDoc, ns, "topcClas", topic))
+            }
+            stdyInfo.appendChild(subject)
+        }
+        if (input.studyDescription) {
+            stdyInfo.appendChild(createTextNode(xmlDoc, ns, "abstract", input.studyDescription))
+        }
+        const periods = study.collectionPeriods.filter(p => p.start.trim() || p.end.trim())
+        const countries = filled(study.countries)
+        const regions = filled(study.regions)
+        if (periods.length + countries.length + regions.length > 0 || study.universe.trim()) {
+            const sumDscr = xmlDoc.createElementNS(ns, "sumDscr")
+            for (const period of periods) {
+                for (const [event, date] of [["start", period.start.trim()], ["end", period.end.trim()]] as [string, string][]) {
+                    if (date) {
+                        const collDate = createTextNode(xmlDoc, ns, "collDate", date)
+                        collDate.setAttribute("date", date)
+                        collDate.setAttribute("event", period.start.trim() && period.end.trim() ? event : "single")
+                        sumDscr.appendChild(collDate)
+                    }
+                }
+            }
+            for (const country of countries) {
+                const nation = createTextNode(xmlDoc, ns, "nation", country)
+                nation.setAttribute("abbr", country)
+                sumDscr.appendChild(nation)
+            }
+            for (const region of regions) {
+                sumDscr.appendChild(createTextNode(xmlDoc, ns, "geogCover", region))
+            }
+            if (study.universe.trim()) {
+                sumDscr.appendChild(createTextNode(xmlDoc, ns, "universe", study.universe.trim()))
+            }
+            stdyInfo.appendChild(sumDscr)
+        }
+        if (stdyInfo.hasChildNodes()) {
+            stdyDscr.appendChild(stdyInfo)
+        }
+
+        // method
+        const timeMethods = filled(study.timeMethods)
+        const samplingProcedures = filled(study.samplingProcedures)
+        const collectionModes = filled(study.collectionModes)
+        if (timeMethods.length + samplingProcedures.length + collectionModes.length > 0) {
+            const method = xmlDoc.createElementNS(ns, "method")
+            const dataColl = xmlDoc.createElementNS(ns, "dataColl")
+            for (const value of timeMethods) {
+                dataColl.appendChild(createConceptualText("timeMeth", value, DdiVocabularies.timeMethod, TimeMethods))
+            }
+            for (const value of samplingProcedures) {
+                dataColl.appendChild(createConceptualText("sampProc", value, DdiVocabularies.samplingProcedure, SamplingProcedures))
+            }
+            for (const value of collectionModes) {
+                dataColl.appendChild(createConceptualText("collMode", value, DdiVocabularies.modeOfCollection, CollectionModes))
+            }
+            method.appendChild(dataColl)
+            stdyDscr.appendChild(method)
+        }
+
+        // data access
+        if (study.availability) {
+            const dataAccs = xmlDoc.createElementNS(ns, "dataAccs")
+            const setAvail = xmlDoc.createElementNS(ns, "setAvail")
+            setAvail.appendChild(createTextNode(xmlDoc, ns, "avlStatus", study.availability))
+            dataAccs.appendChild(setAvail)
+            stdyDscr.appendChild(dataAccs)
+        }
+
+        // other study material
+        const publications = study.publications.filter(p => p.citation.trim())
+        if (publications.length > 0) {
+            const othrStdyMat = xmlDoc.createElementNS(ns, "othrStdyMat")
+            for (const publication of publications) {
+                othrStdyMat.appendChild(createTextNode(xmlDoc, ns, "relPubl", publication.citation.trim()))
+            }
+            stdyDscr.appendChild(othrStdyMat)
+        }
+
+        if (study.notes.trim()) {
+            stdyDscr.appendChild(createTextNode(xmlDoc, ns, "notes", study.notes.trim()))
+        }
+        return stdyDscr
+    }
 
     const prolog = '<?xml version="1.0" encoding="UTF-8"?>'
     const xmlString = new XMLSerializer().serializeToString(xmlDoc)

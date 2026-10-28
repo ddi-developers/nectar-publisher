@@ -1,6 +1,7 @@
 import { DatasetColumn } from './DatasetColumn.ts';
 import { Questionnaire } from './Questionnaire.ts';
 import { questionnaireEmpty } from './questionnaireExample.ts';
+import { StudyInformation } from './StudyInformation.ts';
 
 // Helper function for UUID generation, that works in both browser and Node.js
 function getRandomUUID(): string {
@@ -30,6 +31,7 @@ export class Dataset {
   public uuid: string = getRandomUUID();
   public dataCollectionUuid: string = getRandomUUID();
   public associatedQuestionnaire: Questionnaire = new Questionnaire(questionnaireEmpty);
+  public studyInformation: StudyInformation = new StudyInformation();
 
   constructor(
     input: string | undefined,
