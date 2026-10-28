@@ -28,6 +28,14 @@ watch(() => app.debug, (newValue) => {
 
 const loading = ref(false)
 const codeListVariableIndex = ref(null)
+const answerSet = reactive({
+	uuid: '',
+	newValue: '',
+	newLabel: ''
+})
+const selectedAnswerSet = computed(() => {
+	return input.dataset.associatedQuestionnaire.answers.find(a => a.uuid == answerSet.uuid)
+})
 const input = reactive({
 	file: null,
 	dataset: new Dataset()
@@ -76,6 +84,17 @@ async function importDataFromFile(event) {
 function deleteQuestion(uuid) {
 	const questionnaire = input.dataset.associatedQuestionnaire
 	questionnaire.questions = questionnaire.questions.filter(q => q.uuid !== uuid)
+}
+
+function addAnswerSetCode() {
+	if (!selectedAnswerSet.value) return
+	selectedAnswerSet.value.addCode(answerSet.newValue, answerSet.newLabel)
+	answerSet.newValue = ''
+	answerSet.newLabel = ''
+}
+
+function addAnswerSet() {
+	answerSet.uuid = input.dataset.associatedQuestionnaire.addAnswerSet().uuid
 }
 
 function saveFile(content, type, fileName) {
@@ -252,16 +271,22 @@ function saveFile(content, type, fileName) {
 							<label class="form-label">Decimal positions</label>
 							<input v-model.number="column.decimalPositions" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
 						</div>
-						<div v-if="column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal'" class="col-md-6">
+						<div v-if="column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal'" class="col-md-4">
 							<label class="form-label">Accuracy</label>
 							<input v-model.number="column.accuracy" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
 						</div>
-						<div class="col-md-6">
+						<div class="col-md-4">
 							<label class="form-label">Role</label>
 							<select v-model="column.role" name="role" id="role" class="form-select">
 								<option name="Identifier">Identifier</option>
 								<option name="Measure">Measure</option>
 								<option name="Attribute">Attribute</option>
+							</select>
+						</div>
+						<div class="col-md-4">
+							<label :for="'questionReference-' + index" class="form-label">Question Reference</label>
+							<select v-model="column.questionReference" :id="'questionReference-' + index" class="form-select">
+								<option v-for="question in input.dataset.associatedQuestionnaire.questions" :value="question.uuid">{{ question.questionName }}</option>
 							</select>
 						</div>
 					</div>
@@ -367,18 +392,20 @@ function saveFile(content, type, fileName) {
 								  </div>
 							  </div>
 							  <div v-if="question.answerType == 'coded'" class="row details mb-2">
-								  <div class="col-md-8">
-									  <label class="form-label">Set of answer categories</label>
-									  <input v-model="question.answerCodesReference" list="answer-list" type="text" class="form-control">
-									  <!-- not a good way to do it, just a temp list... -->
-									  <datalist id="answer-list">
-										  <option v-for="codeList in input.dataset.associatedQuestionnaire.answers" :value="codeList.uuid">{{ codeList.name }}</option>
-									  </datalist>
+								  <div class="col-md-2">
+									  <label :for="'answerCodesReference-' + index" class="form-label">Set of answer categories</label>
 								  </div>
-								  <div class="col-md-4">
+								  <div class="col-md-8">
+									  <select v-model="question.answerCodesReference" :id="'answerCodesReference-' + index" class="form-select">
+										  <option v-for="codeList in input.dataset.associatedQuestionnaire.answers" :value="codeList.uuid">{{ codeList.name }}</option>
+									  </select>
+								  </div>
+								  <div class="col-md-2 text-end">
 									  <button type="button"
+											  @click="answerSet.uuid = question.answerCodesReference ?? ''"
+											  data-bs-toggle="modal" data-bs-target="#answerSetModal"
 											  :class="{ 'bg-primary': question.showDetails }"
-											  class="btn btn-outline-secondary">manage sets
+											  class="btn btn-outline-secondary text-white">manage sets
 									  </button>
 								  </div>
 							  </div>
@@ -437,6 +464,64 @@ function saveFile(content, type, fileName) {
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#codeListModal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- MARK: Answer Set Modal -->
+	<div class="modal modal-dialog-scrollable fade" id="answerSetModal" tabindex="-1" aria-labelledby="answerSetModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="answerSetModalLabel">📦Sets of answer categories</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form class="mb-4" @submit.prevent>
+						<div class="mb-3">
+							<label for="answerSetSelect" class="form-label">Set</label>
+							<select v-model="answerSet.uuid" id="answerSetSelect" class="form-select">
+								<option v-for="codeList in input.dataset.associatedQuestionnaire.answers" :value="codeList.uuid">{{ codeList.name }}</option>
+							</select>
+						</div>
+						<div v-if="selectedAnswerSet" class="mb-3">
+							<label for="answerSetName" class="form-label">Set name</label>
+							<input v-model="selectedAnswerSet.name" id="answerSetName" type="text" class="form-control">
+						</div>
+						<div v-if="selectedAnswerSet" class="mb-3">
+							<label for="answerSetDescription" class="form-label">Set description</label>
+							<textarea v-model="selectedAnswerSet.description" id="answerSetDescription" class="form-control" rows="3"></textarea>
+						</div>
+						<template v-if="selectedAnswerSet">
+							<div class="row" v-for="(code, index) in selectedAnswerSet.codeValues">
+								<div class="col-md-4">
+									<label class="form-label" :class="{notFirst: (index > 0)}">Code</label>
+									<input v-model="code.value" type="text" class="form-control">
+								</div>
+								<div class="col-md-8">
+									<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
+									<input v-model="code.label" type="text" class="form-control">
+								</div>
+							</div>
+							<hr />
+							<div class="row">
+								<div class="col-md-4">
+									<label for="answerSetNewValue" class="form-label">New code</label>
+									<input v-model="answerSet.newValue" id="answerSetNewValue" type="text" class="form-control">
+								</div>
+								<div class="col-md-8">
+									<label for="answerSetNewLabel" class="form-label">New name</label>
+									<input v-model="answerSet.newLabel" id="answerSetNewLabel" type="text" class="form-control">
+								</div>
+							</div>
+						</template>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button @click="addAnswerSetCode()" :disabled="!selectedAnswerSet" type="button" class="btn btn-outline-secondary">➕ add code to set</button>
+					<button @click="addAnswerSet()" type="button" class="btn btn-outline-secondary">➕ add new set</button>
+					<button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
 				</div>
 			</div>
 		</div>

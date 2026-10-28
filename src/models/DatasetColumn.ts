@@ -21,6 +21,7 @@ export class DatasetColumn {
   public uuid: string = window.crypto.randomUUID();
   public codeListUuid: string = window.crypto.randomUUID();
   public categorySchemeUuid: string = window.crypto.randomUUID();
+  public questionReference: string;
   public agency?: string;
   public version?: string;
 

@@ -140,8 +140,8 @@ export class CodeList {
     this.codeValues = codeValues.map((cv) => new CodeValue(cv));
   }
 
-  addCode(): void {
-    this.codeValues.push(new CodeValue({ value: "", label: "" }));
+  addCode(value: any = "", label: string = ""): void {
+    this.codeValues.push(new CodeValue({ value, label }));
   }
 }
 
@@ -212,5 +212,11 @@ export class Questionnaire {
         multipleAnswers: false,
       })
     );
+  }
+
+  addAnswerSet(): CodeList {
+    const codeList = new CodeList({ name: `Answer set ${this.answers.length + 1}` });
+    this.answers.push(codeList);
+    return codeList;
   }
 }
