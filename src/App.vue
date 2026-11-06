@@ -109,11 +109,13 @@ function saveFile(content, type, fileName) {
 	</div>
 
 	<!-- Application toolbar -->
-	<nav class="row navbar navbar-expand-lg bg-body-tertiary">
+	<nav class="navbar navbar-expand-lg bg-body-tertiary px-3">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="#">
-				<span class="nectar-publisher-logo"></span> 
-				{{ appMetadata.name }} 
+			<a class="navbar-brand d-flex flex-wrap align-items-center gap-2 text-wrap" href="#">
+				<span class="d-inline-flex align-items-center gap-2 text-nowrap">
+					<span class="nectar-publisher-logo flex-shrink-0"></span>
+					<span>{{ appMetadata.name }}</span>
+				</span>
 				<span 
 					class="badge bg-secondary"
 					aria-label="version">
@@ -130,8 +132,8 @@ function saveFile(content, type, fileName) {
 				aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<div id="navbar" class="collapse navbar-collapse navbar-expand-md">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+			<div id="navbar" class="collapse navbar-collapse">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-2 align-items-lg-center">
 					<li class="nav-item">
 						<button 
 							@click="$refs.inputFile.click()" 
@@ -182,7 +184,8 @@ function saveFile(content, type, fileName) {
 			</div>
 		</div>
 	</nav>
-	<ul class="nav nav-tabs" id="myTab" role="tablist" v-if="input.dataset.fileName != null">
+	<main class="container-fluid px-3 px-xl-4 py-3">
+	<ul class="nav nav-tabs mb-3" id="myTab" role="tablist" v-if="input.dataset.fileName != null">
 		<li class="nav-item" role="presentation">
 			<button class="nav-link active" id="variable-tab" data-bs-toggle="tab" data-bs-target="#variable-tab-pane" type="button" role="tab" aria-controls="variable-tab-pane" aria-selected="true">📝Variables</button>
 		</li>
@@ -193,22 +196,29 @@ function saveFile(content, type, fileName) {
 	<div class="tab-content" id="myTabContent" v-if="input.dataset.fileName != null">
 	<div class="tab-pane fade show active" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab" tabindex="0">
 	<section id="variables">
-		<div class="row">
-			<form class="mb-2" v-for="(column, index) in input.dataset.columns" :class="{ 'bg-light rounded': column.showDetails }">
-				<div class="row">
-					<div class="shrink">
+		<div class="row g-2 g-md-1 align-items-end px-2 pb-2 editor-header d-none d-md-flex" aria-hidden="true">
+			<div class="col-auto shrink"><span class="invisible">0</span></div>
+			<div class="col-12 col-md-2"><span class="form-label mb-0">Name</span></div>
+			<div class="col-12 col-md"><span class="form-label mb-0">Label</span></div>
+			<div class="col-12 col-md-auto editor-type-column"><span class="form-label mb-0">Type</span></div>
+			<div class="col-6 col-md-auto variable-coded-column"><span class="form-label mb-0">Coded</span></div>
+			<div class="col-6 col-md-auto variable-details-column"><span class="form-label mb-0">Details</span></div>
+		</div>
+		<div class="d-flex flex-column gap-2 gap-md-1">
+			<form v-for="(column, index) in input.dataset.columns" class="row g-2 g-md-1 align-items-end align-items-md-center border rounded p-2 p-md-1" :class="{ 'bg-light': column.showDetails }">
+					<div class="col-auto shrink">
 						<span>{{column.position}}</span>
 					</div>
-					<div class="col-md-2">
-						<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
+					<div class="col-12 col-md-2">
+						<label class="form-label editor-field-label">Name</label>
 						<input v-model="column.name" type="text" class="form-control" disabled readonly>
 					</div>
-					<div class="col-md-5 label">
-						<label class="form-label" :class="{notFirst: (index > 0)}">Label</label>
+					<div class="col-12 col-md">
+						<label class="form-label editor-field-label">Label</label>
 						<input v-model="column.label" type="text" class="form-control">
 					</div>
-					<div class="col-md-2">
-						<label class="form-label" :class="{notFirst: (index > 0)}">Type</label>
+					<div class="col-12 col-md-auto editor-type-column">
+						<label class="form-label editor-field-label">Type</label>
 						<div class="input-group">
 							<select v-model="column.hasIntendedDataType" class="form-select">
 								<option v-for="colType in cv.representationType" :value="colType">{{ colType.label }}</option>
@@ -218,9 +228,8 @@ function saveFile(content, type, fileName) {
 							</Transition>
 						</div>
 					</div>
-					<div class="col-md-1">
-						<label class="form-label row codeCheckLabel"
-								:class="{notFirst: (index > 0)}">Coded</label>
+					<div class="col-6 col-md-auto variable-coded-column">
+						<label class="form-label editor-field-label">Coded</label>
 						<div class="btn-group" role="group" aria-label="coded variable">
 							<input v-model="column.coded" @change="column.createCodeList()" type="checkbox"
 									class="btn-check" :id="'coded-'+column.id" autocomplete="off">
@@ -234,23 +243,22 @@ function saveFile(content, type, fileName) {
 							</button>
 						</div>
 					</div>
-					<div class="col-md-1">
-						<label class="form-label row button-label"
-								:class="{notFirst: (index > 0)}">Details</label>
+					<div class="col-6 col-md-auto variable-details-column">
+						<label class="form-label editor-field-label">Details</label>
 						<button @click="column.showDetails = !column.showDetails" type="button"
 								:class="{ 'bg-primary': column.showDetails }"
 								class="btn btn-outline-secondary">⚙️
 						</button>
 					</div>
 
-				</div>
 				<Transition>
-					<div v-if="column.showDetails" class="row details mb-2">
-						<div class="mb-12">
+					<div v-if="column.showDetails" class="col-12">
+						<div class="row g-3 details">
+						<div class="col-12">
 							<label :for="'description-' + column.position" class="form-label">Description</label>
 							<textarea v-model="column.description" class="form-control" :id="'description-' + column.position" rows="4"></textarea>
 						</div>
-						<div v-if="column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal'" class="col-md-12">
+						<div v-if="column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal'" class="col-12">
 							<label class="form-label">Unit</label>
 							<input v-model="column.unit" list="unit-list" type="text" class="form-control">
 							<!-- not a good way to do it, just a temp list... -->
@@ -267,15 +275,15 @@ function saveFile(content, type, fileName) {
 								<option>pascal</option>
 							</datalist>
 						</div>
-						<div v-if="column.hasIntendedDataType.type == 'decimal'" class="col-md-6">
+						<div v-if="column.hasIntendedDataType.type == 'decimal'" class="col-12 col-md-6">
 							<label class="form-label">Decimal positions</label>
 							<input v-model.number="column.decimalPositions" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
 						</div>
-						<div v-if="column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal'" class="col-md-4">
+						<div v-if="column.hasIntendedDataType.type == 'numeric' || column.hasIntendedDataType.type == 'decimal'" class="col-12 col-md-4">
 							<label class="form-label">Accuracy</label>
 							<input v-model.number="column.accuracy" type="number" inputmode="numeric" pattern="[0-9]" step="1" min="0" class="form-control">
 						</div>
-						<div class="col-md-4">
+						<div class="col-12 col-md-4">
 							<label class="form-label">Role</label>
 							<select v-model="column.role" name="role" id="role" class="form-select">
 								<option name="Identifier">Identifier</option>
@@ -283,15 +291,15 @@ function saveFile(content, type, fileName) {
 								<option name="Attribute">Attribute</option>
 							</select>
 						</div>
-						<div class="col-md-4">
+						<div class="col-12 col-md-4">
 							<label :for="'questionReference-' + index" class="form-label">Question Reference</label>
 							<select v-model="column.questionReference" :id="'questionReference-' + index" class="form-select">
 								<option v-for="question in input.dataset.associatedQuestionnaire.questions" :value="question.uuid">{{ question.questionName }}</option>
 							</select>
 						</div>
+						</div>
 					</div>
 				</Transition>
-				<hr class="mt-4" />
 			</form>
 		</div>
 	</section>
@@ -299,21 +307,29 @@ function saveFile(content, type, fileName) {
 
 			  <!-- Questionnaire tab -->
 			  <div class="tab-pane fade" id="questionnaire-tab-pane" role="tabpanel" aria-labelledby="questionnaire-tab" tabindex="0">
-				  <form class="mb-2" v-for="(question, index) in input.dataset.associatedQuestionnaire.questions" :key="question.uuid" :class="{ 'bg-light rounded': question.showDetails }">
-					  <div class="row">
-						  <div class="shrink">
+				  <div class="row g-2 g-md-1 align-items-end px-2 pb-2 editor-header d-none d-md-flex" aria-hidden="true">
+					  <div class="col-auto shrink"><span class="invisible">0</span></div>
+					  <div class="col-12 col-md-2"><span class="form-label mb-0">Nr</span></div>
+					  <div class="col-12 col-md"><span class="form-label mb-0">Question Name</span></div>
+					  <div class="col-12 col-md-auto editor-type-column"><span class="form-label mb-0">Type</span></div>
+					  <div class="col-6 col-md-auto"><span class="form-label mb-0">Details</span></div>
+					  <div class="col-6 col-md-auto"><span class="form-label mb-0">Delete</span></div>
+				  </div>
+				  <div class="d-flex flex-column gap-2 gap-md-1">
+				  <form v-for="(question, index) in input.dataset.associatedQuestionnaire.questions" :key="question.uuid" class="row g-2 g-md-1 align-items-end align-items-md-center border rounded p-2 p-md-1" :class="{ 'bg-light': question.showDetails }">
+						  <div class="col-auto shrink">
 							  <span>{{index}}</span>
 						  </div>
-						  <div class="col-md-2">
-							  <label class="form-label" :class="{notFirst: (index > 0)}">Nr</label>
+						  <div class="col-12 col-md-2">
+							  <label class="form-label editor-field-label">Nr</label>
 							  <input v-model="question.questionNr" type="text" class="form-control">
 						  </div>
-						  <div class="col-md-5 label">
-							  <label class="form-label" :class="{notFirst: (index > 0)}">Question Name</label>
+						  <div class="col-12 col-md">
+							  <label class="form-label editor-field-label">Question Name</label>
 							  <input v-model="question.questionName" type="text" class="form-control">
 						  </div>
-						  <div class="col-md-2">
-							  <label class="form-label" :class="{notFirst: (index > 0)}">Type</label>
+						  <div class="col-12 col-md-auto editor-type-column">
+							  <label class="form-label editor-field-label">Type</label>
 							  <div class="input-group">
 								  <select v-model="question.answerType" class="form-select">
 									  <option>coded</option>
@@ -323,28 +339,27 @@ function saveFile(content, type, fileName) {
 								  </select>
 							  </div>
 						  </div>
-						  <div class="col-md-1">
-							  <label class="form-label row button-label"
-									 :class="{notFirst: (index > 0)}">Details</label>
+						  <div class="col-6 col-md-auto">
+							  <label class="form-label editor-field-label">Details</label>
 							  <button @click="question.showDetails = !question.showDetails" type="button"
 									  :class="{ 'bg-primary': question.showDetails }"
 									  class="btn btn-outline-secondary">⚙️
 							  </button>
 						  </div>
-						  <div class="col-md-1">
-							  <label class="form-label row button-label"
-									 :class="{notFirst: (index > 0)}">Delete</label>
+						  <div class="col-6 col-md-auto">
+							  <label class="form-label editor-field-label">Delete</label>
 							  <button @click="deleteQuestion(question.uuid)" type="button"
 									  :class="{ 'bg-primary': question.delete }"
 									  class="btn btn-outline-secondary">🗑
 							  </button>
 						  </div>
 
-					  </div>
 					  <Transition>
-						  <div v-if="question.showDetails" class="row details mb-2">
-							  <div class="row details">
-								  <div class="col-md-2">
+						  <div v-if="question.showDetails" class="col-12">
+							  <div class="row g-3 details mb-2">
+							  <div class="col-12">
+							  <div class="row g-3 details">
+								  <div class="col-12 col-md-2">
 									  <label class="form-label">multiple items</label>
 									  <div class="btn-group" role="group" aria-label="coded variable">
 										  <input v-model="question.multipleItems" @change="question.createItemList(input.dataset.associatedQuestionnaire)" type="checkbox"
@@ -355,7 +370,7 @@ function saveFile(content, type, fileName) {
 										  </label>
 									  </div>
 								  </div>
-								  <div class="col-md-2">
+								  <div class="col-12 col-md-2">
 									  <label class="form-label">multiple answers</label>
 									  <div class="btn-group" role="group" aria-label="coded variable">
 										  <input v-model="question.multipleAnswers" type="checkbox"
@@ -367,40 +382,48 @@ function saveFile(content, type, fileName) {
 									  </div>
 								  </div>
 							  </div>
-							  <div class="row details mb-2">
-								  <div class="col-md-2">
+							  </div>
+							  <div class="col-12">
+							  <div class="row g-2 details mb-2">
+								  <div class="col-12 col-md-2">
 									  <label :for="'introText-' + index" class="form-label">Question intro text</label>
 								  </div>
-								  <div class="col-md-10">
+								  <div class="col-12 col-md-10">
 									  <textarea v-model="question.introText" class="form-control" :id="'introText-' + index" rows="2"></textarea>
 								  </div>
 							  </div>
-							  <div class="row details mb-2">
-								  <div class="col-md-2">
+							  </div>
+							  <div class="col-12">
+							  <div class="row g-2 details mb-2">
+								  <div class="col-12 col-md-2">
 									  <label :for="'questionText-' + index" class="form-label">Question text</label>
 								  </div>
-								  <div class="col-md-10">
+								  <div class="col-12 col-md-10">
 									  <textarea v-model="question.questionText" class="form-control" :id="'questionText-' + index" rows="4"></textarea>
 								  </div>
 							  </div>
-							  <div class="row details mb-2">
-								  <div class="col-md-2">
+							  </div>
+							  <div class="col-12">
+							  <div class="row g-2 details mb-2">
+								  <div class="col-12 col-md-2">
 									  <label :for="'outroText-' + index" class="form-label">Question outro text</label>
 								  </div>
-								  <div class="col-md-10">
+								  <div class="col-12 col-md-10">
 									  <textarea v-model="question.outroText" class="form-control" :id="'outroText-' + index" rows="2"></textarea>
 								  </div>
 							  </div>
-							  <div v-if="question.answerType == 'coded'" class="row details mb-2">
-								  <div class="col-md-2">
+							  </div>
+							  <div v-if="question.answerType == 'coded'" class="col-12">
+							  <div class="row g-2 details mb-2 align-items-end">
+								  <div class="col-12 col-md-2">
 									  <label :for="'answerCodesReference-' + index" class="form-label">Set of answer categories</label>
 								  </div>
-								  <div class="col-md-8">
+								  <div class="col-12 col-md-8">
 									  <select v-model="question.answerCodesReference" :id="'answerCodesReference-' + index" class="form-select">
 										  <option v-for="codeList in input.dataset.associatedQuestionnaire.answers" :value="codeList.uuid">{{ codeList.name }}</option>
 									  </select>
 								  </div>
-								  <div class="col-md-2 text-end">
+								  <div class="col-12 col-md-2">
 									  <button type="button"
 											  @click="answerSet.uuid = question.answerCodesReference ?? ''"
 											  data-bs-toggle="modal" data-bs-target="#answerSetModal"
@@ -409,17 +432,18 @@ function saveFile(content, type, fileName) {
 									  </button>
 								  </div>
 							  </div>
-							  <div v-if="question.multipleItems" class="row details">
-								  <div class="row details mb-2" v-for="codeVal in input.dataset.associatedQuestionnaire.items.find(o => o.uuid == question.itemCodesReference).codeValues">
-									  <div class="col-md-2">
+							  </div>
+							  <div v-if="question.multipleItems" class="col-12">
+								  <div class="row g-2 details mb-2" v-for="codeVal in input.dataset.associatedQuestionnaire.items.find(o => o.uuid == question.itemCodesReference).codeValues">
+									  <div class="col-12 col-md-2">
 										  <input v-model="codeVal.value" type="text" class="form-control" :id="'codeValueVal-' + index + codeVal.value"></input>
 									  </div>
-									  <div class="col-md-10">
+									  <div class="col-12 col-md-10">
 										  <input v-model="codeVal.label" type="text" class="form-control" :id="'codeValueLab-' + index + codeVal.value"></input>
 									  </div>
 								  </div>
-								  <div class="row details">
-									  <div class="col-md-4">
+								  <div class="row">
+									  <div class="col-12">
 										  <button @click="input.dataset.associatedQuestionnaire.items.find(o => o.uuid == question.itemCodesReference).addCode()" type="button"
 												  :class="{ 'bg-primary': question.showDetails }"
 												  class="btn btn-outline-secondary">add item
@@ -427,22 +451,24 @@ function saveFile(content, type, fileName) {
 									  </div>
 								  </div>
 							  </div>
+							  </div>
 						  </div>
 					  </Transition>
-					  <hr class="mt-4" />
 				  </form>
 				  <button @click="input.dataset.associatedQuestionnaire.addQuestion()" type="button"
 						  class="btn btn-outline-secondary">➕ add question
 				  </button>
+				  </div>
 			  </div>
 
 	</div>
 
 	<DebugSection v-if="app.debug" :output="output" />
+	</main>
 
 	<!-- MARK: Code List Modal -->
-	<div class="modal modal-dialog-scrollable fade" id="codeListModal" tabindex="-1" aria-labelledby="codeListModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
+	<div class="modal fade" id="codeListModal" tabindex="-1" aria-labelledby="codeListModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable">
 			<div v-if="codeListVariableIndex != null" class="modal-content">
 				<div class="modal-header">
 					<h1 class="modal-title fs-5" id="codeListModalLabel">📦Code list <span v-html="input.dataset.columns[codeListVariableIndex].name" class="badge bg-secondary"></span></h1>
@@ -450,28 +476,28 @@ function saveFile(content, type, fileName) {
 				</div>
 				<div class="modal-body">
 					<form class="mb-4">
-						<div class="row" v-for="(code, index) in input.dataset.columns[codeListVariableIndex].codeValues">
-							<div class="col-md-4">
-								<label class="form-label" :class="{notFirst: (index > 0)}">Code</label>
+						<div class="row g-2" v-for="(code, index) in input.dataset.columns[codeListVariableIndex].codeValues">
+						<div class="col-12 col-md-4">
+							<label class="form-label">Code</label>
 								<input v-model="code.value" type="text" class="form-control" disabled>
 							</div>
-							<div class="col-md-8">
-								<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
+							<div class="col-12 col-md-8">
+								<label class="form-label">Name</label>
 								<input v-model="code.label" type="text" class="form-control">
 							</div>
 						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#codeListModal">Close</button>
+					<button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
 				</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- MARK: Answer Set Modal -->
-	<div class="modal modal-dialog-scrollable fade" id="answerSetModal" tabindex="-1" aria-labelledby="answerSetModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
+	<div class="modal fade" id="answerSetModal" tabindex="-1" aria-labelledby="answerSetModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h1 class="modal-title fs-5" id="answerSetModalLabel">📦Sets of answer categories</h1>
@@ -494,23 +520,23 @@ function saveFile(content, type, fileName) {
 							<textarea v-model="selectedAnswerSet.description" id="answerSetDescription" class="form-control" rows="3"></textarea>
 						</div>
 						<template v-if="selectedAnswerSet">
-							<div class="row" v-for="(code, index) in selectedAnswerSet.codeValues">
-								<div class="col-md-4">
-									<label class="form-label" :class="{notFirst: (index > 0)}">Code</label>
+							<div class="row g-2" v-for="(code, index) in selectedAnswerSet.codeValues">
+								<div class="col-12 col-md-4">
+									<label class="form-label">Code</label>
 									<input v-model="code.value" type="text" class="form-control">
 								</div>
-								<div class="col-md-8">
-									<label class="form-label" :class="{notFirst: (index > 0)}">Name</label>
+								<div class="col-12 col-md-8">
+									<label class="form-label">Name</label>
 									<input v-model="code.label" type="text" class="form-control">
 								</div>
 							</div>
 							<hr />
-							<div class="row">
-								<div class="col-md-4">
+							<div class="row g-2">
+								<div class="col-12 col-md-4">
 									<label for="answerSetNewValue" class="form-label">New code</label>
 									<input v-model="answerSet.newValue" id="answerSetNewValue" type="text" class="form-control">
 								</div>
-								<div class="col-md-8">
+								<div class="col-12 col-md-8">
 									<label for="answerSetNewLabel" class="form-label">New name</label>
 									<input v-model="answerSet.newLabel" id="answerSetNewLabel" type="text" class="form-control">
 								</div>
