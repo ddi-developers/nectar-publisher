@@ -23,15 +23,15 @@
     "vue": "^3.5.13",
     "webr": "^0.5.0",
     "ws": "^8.18.3",
-    "xlsx": "^0.18.5"
+    "xlsx": "npm:@e965/xlsx@^0.20.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
-    "happy-dom": "^20.0.11",
     "@vue/tsconfig": "^0.8.1",
+    "happy-dom": "^21.0.4",
     "typescript": "^5.9.3",
     "vite": "^7.0.1",
     "vite-plugin-singlefile": "^2.3.0",
-    "vitest": "^3.2.4"
+    "vitest": "^5.1.0"
   }
 }
