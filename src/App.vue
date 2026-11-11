@@ -4,6 +4,7 @@ import { Parser } from './modules/utils.js'
 import { ref, reactive, computed, watch } from 'vue'
 import { Marked } from 'marked'
 import About from './components/About.vue'
+import Intro from './components/Intro.vue'
 import LoadingSpinner from './components/LoadingSpinner.vue'
 import DebugSection from './components/DebugSection.vue'
 import AppNavbar from './components/layout/AppNavbar.vue'
@@ -108,6 +109,9 @@ async function importDataFromFile(event) {
 				</div>
 			</div>
 		</template>
+		<section v-else>
+			<Intro @import-data="inputFile.click()" />
+		</section>
 
 		<DebugSection v-if="app.debug" :output="output" />
 	</main>
