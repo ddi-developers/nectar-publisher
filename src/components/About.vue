@@ -9,7 +9,7 @@ const props = defineProps({
 })
 
 const copied = ref(false)
-const formats = ['CSV', 'TSV', 'XLS', 'XLSX', 'SPSS']
+const formats = ['CSV', 'TSV', 'SPSS', 'Stata', 'SAS', 'XLS', 'XLSX', 'ODS']
 
 const libraries = [
   { name: 'Papa Parse', url: 'https://www.papaparse.com' },
@@ -61,8 +61,8 @@ async function copyCitation() {
               <h1 id="aboutModalLabel" class="modal-title fs-4 fw-bold">
                 {{ appMetadata.name }}
               </h1>
-              <span v-if="appMetadata.version" class="badge text-bg-light border mt-2">
-                Version {{ appMetadata.version }}
+              <span v-if="appMetadata.softwareVersion" class="badge text-bg-light border mt-2">
+                Version {{ appMetadata.softwareVersion }}
               </span>
             </div>
           </div>
